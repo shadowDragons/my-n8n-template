@@ -1,0 +1,734 @@
+{
+  "name": "reddit-demo",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "70c5e416-9cef-4a0a-aafb-33194f586771",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [-1700, 820],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.postcontent }}",
+        "options": {}
+      },
+      "id": "09b83d0c-cfa7-40dc-a8b5-fd1237b98e43",
+      "name": "Post Sentiment Analysis",
+      "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
+      "position": [660, 1060],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Positive Post",
+        "message": "={{ $json.postcontent }}",
+        "options": {}
+      },
+      "id": "c7d4636f-f9da-4adc-ae2b-07738d41d7d6",
+      "name": "Positive Posts Draft",
+      "type": "n8n-nodes-base.gmail",
+      "position": [1180, 900],
+      "webhookId": "f9dabe4c-9c74-4486-932a-606ea4bb830f",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Neutral Post",
+        "message": "={{ $json.postcontent }}",
+        "options": {}
+      },
+      "id": "3d4dde99-5568-4795-bb54-e3a56d0c61bc",
+      "name": "Neutral  Posts Draft",
+      "type": "n8n-nodes-base.gmail",
+      "position": [1200, 1080],
+      "webhookId": "f9dabe4c-9c74-4486-932a-606ea4bb830f",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "Negative Post",
+        "message": "={{ $json.postcontent }}",
+        "options": {}
+      },
+      "id": "1a5f215a-2174-447a-abc9-ca506ef6f27c",
+      "name": "Negative  Posts Draft",
+      "type": "n8n-nodes-base.gmail",
+      "position": [1200, 1300],
+      "webhookId": "f9dabe4c-9c74-4486-932a-606ea4bb830f",
+      "typeVersion": 2.1,
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "3011087d-327f-4ae1-942f-73bcabbd25e6",
+      "name": "Post Summarization",
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "position": [680, 180],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "id": "0e5393ee-cf77-440f-88d1-42a6e91a6f24",
+      "name": "Merge Input",
+      "type": "n8n-nodes-base.merge",
+      "position": [-380, 760],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1cJlNvQRh4TD_5c1Z-7bq9fuZzRpPyccK2-L_DXHZnOs/edit?gid=1926701449#gid=1926701449",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1926701449,
+          "mode": "list",
+          "cachedResultName": "工作表2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1cJlNvQRh4TD_5c1Z-7bq9fuZzRpPyccK2-L_DXHZnOs/edit#gid=1926701449"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Subreddit_size": "={{ $json.subreddit_subscribers }}",
+            "Post_solution": "={{ $json.solution }}",
+            "Upvotes": "={{ $json.upvotes }}",
+            "Post_date": "={{ $json.date }}",
+            "Post_url": "={{ $json.url }}",
+            "Post_summary": "={{ $json.response.text }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Subreddit_size",
+              "displayName": "Subreddit_size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_date",
+              "displayName": "Post_date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Upvotes",
+              "displayName": "Upvotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_url",
+              "displayName": "Post_url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_summary",
+              "displayName": "Post_summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Post_solution",
+              "displayName": "Post_solution",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "fba1be3b-bd1b-499f-ac3b-4d44f76ea791",
+      "name": "Output The Results",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [1440, 200],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Nl41fcUY0NozeVjw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {}
+      },
+      "id": "51de10b4-0153-477d-b72d-68f287b3d761",
+      "name": "Merge 3 Inputs",
+      "type": "n8n-nodes-base.merge",
+      "position": [1260, 420],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "0823d10a-ad54-4d82-bcea-9dd236e97857",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              },
+              "leftValue": "={{ $json.ups }}",
+              "rightValue": 2
+            },
+            {
+              "id": "bb8187aa-f0f1-4999-8d4b-bdc9abba0618",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.selftext }}",
+              "rightValue": ""
+            },
+            {
+              "id": "539f0f5c-025a-4f82-9b3a-2ef1ad3a2d96",
+              "operator": {
+                "type": "dateTime",
+                "operation": "after"
+              },
+              "leftValue": "={{ DateTime.fromSeconds($json.created).toISO() }}",
+              "rightValue": "={{ $today.minus(180,'days').toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "8d6732f2-2c8a-4213-bf8c-29e1f69e3202",
+      "name": "Filter Posts By Features",
+      "type": "n8n-nodes-base.if",
+      "position": [-1280, 820],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "d5d38c01-3a88-4767-b488-d9c04145bb8f",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "yes"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "edfe3036-c7d6-4831-a1a7-f9befc5c67df",
+      "name": "Filter Posts By Content",
+      "type": "n8n-nodes-base.if",
+      "position": [-120, 780],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e5082ecc-3add-474e-bdb5-b8ad64729930",
+              "name": "upvotes",
+              "type": "string",
+              "value": "={{ $json.ups }}"
+            },
+            {
+              "id": "a92b5859-fbcc-40c2-95e0-452b12530d98",
+              "name": "subreddit_subscribers",
+              "type": "number",
+              "value": "={{ $json.subreddit_subscribers }}"
+            },
+            {
+              "id": "a846e21c-6cff-4521-9e0c-a32fa1305376",
+              "name": "postcontent",
+              "type": "string",
+              "value": "={{ $json.selftext }}"
+            },
+            {
+              "id": "b8045389-684d-4872-9e32-9a6b5511eb2b",
+              "name": "url",
+              "type": "string",
+              "value": "={{ $json.url }}"
+            },
+            {
+              "id": "f182fedc-1b09-40fe-aeb5-2473263da442",
+              "name": "date",
+              "type": "string",
+              "value": "={{ DateTime.fromSeconds($json.created).toISO() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2df9b3f8-f339-44d5-b41e-a687e4b93acf",
+      "name": "Select Key Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [-1040, 800],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "agent": "conversationalAgent",
+        "promptType": "define",
+        "text": "=Decide whether this reddit post is describing a business-related problem or a need for a solution. The post  should mention a specific challenge \n or requirement that a business is trying to address.\nReddit post:  {{ $json.postcontent }}\nIs this post about a business problem or need for a solution ? Output only yes or no",
+        "options": {}
+      },
+      "id": "2a05688f-d6ed-4f61-a071-f6f2a52c8df0",
+      "name": "Analysis Content  By AI",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [-760, 520],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "operation": "search",
+        "subreddit": "=smallbusiness",
+        "keyword": "looking for a solution",
+        "limit": 20,
+        "additionalFields": {
+          "sort": "hot"
+        }
+      },
+      "id": "c89b991e-1f66-4d66-9f18-8a680fd8d0b4",
+      "name": "Get Posts",
+      "type": "n8n-nodes-base.reddit",
+      "position": [-1480, 820],
+      "typeVersion": 1,
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# Data Collection\n## Retrieves recent popular posts from specified Reddit communities\n## Filters content by engagement metrics and keywords",
+        "height": 440,
+        "width": 880
+      },
+      "id": "4de98933-52d2-46b6-9bcd-51ae6bdc9250",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-1800, 580],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Post Sentiment Analysis\n## ",
+        "height": 660,
+        "width": 1020
+      },
+      "id": "cf414057-d55e-48c9-a5b4-d4237111c5df",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [260, 840],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Analysis Content\n## Emerging market needs\n## Underserved customer demands",
+        "height": 680,
+        "width": 820,
+        "color": 4
+      },
+      "id": "16638e7a-8caf-469f-bfb1-d072eb867ea3",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [-800, 300],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [-740, 700],
+      "id": "d6bf831e-50e4-4688-8d6d-89ac67475845",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [620, 1280],
+      "id": "bb02f266-d4d0-4895-9b33-2a62817e8ee4",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [600, 320],
+      "id": "1d981a88-c2f0-4276-acde-0e823b574238",
+      "name": "DeepSeek Chat Model2",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Based on the following Reddit post, suggest a business idea or service that I could create to help this problem for this business and other with similar needs.\n\nReddit post:  \"{{ $json.postcontent }}\"\n\nProvide a concise description of a business idea or service that would adress this issue effectively for mutiple businesses facing similar challenges.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [720, 340],
+      "id": "4f47d861-b71e-4a9b-a777-c5d84014d671",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [580, 520],
+      "id": "a8c5e142-9b4b-44f1-ae38-5d4c874cd7ac",
+      "name": "DeepSeek Chat Model3",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9a518336-e9f1-4fbf-ba79-261114e8fd9e",
+              "name": "solution",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [1040, 380],
+      "id": "2a7418f3-a446-4fdf-9b79-797dfcafc899",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get Posts": {
+      "main": [
+        [
+          {
+            "node": "Filter Posts By Features",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Input": {
+      "main": [
+        [
+          {
+            "node": "Filter Posts By Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge 3 Inputs": {
+      "main": [
+        [
+          {
+            "node": "Output The Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Select Key Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge Input",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Analysis Content  By AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Post Summarization": {
+      "main": [
+        [
+          {
+            "node": "Merge 3 Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysis Content  By AI": {
+      "main": [
+        [
+          {
+            "node": "Merge Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Posts By Content": {
+      "main": [
+        [
+          {
+            "node": "Post Summarization",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Post Sentiment Analysis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge 3 Inputs",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Post Sentiment Analysis": {
+      "main": [
+        [
+          {
+            "node": "Positive Posts Draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Neutral  Posts Draft",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Negative  Posts Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Posts By Features": {
+      "main": [
+        [
+          {
+            "node": "Select Key Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analysis Content  By AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Post Sentiment Analysis",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Post Summarization",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge 3 Inputs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ce4d08c6-c9cf-4c66-af7b-1670764563de",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "W8H3oI5CxxhMDUFC",
+  "tags": []
+}

@@ -1,0 +1,246 @@
+{
+  "name": "tool collect",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "工具收藏",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "工具连接",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [0, 0],
+      "id": "d40d2564-5fd8-46aa-be0f-b346ff01ccc3",
+      "name": "On form submission",
+      "webhookId": "ee822d24-5d3a-453b-b08c-4854c2259512"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一个工具推荐中文写作博主，你需要分析工具链接：{{ $json[\"工具连接\"] }}，写一篇推荐该工具的中文博客文章，输出内容如下：\n类型type：Post（固定值）\n状态status: Published（固定值）\n输出标题title(格式：产品名称：一句话总结)，\n摘要summary，\n内容connent，\n日期date：{{$today}}，\n标签tags：多个值，在这里面选（付费，免费，开源，AI），\n分类category：单个值，在这里面选（开发工具，学习教育，数据分析，新闻资讯，设计创意，音视频资源和处理，营销工具，健康科学，职场面试，生活旅行，文化历史，休闲娱乐，文件处理工具，图像资源和处理，搜索百科）\nurl：{{ $json[\"工具连接\"] }}\nslug(产品名称英文或者拼音)",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": ""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [440, 0],
+      "id": "f9c39dc0-916d-4924-97f6-23db42859f9b",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"title\": \"title\",\n\t\"summary\": \"summary\",\n    \"content\": \"content\",\n    \"url\": \"url\",\n    \"category\": \"category\",\n    \"date\": \"date\",\n    \"type\": \"Post\",\n    \"statuts\": \"Published\",\n    \"slug\": \"slug\",\n    \"tags\": [\"tag1\", \"tag2\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [700, 180],
+      "id": "90d2e817-522e-4894-b8bb-e1260d1f7065",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [380, 220],
+      "id": "c88741ca-9ad6-4c56-b662-0d65cfd8fc2f",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "databaseId": {
+          "__rl": true,
+          "value": "14cbfc15-6863-800c-a6ff-f113eeaba247",
+          "mode": "list",
+          "cachedResultName": "字节工具导航站",
+          "cachedResultUrl": "https://www.notion.so/14cbfc156863800ca6fff113eeaba247"
+        },
+        "title": "={{ $json.output.title }}",
+        "propertiesUi": {
+          "propertyValues": [
+            {
+              "key": "summary|rich_text",
+              "textContent": "={{ $json.output.summary }}"
+            },
+            {
+              "key": "date|date",
+              "date": "={{ $json.output.date }}"
+            },
+            {
+              "key": "category|select",
+              "selectValue": "={{ $json.output.category }}"
+            },
+            {
+              "key": "slug|rich_text",
+              "textContent": "={{ $json.output.slug }}"
+            },
+            {
+              "key": "tags|multi_select",
+              "multiSelectValue": "={{ $json.output.tags }}"
+            },
+            {
+              "key": "url|url",
+              "urlValue": "={{ $json.output.url }}"
+            },
+            {
+              "key": "type|select",
+              "selectValue": "={{ $json.output.type }}"
+            },
+            {
+              "key": "status|select",
+              "selectValue": "Published"
+            }
+          ]
+        },
+        "blockUi": {
+          "blockValues": [
+            {
+              "textContent": "={{ $json.output.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [1060, 120],
+      "id": "67c03e8e-2d24-403a-87f2-6cd17dad6985",
+      "name": "Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "p0vBw93aPC87iHmp",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "-1002677235789",
+        "text": "={{ $('AI Agent').item.json.output.title }}\n\n介绍：{{ $('AI Agent').item.json.output.summary }}\n\n标签：#{{ $json.property_category }}\n\n链接：https://tool.directory.cab/article/{{ $('AI Agent').item.json.output.slug }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [1480, -40],
+      "id": "c122c6d1-2e5f-4a54-986d-30efac4b668b",
+      "name": "Telegram",
+      "webhookId": "d95aedae-4f69-4a3f-8b6a-5c77b4948ff0",
+      "credentials": {
+        "telegramApi": {
+          "id": "jgd53Ex4Vf3d2xMr",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "unit": "minutes"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [1280, 120],
+      "id": "d0ac6a3c-8157-45c1-9985-ecbfcf38356c",
+      "name": "Wait",
+      "webhookId": "a5914fe5-2cae-4a5d-b1ee-62a3ef901a18"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Notion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Notion": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "373ee236-cd4e-4692-a42a-831911a23522",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "VGIwIv8NjYP3tbqY",
+  "tags": []
+}
