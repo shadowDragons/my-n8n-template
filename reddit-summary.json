@@ -53,42 +53,12 @@
       }
     },
     {
-      "parameters": {
-        "promptType": "=请总结以下Reddit帖子及其评论：\n\n帖子标题：{{$json.postTitle}}\n帖子内容：{{$json.postContent}}\n评论内容：\n\n评论：\n{{$json.comments.join('\\n')}}\n\n总结（请分点列出）：",
-        "text": "",
-        "options": {
-          "systemMessage": "You are a helpful assistant"
-        }
-      },
-      "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.8,
-      "position": [620, -500],
-      "id": "78a464bd-eedc-421b-8669-16f80af19ec0",
-      "name": "AI Agent"
-    },
-    {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [-920, -100],
       "id": "a8222a56-e0ee-40bc-8331-ad752bf4913c",
       "name": "When clicking ‘Test workflow’"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
-      "typeVersion": 1,
-      "position": [620, -300],
-      "id": "7858dfe5-e735-4879-a3ac-2108d3bfba5e",
-      "name": "DeepSeek Chat Model",
-      "credentials": {
-        "deepSeekApi": {
-          "id": "HG2MiMSzHpKDJXkh",
-          "name": "DeepSeek account"
-        }
-      }
     },
     {
       "parameters": {
@@ -207,7 +177,7 @@
       },
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.1,
-      "position": [380, -320],
+      "position": [320, -440],
       "id": "392392c0-6191-4223-8ea0-3677b60d88f1",
       "name": "Merge"
     },
@@ -273,20 +243,6 @@
         ]
       ]
     },
-    "AI Agent": {
-      "main": [[]]
-    },
-    "DeepSeek Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Edit Fields1": {
       "main": [
         [
@@ -336,7 +292,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b69f8ac1-6231-47f0-a252-17410e4c2876",
+  "versionId": "82c9c6d3-a999-4a41-86a9-d70e3d160288",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
