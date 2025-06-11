@@ -1,0 +1,346 @@
+{
+  "name": "reddit-summary",
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "python",
+        "limit": "=25",
+        "filters": {
+          "category": "top"
+        }
+      },
+      "id": "418d6541-f6ae-41a9-b460-622ac0bb1233",
+      "name": "获取热门帖子",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [-600, -60],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取前5个热门帖子的ID，用于获取评论\nconst hotPostsRaw = $input.first().json; // 理论上这里应该拿到的是整个数组的第一个元素\n\n// 由于$input.first().json可能只拿到第一个数据项，而不是整个数组。\n// 为了确保hotPosts是一个数组，我们应该从所有输入数据中获取。\n// 假设“获取热门帖子”节点正确输出了所有热门帖子作为单独的数据项。\n\n// 如果“获取热门帖子”节点为每个帖子输出一个单独的项，那么 $input.all() 将包含所有这些项\nconst allHotPosts = $input.all().map(item => item.json); \n\n// 现在 allHotPosts 应该是一个包含所有热门帖子的数组\n// 如果您只需要前5个，您可以直接从这里切片\nconst topPosts = allHotPosts.slice(0, 5);\n\nconst postIds = topPosts.map(post => ({\n  postId: post.id,\n  postTitle: post.title,\n  subreddit: post.subreddit\n}));\n\nreturn postIds.map(item => ({ json: item }));"
+      },
+      "id": "eaad1cc4-db59-4149-9136-8dbf1fd20cfc",
+      "name": "提取帖子ID",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [-520, 220]
+    },
+    {
+      "parameters": {
+        "resource": "postComment",
+        "operation": "getAll",
+        "subreddit": "python",
+        "postId": "={{ $json.postId }}",
+        "limit": 6
+      },
+      "id": "13fdab5c-d2ef-4f75-bf42-a66f722e397c",
+      "name": "获取帖子评论",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [-340, 100],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "=请总结以下Reddit帖子及其评论：\n\n帖子标题：{{$json.postTitle}}\n帖子内容：{{$json.postContent}}\n评论内容：\n\n评论：\n{{$json.comments.join('\\n')}}\n\n总结（请分点列出）：",
+        "text": "",
+        "options": {
+          "systemMessage": "You are a helpful assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [620, -500],
+      "id": "78a464bd-eedc-421b-8669-16f80af19ec0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [-920, -100],
+      "id": "a8222a56-e0ee-40bc-8331-ad752bf4913c",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [620, -300],
+      "id": "7858dfe5-e735-4879-a3ac-2108d3bfba5e",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36265828-655a-4242-95d9-010abd39c684",
+              "name": "selftext",
+              "value": "={{ $json.selftext }}",
+              "type": "string"
+            },
+            {
+              "id": "3c94d606-a7bc-4340-b9b6-c5d94fe4df40",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "022f7955-6ff0-4cfd-b878-d1ac73056146",
+              "name": "subreddit",
+              "value": "={{ $json.subreddit }}",
+              "type": "string"
+            },
+            {
+              "id": "c135b37a-0d68-4815-b0a8-e2506b3c8ef8",
+              "name": "post_id",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "afba3f94-d6fa-4482-8145-b96a4ab0b96c",
+              "name": "ups",
+              "value": "={{ $json.ups }}",
+              "type": "number"
+            },
+            {
+              "id": "d923a43e-a6bb-4899-a63b-ef35d6a3b323",
+              "name": "num_comments",
+              "value": "={{ $json.num_comments }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-380, -360],
+      "id": "53aabf7b-2178-4c83-a015-1524378c347b",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fb0087e5-aafc-4fd6-9877-9c8705be3a56",
+              "leftValue": "={{ $json.distinguished }}",
+              "rightValue": "moderator",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [-160, 160],
+      "id": "32edff8b-f743-4f8d-95dd-a7c205dfcb6e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ecf4bf52-143c-4053-af57-f286e0911b4b",
+              "name": "post_id",
+              "value": "={{ $json.link_id }}",
+              "type": "string"
+            },
+            {
+              "id": "525a6e27-880f-4248-84ec-fd2fe7e282d4",
+              "name": "comment_body",
+              "value": "={{ $json.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [-20, -60],
+      "id": "81978bac-fb82-4f80-b07a-e292685f41e7",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "post_id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [380, -320],
+      "id": "392392c0-6191-4223-8ea0-3677b60d88f1",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Code 节点的代码\n// 假设输入数据是一个包含多个评论对象的数组\n\nconst items = $input.all(); // 获取所有输入的 items\n\nconst groupedPosts = {};\n\nfor (const item of items) {\n  const currentItemJson = item.json; // 获取当前 item 的 JSON 数据\n  const postId = currentItemJson.post_id;\n\n  // 如果这个 post_id 还没有被处理过\n  if (!groupedPosts[postId]) {\n    // 创建新的帖子对象，包含所有帖子级别的字段和空的评论数组\n    groupedPosts[postId] = {\n      post_id: postId,\n      comments: [], // 初始化评论数组\n    };\n  }\n\n  // 将当前评论添加到对应帖子的评论数组中\n  groupedPosts[postId].comments.push(currentItemJson.comment_body);\n}\n\n// 将处理后的对象转换为 n8n 期望的输出格式（一个包含 json 属性的对象数组）\nconst output = Object.values(groupedPosts).map(post => ({\n  json: post,\n}));\n\nreturn output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [200, -80],
+      "id": "a49ae2f3-7192-4fd8-85ae-460d94bd45bb",
+      "name": "Code"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "获取热门帖子": {
+      "main": [
+        [
+          {
+            "node": "提取帖子ID",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取帖子ID": {
+      "main": [
+        [
+          {
+            "node": "获取帖子评论",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取帖子评论": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "获取热门帖子",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [[]]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "b69f8ac1-6231-47f0-a252-17410e4c2876",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "MnjTNvxSc7uv49oP",
+  "tags": []
+}
