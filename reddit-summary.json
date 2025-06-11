@@ -1,5 +1,5 @@
 {
-  "name": "reddit-summary",
+  "name": "My workflow",
   "nodes": [
     {
       "parameters": {
@@ -10,11 +10,11 @@
           "category": "top"
         }
       },
-      "id": "418d6541-f6ae-41a9-b460-622ac0bb1233",
+      "id": "cb5035d4-8e28-4574-b2fc-c184933bb5e6",
       "name": "获取热门帖子",
       "type": "n8n-nodes-base.reddit",
       "typeVersion": 1,
-      "position": [-600, -60],
+      "position": [-920, 380],
       "credentials": {
         "redditOAuth2Api": {
           "id": "KnPW2HNGMYje2G0S",
@@ -24,13 +24,13 @@
     },
     {
       "parameters": {
-        "jsCode": "// 获取前5个热门帖子的ID，用于获取评论\nconst hotPostsRaw = $input.first().json; // 理论上这里应该拿到的是整个数组的第一个元素\n\n// 由于$input.first().json可能只拿到第一个数据项，而不是整个数组。\n// 为了确保hotPosts是一个数组，我们应该从所有输入数据中获取。\n// 假设“获取热门帖子”节点正确输出了所有热门帖子作为单独的数据项。\n\n// 如果“获取热门帖子”节点为每个帖子输出一个单独的项，那么 $input.all() 将包含所有这些项\nconst allHotPosts = $input.all().map(item => item.json); \n\n// 现在 allHotPosts 应该是一个包含所有热门帖子的数组\n// 如果您只需要前5个，您可以直接从这里切片\nconst topPosts = allHotPosts.slice(0, 5);\n\nconst postIds = topPosts.map(post => ({\n  postId: post.id,\n  postTitle: post.title,\n  subreddit: post.subreddit\n}));\n\nreturn postIds.map(item => ({ json: item }));"
+        "jsCode": "// 获取前5个热门帖子的ID，用于获取评论\nconst hotPostsRaw = $input.first().json; // 理论上这里应该拿到的是整个数组的第一个元素\n\n// 由于$input.first().json可能只拿到第一个数据项，而不是整个数组。\n// 为了确保hotPosts是一个数组，我们应该从所有输入数据中获取。\n// 假设'获取热门帖子'节点正确输出了所有热门帖子作为单独的数据项。\n\n// 如果'获取热门帖子'节点为每个帖子输出一个单独的项，那么 $input.all() 将包含所有这些项\nconst allHotPosts = $input.all().map(item => item.json); \n\n// 现在 allHotPosts 应该是一个包含所有热门帖子的数组\n// 如果您只需要前5个，您可以直接从这里切片\nconst topPosts = allHotPosts.slice(0, 5);\n\nconst postIds = topPosts.map(post => ({\n  postId: post.id,\n  postTitle: post.title,\n  subreddit: post.subreddit\n}));\n\nreturn postIds.map(item => ({ json: item }));"
       },
-      "id": "eaad1cc4-db59-4149-9136-8dbf1fd20cfc",
+      "id": "68acf39b-08b6-4149-a6e0-3eff6d948795",
       "name": "提取帖子ID",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [-520, 220]
+      "position": [-840, 660]
     },
     {
       "parameters": {
@@ -40,11 +40,11 @@
         "postId": "={{ $json.postId }}",
         "limit": 6
       },
-      "id": "13fdab5c-d2ef-4f75-bf42-a66f722e397c",
+      "id": "5958b19b-c6ae-4912-98a0-3f1538c1650f",
       "name": "获取帖子评论",
       "type": "n8n-nodes-base.reddit",
       "typeVersion": 1,
-      "position": [-340, 100],
+      "position": [-660, 540],
       "credentials": {
         "redditOAuth2Api": {
           "id": "KnPW2HNGMYje2G0S",
@@ -56,9 +56,9 @@
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [-920, -100],
-      "id": "a8222a56-e0ee-40bc-8331-ad752bf4913c",
-      "name": "When clicking ‘Test workflow’"
+      "position": [-1240, 340],
+      "id": "90acce79-a110-4a9d-b2f2-90c141748917",
+      "name": "When clicking 'Test workflow'"
     },
     {
       "parameters": {
@@ -106,8 +106,8 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-380, -360],
-      "id": "53aabf7b-2178-4c83-a015-1524378c347b",
+      "position": [-700, 80],
+      "id": "c0f57b4d-bd6b-4ddd-928e-0af75ff1cd9e",
       "name": "Edit Fields1"
     },
     {
@@ -137,8 +137,8 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [-160, 160],
-      "id": "32edff8b-f743-4f8d-95dd-a7c205dfcb6e",
+      "position": [-480, 600],
+      "id": "26212380-c671-4cb1-9587-b215a2242795",
       "name": "If"
     },
     {
@@ -165,8 +165,8 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-20, -60],
-      "id": "81978bac-fb82-4f80-b07a-e292685f41e7",
+      "position": [-340, 380],
+      "id": "9431c66e-2815-4dd9-b25b-ce719327b4f0",
       "name": "Edit Fields"
     },
     {
@@ -177,8 +177,8 @@
       },
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.1,
-      "position": [320, -440],
-      "id": "392392c0-6191-4223-8ea0-3677b60d88f1",
+      "position": [0, 0],
+      "id": "2236659f-c9df-4afd-986f-748cd62c4e68",
       "name": "Merge"
     },
     {
@@ -187,12 +187,126 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [200, -80],
-      "id": "a49ae2f3-7192-4fd8-85ae-460d94bd45bb",
+      "position": [-120, 360],
+      "id": "26fc1c7e-24a7-447d-bc4d-d8671c16bcd6",
       "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一个专业的Reddit内容分析师。请分析以下Python社区的热门帖子数据，并生成一份详细的中文总结报告。\n\n要求；\n1. 对每个帖子进行简洁但全面的总结（100-150字）\n2. 识别技术要点和学习价值\n3. 分析社区讨论的热点和趋势\n4. 提供实用的建议或见解\n5. 使用清晰的结构和专业的语言\n\n请分析这个Reddit Python社区的热门帖子，生成专业的中文总结：\n标题：{{ $json.title }}\n内容：{{ $json.selftext }}\n评论：{{ $json.comments }}\n点赞：{{ $json.ups }}\n评论数：{{ $json.num_comments }}\n",
+        "options": {}
+      },
+      "id": "1c355673-4cc1-474a-a39c-cfc927020be9",
+      "name": "AI智能分析师",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [380, -240]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [380, 0],
+      "id": "a9a8c497-6d8d-4e7e-a451-d0de7c280eb0",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "Merge": [
+      {
+        "json": {
+          "selftext": "Ladies and gentleman!\n\n  \nI've been trying to run a (very networking, computation and io heavy) script that is async in 90% of its functionality. so far i've been using uvloop for its claimed better performance.\n\n  \nNow that python 3.13's free threading is supported by the majority of libraries (and the newest cpython release) the only library that is holding me back from using the free threaded python is uvloop, since it's still not updated (and hasn't been since October 2024). I'm considering falling back on asyncio's event loop for now, just because of this. \n\n  \nHas anyone here ran some tests to see if uvloop is still faster than asyncio? if so, by what margin? ",
+          "title": "Is uvloop still faster than asyncio's event loop in python3.13?",
+          "subreddit": "Python",
+          "post_id": "t3_1l8fwu1",
+          "ups": 177,
+          "num_comments": 14,
+          "comments": [
+            "I tested this a few weeks ago, and forgot the exact results, but uvicorn /w uvloop was significantly faster (in a statistical sense), but it was a trivial difference (like 20-40ms speedups on endpoints that normally take 1-2 seconds).\n\nGranted it cost me nothing to use it, so i left it in",
+            "Last time I tested, uvloop yielded ~15% more performance on python 3.13.0, using litestar framework with --uvloop and without. \n\nI believe that I'm on the same boat - RAGs are naturally very network oriented",
+            "It's going to remain significantly faster. There's no efforts underway to move the default asyncio loops out of their current mostly pure-Python implementation.\n\nIf you want fast asyncio event loops you need a library that implements the loop as a native extension like `uvloop`.",
+            "Did anyone compare performance of Granian on the latest Python stack?",
+            "I am also at the moment making a script that queries the data and inserts it into db with some encoding and compression (so mostly i/o tasks with encoding and/or compression) using python 3.13. By adding uvloop i achieved about 30-40% increase. So while I do not know your full use case it helped me a lot to boost the preformance.",
+            "&gt; I've been trying to run a (very networking, computation and io heavy) script that is async in 90% of its functionality\n\n...\n\nIn Python? I didn't realize I was in a masochism subreddit."
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "# [Github project + demo videos](https://github.com/kongaskristjan/policy-annealing#policy-annealing)\n\n**What my project does**\n\nPhysics ensures that particles usually settle in low-energy states; electrons stay near an atom's nucleus, and air molecules don't just fly off into space. I've applied an analogy of this principle to a completely different problem: teaching a neural network to safely land a lunar lander.\n\nI did this by assigning low \"energy\" to good landing attempts (e.g. no crash, low fuel use) and high \"energy\" to poor ones. Then, using standard neural network training techniques, I enforced equations derived from thermodynamics. As a result, the lander learns to land successfully with a high probability.\n\n**Target audience**\n\nThis is primarily a fun project for anyone interested in physics, AI, or Reinforcement Learning (RL) in general.\n\n**Comparison to Existing Alternatives**\n\nWhile most of the algorithm variants I tested aren't competitive with the current industry standard, one approach does look promising. When the derived equations are written as a regularization term, the algorithm exhibits superior stability properties compared to popular methods like Entropy Bonus.\n\nGiven that stability is a major challenge in the heavily regularized RL used to train today's LLMs, I guess it makes sense to investigate further.",
+          "title": "I turned a thermodynamics principle into a learning algorithm - and it lands a moonlander",
+          "subreddit": "Python",
+          "post_id": "t3_1l7y0zh",
+          "ups": 76,
+          "num_comments": 15,
+          "comments": [
+            "Are you trying to say you've implemented simulated annealing without actually saying it?",
+            "&gt; assigning low \"energy\" to good landing attempts (e.g. no crash, low fuel use) and high \"energy\" to poor ones\n\nHow does this differ from standard reward functions in neural network training? It’s not really clear what the equations being “derived from thermodynamics” adds.",
+            "People are going to want to crap on what you've done because of whatever reasons they need to go to therapy to figure out. Ignore them. Seek out responses from people with legitimate criticism that can help you learn, grow, and improve.\n\nWhether or not this is functionally similar to some other RL method that already exists, you were inspired and then followed your inspiration all the way to realization. That's a powerful skill on its own.\n\nI don't have the expertise to adequately assess your work for originality, applicability, etc. I'm a layman in ML and physics, but still enthusiastic. I enjoyed learning about your project, and I love seeing inspiration come from unexpected places and manifest into real world projects. Keep it up!",
+            "I thought about simulated annealing, but at first glance the idea is more complex.",
+            "It's pressure and the Universe is a fractal. Pressure is the normalization rate of a field. Under low pressure, loops and wells form. Under high pressure they fall apart and the captured energy is released. \n\n\nSo gravity is more like a push where the low pressure is around other energy. When you look at it this way, galaxies not flinging apart is no longer a mystery, because it's clearly a structure held together by the pressure of spacetime.\n\n\nIf you can recognize right and wrong answers, you can adjust pressure accordingly. \n\n\nMy working theory is that in biological systems, anger and frustration are mechanisms for changing this pressure, and are to break apart a bad loop. Sleep is a means of trying different pressure levels to get loops to form."
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "I'm about to switch jobs and have been required to use only python 3.9 for years in order to maintain consistency within my team. In my new role I'll responsible for leading the creation of our python based infrastructure. I never really know the best term for what I do, but let's say full-stack data analytics. So, the whole process from data collection, etl, through to analysis and reporting. I most often use pandas and duckdb in my pipelines. For folks who do stuff like that, what's your go to python version? Should I stick with 3.9?\n\nP.S. I know I can use different versions as needed in my virtual environments, but I'd rather  have a standard and note the exception where needed. ",
+          "title": "What version do you all use at work?",
+          "subreddit": "Python",
+          "post_id": "t3_1l8chj0",
+          "ups": 66,
+          "num_comments": 88,
+          "comments": [
+            "3.9 is almost end of life so I wouldn't recommend it. Since you're starting from scratch in this team, I'd start with the latest stable version which is 3.13.\n\n\nI would probably suggest a work style where you deploy your code with one version of python but you test across a range of versions, so you develop with forward compatibility in mind and when versions go to end of life, you have a fairly high confidence that you can upgrade your python version without much issue.",
+            "Pick a version that is supported. Put in place mechanisms that make it easy to upgrade periodically. A tool like uv is great.\n\nIn my experience, moving up one minor version every year is much more manageable than dealing with the headache of using versions nobody supports anymore.",
+            "I would suggest one version behind the latest which is 3.12 as a safe bet. Some libraries still have issues running on 3.13. It takes time for the libraries to be upgraded. I ran into one recently, so have to stick with 3.12 until it is resolved.",
+            "I’d use 3.11 at a minimum.",
+            "Where I work we almost exclusively use Python interpreters contained within other software, so we often don't have any choice (or, rather, there's a lot more involved in the decision to change host software version then just the Python version).\n\nIt was only about 18 months ago we moved on from our final 2.7 host.",
+            "The latest stable version unless there is a very specific reason to use an older release."
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "**What My Project Does**  \nIt’s a site and puzzle-building tool for training yourself to spot the *worst* move in a chess position. Instead of solving for the best or most accurate move, you try to find the move that completely falls apart. hangs a piece, walks into mate, or otherwise ruins the position.\n\nThe idea started as a joke, but it came from a real problem: I’m not a great chess player, and I realized my biggest issue was missing threats while focusing too much on attacking. My defensive awareness was weak. So I thought what if I trained myself to recognize how *not* to play?\n\nIt turned out to be a fun and occasionally useful way to train awareness, pattern recognition, and tactical blunder detection.\n\n**Target Audience**  \nThis is mostly a side project for casual and improving players, or anyone who wants a different take on chess training. It’s not meant for production-level competitive prep. Think of it more as a supplement to traditional study or just a chaotic way to enjoy tactics training.\n\n**Comparison**  \nThere aren’t any real alternatives I know of. Most chess training tools focus on optimal or engine-approved lines this flips that. Instead of “play like Stockfish,” it’s more like “don’t play like me in blitz at 2AM.” That’s the twist.\n\nThe project is open source, free, and will always stay free.  \nCode &amp; info: [https://github.com/nedlir/worstmovepossible](https://github.com/nedlir/worstmovepossible)",
+          "title": "Built a website to train spotting the worst move in Chess",
+          "subreddit": "Python",
+          "post_id": "t3_1l84p2i",
+          "ups": 23,
+          "num_comments": 1,
+          "comments": [
+            "That's really cool, man. Good job. I'll check it out.\n\nEdit: I checked it out. Pretty cool concept. My only complaint is that if the page refreshes, your progress through the puzzles is reset to zero. \n\nOtherwise, it works really well - better than I'd rightly expect. The quotes attached to correct solutions are witty and funny as well, which makes it more interesting to use."
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "Hi everyone, I’m conducting a short experiment for my master’s thesis in Information Studies at the University of Amsterdam. I’m researching how people explore and debug code in Jupyter Notebooks.\n\nThe experiment takes around 15 minutes and must be completed on a computer or laptop (not a phone or tablet). You’ll log into a JupyterHub environment, complete a few small programming tasks, and fill out two short surveys. No advanced coding experience is required beyond basic Python, and your data will remain anonymous.\n\nLink to participate: [https://jupyter.jupyterextension.com](https://jupyter.jupyterextension.com/) Please do not use any personal information for your username when signing up. After logging in, open the folder named “Experiment\\_notebooks” and go through the notebooks in order.\n\nFeel free to message me with any questions. I reached out to the mods and they approved the post. Thank you in advance for helping out.",
+          "title": "Academic study on code debugging",
+          "subreddit": "Python",
+          "post_id": "t3_1l81fjc",
+          "ups": 12,
+          "num_comments": 12,
+          "comments": [
+            "print(variableA)\n\nprint(\"made it to line 289\")\n\n&lt;stuff&gt;\n\nprint(variableA)\n\nprint(\"made it to line 315\")\n\n&lt;stuff&gt;\n\nprint(variableA)\n\nprint(\"made it to line 341\")\n\nexit(1)\n\n\n\nThis is my entry for your analysis and the totality of my debugging strategy",
+            "People are *debugging* jupyter notebooks?",
+            "Please do mine https:// forms.gle/zr5XUzyaZ4mPk7iF6",
+            "People who debug / work in notebooks (for more than tutorials / plotting) have definitely lost the control over their life.",
+            "Remind me!  1 day"
+          ]
+        }
+      }
+    ]
+  },
   "connections": {
     "获取热门帖子": {
       "main": [
@@ -232,7 +346,7 @@
         ]
       ]
     },
-    "When clicking ‘Test workflow’": {
+    "When clicking 'Test workflow'": {
       "main": [
         [
           {
@@ -286,17 +400,42 @@
           }
         ]
       ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI智能分析师",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI智能分析师": {
+      "main": [[]]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI智能分析师",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "82c9c6d3-a999-4a41-86a9-d70e3d160288",
+  "versionId": "c5db9e7d-cb91-4cd7-bde3-7e6cbde319ad",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
   },
-  "id": "MnjTNvxSc7uv49oP",
+  "id": "MKCYmOJbf8ebwYYN",
   "tags": []
 }
