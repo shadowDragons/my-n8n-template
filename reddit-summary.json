@@ -1,62 +1,34 @@
 {
-  "name": "My workflow 2",
+  "name": "reddit-summary",
   "nodes": [
-    {
-      "parameters": {
-        "operation": "getAll",
-        "subreddit": "python",
-        "limit": "=25",
-        "filters": {
-          "category": "top"
-        }
-      },
-      "id": "4e2345c3-3ff8-422e-bc97-21bb94775c71",
-      "name": "获取热门帖子",
-      "type": "n8n-nodes-base.reddit",
-      "typeVersion": 1,
-      "position": [-1220, 460],
-      "credentials": {
-        "redditOAuth2Api": {
-          "id": "KnPW2HNGMYje2G0S",
-          "name": "Reddit account"
-        }
-      }
-    },
-    {
-      "parameters": {
-        "jsCode": "const allHotPosts = $input.all().map(item => item.json); \nconst topPosts = allHotPosts.slice(0, 5);\n\nconst postIds = topPosts.map(post => ({\n  postId: post.id,\n  postTitle: post.title,\n  subreddit: post.subreddit\n}));\n\nreturn postIds.map(item => ({ json: item }));"
-      },
-      "id": "b4c0ac12-854d-49ec-9ef0-c45f2c703422",
-      "name": "提取帖子ID",
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [-1140, 740]
-    },
     {
       "parameters": {
         "resource": "postComment",
         "operation": "getAll",
-        "subreddit": "python",
-        "postId": "={{ $json.postId }}",
-        "limit": 6
+        "subreddit": "={{ $json.subreddit }}",
+        "postId": "={{ $json.id }}",
+        "returnAll": true
       },
       "id": "81b4a8dd-e80e-4369-9be3-95682597041e",
       "name": "获取帖子评论",
       "type": "n8n-nodes-base.reddit",
       "typeVersion": 1,
-      "position": [-960, 620],
+      "position": [-1140, 560],
+      "alwaysOutputData": true,
+      "notesInFlow": false,
       "credentials": {
         "redditOAuth2Api": {
           "id": "KnPW2HNGMYje2G0S",
           "name": "Reddit account"
         }
-      }
+      },
+      "onError": "continueRegularOutput"
     },
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
-      "position": [-1540, 420],
+      "position": [-2080, 480],
       "id": "577f25d7-22f6-4a12-8c9b-77eeb83d8b3f",
       "name": "When clicking 'Test workflow'"
     },
@@ -106,7 +78,7 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-1000, 160],
+      "position": [-1140, 200],
       "id": "277d7752-beea-488a-bb17-419791815cab",
       "name": "Edit Fields1"
     },
@@ -137,7 +109,7 @@
       },
       "type": "n8n-nodes-base.if",
       "typeVersion": 2.2,
-      "position": [-780, 680],
+      "position": [-920, 520],
       "id": "2d5f87d0-0c28-464e-a736-935c938706b9",
       "name": "If"
     },
@@ -165,7 +137,7 @@
       },
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
-      "position": [-640, 460],
+      "position": [-660, 400],
       "id": "16ee1bbb-e958-46bb-b67a-85e3f4d0c8d7",
       "name": "Edit Fields"
     },
@@ -173,6 +145,7 @@
       "parameters": {
         "mode": "combine",
         "fieldsToMatchString": "post_id",
+        "joinMode": "enrichInput1",
         "options": {}
       },
       "type": "n8n-nodes-base.merge",
@@ -194,7 +167,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=你是一个专业的Reddit内容分析师。请根据以下Python社区热门帖子数据，生成一份详细的中文分析报告。\n标题(title):标题翻译成中文\n内容(content):对内容的总结，文章结构要清晰。\n评论(comments)：要对评论内容做总结\n启示(apocalypse):通过这个帖子的启示\n---\n帖子数据：\n标题：{{ $json.title }}\n内容：{{ $json.selftext }}\n评论内容：{{ $json.comments }}",
+        "text": "=你是一个专业的Reddit内容分析师。请根据以下Python社区热门帖子数据，生成一份详细的中文分析报告。\n板块(subreddit):{{ $json.subreddit }}\n标题(title):标题翻译成中文\n内容(content):对内容的总结，文章结构要清晰。\n评论(comments)：要对评论内容做总结，如果没有评论内容，则留空\n启示(apocalypse):通过这个帖子的启示\n---\n帖子数据：\n标题：{{ $json.title }}\n内容：{{ $json.selftext }}\n评论内容：{{ $json.comments }}",
         "hasOutputParser": true,
         "options": {}
       },
@@ -222,44 +195,132 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "[\n  {\n  \t\"post_id\": 1,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\"\n  },\n  {\n    \"post_id\": 2,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\"\n  }\n]"
+        "jsonSchemaExample": "[\n  {\n    \"subreddit\": \"python\",\n  \t\"post_id\": 1,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\"\n  },\n  {\n    \"subreddit\": \"python\",\n    \"post_id\": 2,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\"\n  }\n]"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [260, 60],
       "id": "39d2b730-7e80-45e2-8e74-f62568dcdae9",
       "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "=internetisbeautiful",
+        "limit": "=5",
+        "filters": {
+          "category": "top"
+        }
+      },
+      "id": "cce31660-6327-416f-b23f-554d6a823fe1",
+      "name": "internetisbeautiful 获取热门帖子",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [-1760, 500],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "roastmystartup",
+        "limit": 5,
+        "filters": {
+          "category": "top"
+        }
+      },
+      "id": "4e2345c3-3ff8-422e-bc97-21bb94775c71",
+      "name": "roastmystartup 获取热门帖子",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [-1760, 160],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "imadethis",
+        "limit": "=5",
+        "filters": {
+          "category": "top"
+        }
+      },
+      "id": "e026e817-0865-4085-8db0-b548b9f3c13e",
+      "name": "imadethis 获取热门帖子",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [-1760, 340],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "sideproject",
+        "limit": "=5",
+        "filters": {
+          "category": "top"
+        }
+      },
+      "id": "46e61217-a7e5-45fb-aad5-b2131305b236",
+      "name": "sideprojct获取热门帖子",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [-1760, 900],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "indiebiz",
+        "limit": "=5",
+        "filters": {
+          "category": "top"
+        }
+      },
+      "id": "bd7c7633-0faf-41f7-9c0d-e79fe4897cad",
+      "name": "indiebiz 获取热门帖子",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [-1740, 720],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [-1420, 380],
+      "id": "4a5e6483-d94f-433c-9dbd-50c2cd679c40",
+      "name": "Merge1"
     }
   ],
   "pinData": {},
   "connections": {
-    "获取热门帖子": {
-      "main": [
-        [
-          {
-            "node": "提取帖子ID",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Edit Fields1",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "提取帖子ID": {
-      "main": [
-        [
-          {
-            "node": "获取帖子评论",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "获取帖子评论": {
       "main": [
         [
@@ -275,7 +336,27 @@
       "main": [
         [
           {
-            "node": "获取热门帖子",
+            "node": "roastmystartup 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "imadethis 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "internetisbeautiful 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "indiebiz 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sideprojct获取热门帖子",
             "type": "main",
             "index": 0
           }
@@ -361,13 +442,84 @@
           }
         ]
       ]
+    },
+    "roastmystartup 获取热门帖子": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "imadethis 获取热门帖子": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "internetisbeautiful 获取热门帖子": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "indiebiz 获取热门帖子": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "sideprojct获取热门帖子": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "获取帖子评论",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "75e244ba-1fe6-46c0-ad1c-9d95281f8922",
+  "versionId": "cf80601c-8247-458d-9b9c-e92046feb6c8",
   "meta": {
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
   },
