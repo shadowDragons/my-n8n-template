@@ -25,14 +25,6 @@
       "onError": "continueRegularOutput"
     },
     {
-      "parameters": {},
-      "type": "n8n-nodes-base.manualTrigger",
-      "typeVersion": 1,
-      "position": [-2080, 480],
-      "id": "577f25d7-22f6-4a12-8c9b-77eeb83d8b3f",
-      "name": "When clicking 'Test workflow'"
-    },
-    {
       "parameters": {
         "assignments": {
           "assignments": [
@@ -71,6 +63,12 @@
               "name": "num_comments",
               "value": "={{ $json.num_comments }}",
               "type": "number"
+            },
+            {
+              "id": "75ce3aba-1470-43d7-ba16-ffe03ea2eb65",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
             }
           ]
         },
@@ -167,7 +165,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=你是一个专业的Reddit内容分析师。请根据以下Python社区热门帖子数据，生成一份详细的中文分析报告。\n板块(subreddit):{{ $json.subreddit }}\n标题(title):标题翻译成中文\n内容(content):对内容的总结，文章结构要清晰。\n评论(comments)：要对评论内容做总结，如果没有评论内容，则留空\n启示(apocalypse):通过这个帖子的启示\n---\n帖子数据：\n标题：{{ $json.title }}\n内容：{{ $json.selftext }}\n评论内容：{{ $json.comments }}",
+        "text": "=你是一个专业的Reddit内容分析师。请根据以下Python社区热门帖子数据，生成一份详细的中文分析报告。\n板块(subreddit):{{ $json.subreddit }}\n链接(url):{{ $json.url }}\n标题(title):标题翻译成中文\n内容(content):对内容的总结，文章结构要清晰。\n评论(comments)：要对评论内容做总结，如果没有评论内容，则留空\n启示(apocalypse):通过这个帖子的启示\n---\n帖子数据：\n标题：{{ $json.title }}\n内容：{{ $json.selftext }}\n评论内容：{{ $json.comments }}",
         "hasOutputParser": true,
         "options": {}
       },
@@ -175,7 +173,7 @@
       "name": "AI智能分析师",
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 1.6,
-      "position": [80, -160]
+      "position": [-60, -120]
     },
     {
       "parameters": {
@@ -183,7 +181,7 @@
       },
       "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
       "typeVersion": 1,
-      "position": [80, 80],
+      "position": [-20, 160],
       "id": "cd43580e-91e8-4ee9-a945-594c501f584e",
       "name": "DeepSeek Chat Model",
       "credentials": {
@@ -195,11 +193,11 @@
     },
     {
       "parameters": {
-        "jsonSchemaExample": "[\n  {\n    \"subreddit\": \"python\",\n  \t\"post_id\": 1,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\"\n  },\n  {\n    \"subreddit\": \"python\",\n    \"post_id\": 2,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\"\n  }\n]"
+        "jsonSchemaExample": "[\n  {\n    \"subreddit\": \"python\",\n  \t\"post_id\": 1,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\",\n    \"url\": \"url\"\n  },\n  {\n    \"subreddit\": \"python\",\n    \"post_id\": 2,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\",\n    \"url\": \"url\"\n  }\n]"
       },
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
-      "position": [260, 60],
+      "position": [180, 200],
       "id": "39d2b730-7e80-45e2-8e74-f62568dcdae9",
       "name": "Structured Output Parser"
     },
@@ -317,46 +315,559 @@
       "position": [-1420, 380],
       "id": "4a5e6483-d94f-433c-9dbd-50c2cd679c40",
       "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "sendTo": "shadowdragon4399@gmail.com",
+        "subject": "reddit总结",
+        "emailType": "text",
+        "message": "={{ $json.markdown }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [720, 100],
+      "id": "9b10eb39-a629-4c79-b4ba-c17bcbebc4be",
+      "name": "Gmail",
+      "webhookId": "9e705004-d46c-47b7-83da-e6363af5aaef",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取输入的所有数据项\nconst items = $input.all();\n\n// 初始化markdown内容\nlet markdownContent = \"# Reddit 帖子分析报告\\n\\n\";\nmarkdownContent += `生成时间：${new Date().toLocaleString('zh-CN')}\\n\\n`;\nmarkdownContent += \"---\\n\\n\";\n\n// 遍历每个数据项\nitems.forEach((item, index) => {\n  const data = item.json;\n  \n  // 检查是否有output字段\n  if (data.output && Array.isArray(data.output)) {\n    data.output.forEach((post, postIndex) => {\n      // 帖子标题\n      markdownContent += `## ${post.title}\\n\\n`;\n      \n      // 基本信息\n      markdownContent += `**板块：** r/${post.subreddit}\\n\\n`;\n      markdownContent += `**帖子ID：** ${post.post_id}\\n\\n`;\n      markdownContent += `**链接：** [查看原帖](${post.url})\\n\\n`;\n      \n      // 内容摘要\n      markdownContent += `### 📝 内容摘要\\n\\n`;\n      markdownContent += `${post.content}\\n\\n`;\n      \n      // 评论分析\n      markdownContent += `### 💬 评论分析\\n\\n`;\n      if (post.comments && post.comments.length > 0) {\n        post.comments.forEach((comment, commentIndex) => {\n          markdownContent += `${commentIndex + 1}. ${comment}\\n\\n`;\n        });\n      } else {\n        markdownContent += `暂无评论内容\\n\\n`;\n      }\n      \n      // 启示\n      markdownContent += `### 💡 启示与洞察\\n\\n`;\n      markdownContent += `${post.apocalypse}\\n\\n`;\n      \n      // 分隔线\n      markdownContent += `---\\n\\n`;\n    });\n  }\n});\n\n// 添加报告结尾\nmarkdownContent += `\\n## 📊 报告总结\\n\\n`;\nmarkdownContent += `本报告共分析了 ${items.length} 个Reddit帖子，涵盖了多个不同的板块和主题。\\n\\n`;\nmarkdownContent += `**分析板块包括：**\\n`;\n\n// 统计板块信息\nconst subreddits = new Set();\nitems.forEach(item => {\n  if (item.json.output && Array.isArray(item.json.output)) {\n    item.json.output.forEach(post => {\n      subreddits.add(post.subreddit);\n    });\n  }\n});\n\nsubreddits.forEach(subreddit => {\n  markdownContent += `- r/${subreddit}\\n`;\n});\n\nmarkdownContent += `\\n**报告特点：**\\n`;\nmarkdownContent += `- ✅ 内容翻译成中文\\n`;\nmarkdownContent += `- ✅ 结构化分析\\n`;\nmarkdownContent += `- ✅ 评论总结\\n`;\nmarkdownContent += `- ✅ 深度洞察\\n\\n`;\n\nmarkdownContent += `---\\n`;\nmarkdownContent += `*本报告由AI自动生成，仅供参考*`;\n\n// 返回markdown格式的文本\nreturn [{ json: { markdown: markdownContent } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [460, 260],
+      "id": "7c30de0d-987f-4281-bfa4-dc6fd7854bf2",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [{}]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [-2080, 540],
+      "id": "700c5416-c8f1-4a18-850f-da381d328111",
+      "name": "Schedule Trigger"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "Merge": [
+      {
+        "json": {
+          "selftext": "currently searches subreddits, facebook groups, discord server, mastodon servers, and x (fka twitter) communities. next i wanna add slack communities and linkedin groups. what else?",
+          "title": "I made a free tool to find the best online communities for any niche",
+          "subreddit": "IMadeThis",
+          "post_id": "t3_1l958zf",
+          "ups": 5,
+          "num_comments": 1,
+          "url": "https://www.pluggo.ai/find-online-communities-free",
+          "comments": [
+            "This is such a useful tool! Finding the right online community for any niche can be time-consuming, but with [**pluggo.ai**](http://pluggo.ai), it's much easier to connect with like-minded people across multiple platforms.\n\nFor future additions, I'd suggest adding **Telegram groups**, **WhatsApp groups**, or even **Clubhouse rooms** since these platforms are growing rapidly and have niche communities too. It could also be cool to have a **community rating system** to see how active and engaged a community is.\n\nIf you're interested in discovering more AI tools, check out [**Best AI Tools**](https://www.best-ai-tools.org/) for a curated list of AI resources that can help you level up your projects!\n\nGreat job on **pluggo.ai**\\-looking forward to seeing what's next! 🙌"
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "Add intense energy to your digital space with this explosive abstract wallpaper — a high-resolution, digital download designed to make your screen pop. Featuring fiery strokes of orange, yellow, black, and white bursting from a dramatic center, this modern artwork is perfect for creatives, gamers, and bold design lovers.\n\n\n\nPerfect as a phone or desktop wallpaper — or message me for a high-resolution printable version at no extra cost.\n\n\n\n\n\n🖥️ Included Resolutions:  \n\n\n• 1290x2796 (iPhone)\n\n• 1440x3040 (Android Phones)\n\n• 2048x2732 (iPad)\n\n• 2732x2048 (iPad)\n\n• 1200x1920 (Android Tablet)\n\n• 1920x1200 (Android Tablet)\n\n• 2560x1440 Desktop-Laptop\n\n• 3840x2160 Desktop-Laptop\n\n• 5120x2160 Desktop-Laptop\n\n\n\n🔧 The full download also comes with a simple setup guide (PDF) covering all devices.\n\n🎨 Artist: (StillMotionCo)  \n📎 Download link and preview mockups in the comments.",
+          "title": "[1024x600] Explosive Abstract Digital Wallpaper – Fiery Modern Art for Desktop, Laptop &amp; Phone | Bold Energetic Painting Background (StillMotionCo)",
+          "subreddit": "IMadeThis",
+          "post_id": "t3_1l8ptra",
+          "ups": 3,
+          "num_comments": 1,
+          "url": "https://i.redd.it/d87poma46a6f1.jpeg",
+          "comments": [
+            "🌀 **Created this wallpaper pack to bring a bit of calm energy to my screen — sharing in case anyone needs the same.**  \n\n\nComes in 9 optimized formats (iPhone, Android, iPad, tablet, desktop: HD/4K/5K) + a simple step-by-step setup guide.\n\n\n\n🔗 [Available here if you're into this vibe](https://www.etsy.com/shop/StillMotionCo)\n\n  \n\n\nIf you'd like this design as a high-resolution print for wall art, feel free to message me! I’m happy to resize it to your preferred dimensions **at no extra cost**.  \n\n\nLet me know what you think or if you want help with setup!"
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "",
+          "title": "I made a web tool for video files that lets you extract frames manually, at intervals, with auto-detection or as a grid collage - and it runs locally in your browser",
+          "subreddit": "InternetIsBeautiful",
+          "post_id": "t3_1l8u0yy",
+          "ups": 118,
+          "num_comments": 17,
+          "url": "https://pilko.studio",
+          "comments": [
+            "I asked how people took screenshots of video files (if they had to). And the answer varied, always leading to an improper or a lengthy process (snipping tool or full screen crop in paint, etc.)  \nI was the same!  \nSo I decided to make a tool for that and added useful features along the way.\n\nThe web tool runs locally on your browser and doesn't require anything else.\n\n[GitHub](https://github.com/LandoNikko/Pilko-Frame-Capture-Studio)",
+            "If it could grab from youtube, tik tok or instagram reels would be nice",
+            "Very cool, great idea. What does the \"remove black bars\" option do? The ? button doesn't seem to work, and the info button doesn't discuss it.",
+            "Finally a tool that does what I want without trying to take over my PC. You, sir, are the hero we need.",
+            "Why does it have to be a .mov video file?",
+            "Really cool! A feature I'd really like would be the ability to post links, say, you could link a YouTube video or Instagram reel and let you browse frame by frame. Idk if that'd be really difficult or possible at all, but it'd be super handy!",
+            "\n\nDissecting videos like an elementary school art project! Neat tool",
+            "Stuff like this is exactly why I love this subreddit. Curious if there’s more like it.",
+            "This seems really neat.\n\nI've noticed that there are no good FOSS in-browser video editors. Since you have already implemented in-browser video processing, I wonder if you would consider adding the ability to trim video, join videos, add audio overlay, add images, and maybe some simple effects like text overlays.\n\nDo you have a git repo for this project?"
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "**Learn Anything FAST with Fenne! Turn any topic into quick engaging videos with audio &amp; captions in your language.**\n\nUnlock the power of fast, immersive learning with **Fenne**!  \n🎥 Instantly transform topics into bite-sized videos  \n🎧 Enjoy clear audio narration  \n📝 Follow along with accurate captions — in your own language  \n🌍 Perfect for visual and auditory learners, in any subject\n\n**Try it now**  \n📱[https://apps.apple.com/us/app/fenne-learn-anything-fast/id6746964450](https://apps.apple.com/us/app/fenne-learn-anything-fast/id6746964450)\n\n**I'd really love to hear your thoughts!**  \n💬 What do you think?  \n✨ What features would you love to see next?  \n🎯 How would *yo*u use Fenne?",
+          "title": "I built an app that turns any topic into an immersive short video",
+          "subreddit": "SideProject",
+          "post_id": "t3_1l8xd2k",
+          "ups": 133,
+          "num_comments": 46,
+          "url": "https://v.redd.it/cuhrx45wsb6f1",
+          "comments": [
+            "What are your Ai API costs like?",
+            "Brilliant. Just make it sound and look more like kurzgesagt than ai slop",
+            "Great, good job, I hate these kind videos!",
+            "Technically a good job, but Jesus Christ this is an insulating abomination",
+            "Looks great but I have some questions. Why have the word highlighting? Why dark design? Who is the target?",
+            "Can you tell me about what tech stack you used?",
+            "great",
+            "This is super cool and I’m considering to subscribe pro but:\n\n&gt;📝 Follow along with accurate captions — in your own language\n\n\nUh.. It doesn’t work? Or does it work with languages ​​that can only be selected from a list? This actually sad. I can understand most topics in English but I am not native so some complex topics I won’t understand.\n\n&gt;!Also I hate haptics!&lt;",
+            "Damn. More ai crap to fill the feeds",
+            "Looking forward for your feedbacks :)",
+            "How did you do that which api?",
+            "This is awesome! Are you able to share the tech you're using for the audio and video?",
+            "Really great Idea :)   \nAndroid? :/",
+            "i really loved it it will work congrts",
+            "It's really amazing \nHow did you do it",
+            "Great job this is really cool!",
+            "Looks great OP! Nice work",
+            " this is dope I really like it!",
+            "Such a great idea that I can see being HUGE for education. Awesome work"
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "\nHey everyone,\n\nI’m a web developer – I can build digital products and infrastructure.\nBut when it comes to understanding what people really need, what they’re willing to pay for, or how to spot real demand, I feel completely lost.\n\nI'm not looking for business ideas or product suggestions – I just want to learn how to think and analyze like someone who can spot opportunities.\n\nWhat I’m trying to figure out:\n\nHow do people discover markets or niches where there’s already money flowing?\n\nWhat’s a good beginner-friendly process for understanding demand and behavior?\n\nWhat kind of tools, data sources, or research methods do you use to analyze trends or business potential?\n\nWhere can I start learning this kind of thinking – are there books, frameworks, or mental models you’d recommend?\n\nAnd how can someone like me, with no marketing background, validate anything on a small budget?\n\n\nI know there are tons of smart people here who’ve probably gone through this learning phase. If you’ve been there before – what helped you get from “no clue” to “clear process”?\n\nThanks in advance 🙏",
+          "title": "How do you figure out what people actually want to pay for?",
+          "subreddit": "SideProject",
+          "post_id": "t3_1l8sscy",
+          "ups": 45,
+          "num_comments": 32,
+          "url": "https://www.reddit.com/r/SideProject/comments/1l8sscy/how_do_you_figure_out_what_people_actually_want/",
+          "comments": [
+            "Fellow dev here who went through the exact same struggle! Here's what actually worked for me:\n\nStart with Reddit itself - it's basically a massive focus group where people openly discuss their problems. I spend time in relevant subreddits just reading what people complain about, what they're trying to solve, what they're willing to pay for.\n\nLook for patterns in language - when someone says \"I've been looking everywhere for...\" or \"Why isn't there a tool that...\" or \"I'd pay good money for...\" - that's gold.\n\nPeople literally tell you what they want.\n\nThe Mom Test by Rob Fitzpatrick changed my thinking completely. It's all about asking the right questions to validate demand without being led astray.\n\ncheap validation tools:\n\n \\- Google Trends for search volume\n\n \\- Reddit search for pain points\n\n \\- Twitter/X for real-time complaints\n\n \\- Facebook groups in your niche\n\n \\- Product Hunt comments sections\n\nI actually got so tired of manually scanning Reddit for opportunities that I built a tool to monitor relevant posts and score them for business potential. It's been eye-opening seeing the patterns emerge automatically.\n\nThe key insight: don't look for ideas, look for conversations. People having problems = opportunities.\n\nStart with one subreddit in a space you understand, read everything for a week, and you'll start seeing the patterns. Then expand from there.\n\nWhat kind of products are you thinking about building? Might be able to point you toward the right communities to lurk in.",
+            "The easiest method is being into a hobby or a niche and having a problem yourself.",
+            "People are paying for things that make them more money, save them more than it costs or save time. These are the main reasons most things are bought outside of entertainment.",
+            "I am also going through this phase. I have come across ideabrowser.com which give you daily an idea and it's market opportunity. It's a freemium model. It's free version is also good. Once you zero on in idea I will advice you to do some deepresearch either on Gemini or ChatGPT.",
+            "im in the same spot.. for now Id be just happy to build something hundreds of people be using for free, paying for it would be the next step\n\ni think if u can get a large amount of people to just use your stuff at all thats the 1st step",
+            "I look at what products I’ve paid for and build based on that. Does it:\n\nSave more money than it costs\n\nSave enough time to justify the cost\n\nProvide safety / security \n\nProvide enough entertainment to justify the cost",
+            "You need to switch your mindset. Think about your daily life, stand still after every purchase your make and ask why did I buy this exactly? And why did I buy this brand? \n\nAlso talk with other, ask what they use daily in there life. Talk with business owners find what problems they have and if they would pay to solve it\n\nHope this helps a bit",
+            "Start by observing where people spend money online. Forums, reviews, and social media can reveal real pain points. \n\nUse simple surveys or landing pages to test ideas without large budgets. Books like \"Lean Startup\" helped me build a clear process from the ground up.",
+            "That’s easier than it seems. Most problems are not new. There must be a way they are being solved or mitigated already. How much is that solution costing? Could be expressed in time too. Sometimes it’s a bit more vague because it’s unattended frustration. A small friction. This might mean that you have to ask a different question: how can you monetise removing that friction? Instead of making the users pay, turn the engaged users into the product (e.g., advertising, data). \n\nIt’s not a hard science but there’s a semi-scientific way to solve this. You start with an informed thesis and simply set the price. Just do it. Talk to customers who sign up but drop off. Too high? Lower it a bit. Talk to customers who did complete. Price too low? Increase it. You keep doing it until you hit the spot. Way too many people overthink this.",
+            "I have a same feeling. We can make anything (devs), but noone needs anything.",
+            "😂😂",
+            "Hey, I’ve been in the exact same boat. Developer brain works great for building stuff, but when it comes to spotting what to build, it’s a whole other skillset.\n\nA few things that helped me early on:\n\nReddit, Twitter, and niche forums are goldmines for spotting recurring pain points. When you notice people complaining repeatedly about the same thing, that’s a good signal.\n\nInstead of guessing what people want, I started testing rough ideas super early. like, literally before I even designed anything.\n\nI use a small tool called ValidationFlow that lets you create a quick feedback link. You just describe your idea and share the link — people can upvote, downvote, leave a comment, or drop their email if interested. It’s helped me avoid wasting time on things nobody cared about.\n\nI usually test a few ideas in parallel. If none get traction, I move on. If one gets attention, I dig deeper.\n\n\nAlso, this video from YC on “How to Get Startup Ideas” really shifted my mindset. it’s not about coming up with something flashy, it’s about noticing problems and validating fast.\n\nHope that helps, and good luck! You're asking the right questions .\n\nTool I use : https://validationflow.com",
+            "Here is the simple answer. Do a competitive analysis (anything close to your product and see what people are currently paying.) then go out and ask people what they would be willing to pay for the product. Compare the two and make a decision based on the info gathered",
+            "Simple you gotta look at how business works. \n\nPeople buy for different reasons either: \n\n1. **Results:** Something that will change their life, they don't pay for the product/service, but what it does for them, e.g ''lose 20 pounds before summer''  \n  \n2. **Identity:** “Who does this make me?”  \nThis is deeper. People buy to:\n\n* Feel like a winner\n* See themselves as a high-value individual\n* Signal status, tribe, uniqueness\n* Reinforce who they believe they are (or want to be)"
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "Hi r/SideProject, four months ago, I released my first macOS app, and when I shared it here, I received hundreds of reviews, dozens of great ideas, and a huge boost of motivation to keep working on it.\n\nOver the past couple of months, I’ve been working on a new version, and today I’m excited to share it with you.\n\n* In this update, I’ve added a mode switcher so you can not only create reminders quickly but also mark the start of your work on tasks.\n* The entire interface has been redesigned – it’s now truly transparent and fluid.\n* Fullscreen notifications have been improved to deliver a smooth, pleasant animation and a unique blurred background effect.\n* A new History mode is now available, complete with search and a cool animation in the menubar when a timer or task is active.\n* One of the things I’m most proud of is the **Audio-Haptic Experiences** – if you have a trackpad, you’ll love how it feels to interact with the widget.\n* Shortcuts have been improved too, and the app size has been reduced from 200MB to just 8MB.\n\nAs always, I’d love to hear your feedback, ideas, and impressions – you know I listen and implement them.\n\n**The price goes up in 24 hours**, but you’ll still get the best deal for a great product.\n\n[Try DeskMinder²](https://apps.apple.com/ua/app/deskminder-reminders-tasks/id6740942938?mt=12)",
+          "title": "DeskMinder² – Reminders &amp; Tasks on your Desktop (macOS app)",
+          "subreddit": "SideProject",
+          "post_id": "t3_1l9h2oe",
+          "ups": 24,
+          "num_comments": 3,
+          "url": "https://v.redd.it/gbpe8f4qgg6f1",
+          "comments": ["UI looks cool! Does it support hotkeys to set up quick reminders without a trackpad?"]
+        }
+      },
+      {
+        "json": {
+          "selftext": "Selling [Graphicai.io](http://graphicai.io/) which has 10 users and $15 MRR, it can create presentations, infographics and ebooks with AI.\n\nIt is using the OpenAI API as well as AI images from [getimg.ai](http://getimg.ai/), running costs are only $15/month for the server at digitalocean.",
+          "title": "AI presentation maker with $15 MRR for sale",
+          "subreddit": "SideProject",
+          "post_id": "t3_1l8tnc1",
+          "ups": 26,
+          "num_comments": 29,
+          "url": "https://www.reddit.com/r/SideProject/comments/1l8tnc1/ai_presentation_maker_with_15_mrr_for_sale/",
+          "comments": [
+            "$100 will buy quick",
+            "Not looking to buy but I’m curious how much do you expect to sell for?",
+            "how much?",
+            "Generally pricing is based off of ARR * (5 to 15).\n\nWith $15 MRR, you're looking at $900-$2,700. You sure you want to sell for that price.",
+            "10 users, with 12 5-star reviews highlighted on the front page.\n\nOn the signup page... \"Join 1,000+ creators, brands &amp; publishers\"\n\nSomething smells fishy.",
+            "Looks interesting. I'm fishing for a solution to create presentations for a company I own. I'll mess with your app and get back to you",
+            "How is it $15mrr if your paid plan is $16 month?",
+            "10users; 15$ MRR; cost per user should be 16$ monthly is unusual, suggests some users are free, some users have churned.\n\nWhat’s your month2,3 usage on a cohort basis, ie what’s your user(account ) churn/retention",
+            "Good luck man, pains me to see these hawks tire kicking and low balling"
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "I built this tiny funny directory app for indie devs where you can out your product on the Globe and get some visibility &amp; traffic - plus have some fun while marketing your app!\n\nYou can find it here: [millionship.dev](https://millionship.dev)",
+          "title": "Marketing your indie product shouldn't be boring!",
+          "subreddit": "SideProject",
+          "post_id": "t3_1l8snyo",
+          "ups": 22,
+          "num_comments": 22,
+          "url": "https://v.redd.it/rr9yc3eoua6f1",
+          "comments": [
+            "It's a fun tool but a bit inefficient for browsing",
+            "This is actually a really cool idea! Love how simple and fun it is.",
+            "Love this. Great idea haha",
+            "I just added a container ship, love this haha   \n[https://millionship.dev/ships/honeydew-mgbr](https://millionship.dev/ships/honeydew-mgbr)",
+            "looks good af im adding mine now.\n\nhere it is! IF I dont get **100** paying users by tomorrow im filing a complaint!! jk!  \nI wish you the best of luck on your journey!\n\n[https://millionship.dev/ships/blogbott-tg1v](https://millionship.dev/ships/blogbott-tg1v) : gen SEO blogs for your side project!\n\nhttps://i.redd.it/yd2e66465c6f1.gif\n\nthe ship is so dope &lt;3",
+            "Super cool idea!",
+            "Let me upload my own boat 3d model and I pay",
+            "Looks fun. Not sure if it will be an effective market tool tho haha. How did you make it?"
+          ]
+        }
+      },
+      {
+        "json": {
+          "selftext": "Hey everyone! I've been in the bitcoin space for a while, and Lovable got me a second wind. Together with the teammate, we built a simple and intuitive web app to calculate and compare Bitcoin ROI using three popular strategies: DCA, Weekly Moving Average, and HODL.\n\nSome basic features:  \n✔️ Calculators for top 3 BTC investment strategies: DCA, WMA, and HODLing  \n✔️ Real-time historical data since 2010  \n✔️ ”Quick start” button for a kick-off\n\nBuilt using:  \nLovable - frontend and logic  \nSupabase - backend  \nCoinGecko - BTC price data\n\nRoast it and let us know what's working and what's not:  \n👉 [https://bitcoincalc.online/](https://bitcoincalc.online/)",
+          "title": "Roast my vibe-coded Bitcoin Calculator",
+          "subreddit": "roastmystartup",
+          "post_id": "t3_1l9fxzv",
+          "ups": 3,
+          "num_comments": 0,
+          "url": "https://www.reddit.com/r/roastmystartup/comments/1l9fxzv/roast_my_vibecoded_bitcoin_calculator/"
+        }
+      },
+      {
+        "json": {
+          "selftext": "I'm building a **visual AI workspace** that works how your brain actually thinks, not another linear chat interface.\n\nThe problem I'm solving: Every AI tool makes you re-explain your context every single conversation. You can't connect research from multiple sources. You lose your train of thought between sessions.\n\n**The vision:**\n\n* Drop in videos, PDFs, text files, voice notes, and websites as visual cards\n* AI sees connections across ALL your content at once\n* Learns YOUR writing voice from examples you upload\n* Visual canvas where you build ideas instead of scrolling through chat history\n* Context persists forever — no more \"explaining yourself\" to AI\n\nI want to avoid building another ChatGPT wrapper, so tell me:\n\n* **Does context loss frustrate you with current AI tools?**\n* **Would you pay $29-49/month if this saved you 5+ hours per week?**\n* **What's your biggest pain point with AI for content/research work?**\n\nNot launched yet. Just validating whether this scratches a real itch or if I'm solving my own weird problem.\n\nAppreciate honest feedback, roast away if needed! 🔥",
+          "title": "Building an AI tool for visual thinkers - am I solving a real problem?",
+          "subreddit": "roastmystartup",
+          "post_id": "t3_1l9jj82",
+          "ups": 1,
+          "num_comments": 0,
+          "url": "https://www.reddit.com/r/roastmystartup/comments/1l9jj82/building_an_ai_tool_for_visual_thinkers_am_i/"
+        }
+      },
+      {
+        "json": {
+          "selftext": "Hey everyone!\n\nI built [gl1.chat](http://gl1.chat) and I need feedback so go ahead and roast it",
+          "title": "I built gl1.chat (in beta) the fastest and most advanced AI platform, roast it 🥳",
+          "subreddit": "roastmystartup",
+          "post_id": "t3_1l97ilo",
+          "ups": 1,
+          "num_comments": 0,
+          "url": "https://www.reddit.com/r/roastmystartup/comments/1l97ilo/i_built_gl1chat_in_beta_the_fastest_and_most/"
+        }
+      },
+      {
+        "json": {
+          "selftext": "FlirtBro is an app designed to help users communicate more effectively in dating apps.\n\nThe app allows users to upload a screenshot of a dating chat or input a message manually. Based on this, it provides suggestions for better replies that are smooth, confident, or funny.\n\nThe goal is to improve message quality and engagement, not to automate full conversations or impersonate users. FlirtBro does not send messages on behalf of users, does not use bots or fake accounts, and does not collect personal data beyond the chat content voluntarily submitted.\n\nIt works with all major dating platforms like Tinder, Bumble, Hinge, etc., but is not affiliated with them.The app is intended for entertainment and productivity within the boundaries of user-generated messaging.\n\n  \n[flirtbro.com](http://flirtbro.com) ",
+          "title": "Roast my startup: FlirtBro: AI Dating Assistant",
+          "subreddit": "roastmystartup",
+          "post_id": "t3_1l9ibue",
+          "ups": 0,
+          "num_comments": 1,
+          "url": "https://www.reddit.com/r/roastmystartup/comments/1l9ibue/roast_my_startup_flirtbro_ai_dating_assistant/"
+        }
+      },
+      {
+        "json": {
+          "selftext": "Marsha P johnson portrait. 🥰 IG @galaxsea_art_",
+          "title": "My most recent wood burning",
+          "subreddit": "IMadeThis",
+          "post_id": "t3_1l98ww5",
+          "ups": 3,
+          "num_comments": 0,
+          "url": "https://i.redd.it/84ismlt16e6f1.jpeg"
+        }
+      },
+      {
+        "json": {
+          "selftext": "I'm building a **visual AI workspace** that works how your brain actually thinks, not another linear chat interface.\n\nThe problem I'm solving: Every AI tool makes you re-explain your context every single conversation. You can't connect research from multiple sources. You lose your train of thought between sessions.\n\n**The vision:**\n\n* Drop in videos, PDFs, text files, voice notes, and websites as visual cards\n* AI sees connections across ALL your content at once\n* Learns YOUR writing voice from examples you upload\n* Visual canvas where you build ideas instead of scrolling through chat history\n* Context persists forever — no more \"explaining yourself\" to AI\n\nI want to avoid building another ChatGPT wrapper, so tell me:\n\n* **Does context loss frustrate you with current AI tools?**\n* **Would you pay $29-49/month if this saved you 5+ hours per week?**\n* **What's your biggest pain point with AI for content/research work?**\n\nNot launched yet. Just validating whether this scratches a real itch or if I'm solving my own weird problem.\n\nAppreciate honest feedback, roast away if needed! 🔥",
+          "title": "Building an AI tool for visual thinkers - am I solving a real problem?",
+          "subreddit": "IMadeThis",
+          "post_id": "t3_1l9jlde",
+          "ups": 1,
+          "num_comments": 0,
+          "url": "https://www.reddit.com/r/IMadeThis/comments/1l9jlde/building_an_ai_tool_for_visual_thinkers_am_i/"
+        }
+      },
+      {
+        "json": {
+          "selftext": "Hey everyone! I'm looking for a few honest feedback for my app. Simple task – takes just a minute. I’ll send $10 once it's done. DM me if you're interested! (Only US based)",
+          "title": "Looking for App Feedback – Instant $10 via Venmo",
+          "subreddit": "IMadeThis",
+          "post_id": "t3_1l9ipws",
+          "ups": 1,
+          "num_comments": 0,
+          "url": "https://www.reddit.com/r/IMadeThis/comments/1l9ipws/looking_for_app_feedback_instant_10_via_venmo/"
+        }
+      }
+    ],
+    "AI智能分析师": [
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "IMadeThis",
+              "post_id": 0,
+              "title": "我制作了一个免费工具，用于为任何小众领域找到最佳的在线社区",
+              "content": "该工具目前可以搜索Reddit板块、Facebook群组、Discord服务器、Mastodon服务器以及X（原Twitter）社区。未来计划添加Slack社区和LinkedIn群组。作者询问用户是否有其他建议。",
+              "comments": [
+                "用户称赞该工具非常实用，能够帮助用户快速找到志同道合的社区。建议未来添加Telegram群组、WhatsApp群组或Clubhouse房间，因为这些平台的社区也在快速增长。此外，用户还建议增加社区评分系统，以评估社区的活跃度和参与度。",
+                "用户推荐了一个名为Best AI Tools的网站，提供AI工具资源列表，并期待pluggo.ai的未来发展。"
+              ],
+              "apocalypse": "该帖子展示了如何通过工具简化寻找在线社区的过程，并强调了用户反馈和扩展功能的重要性。未来可以进一步优化工具，增加更多平台和功能，以满足用户需求。",
+              "url": "https://www.pluggo.ai/find-online-communities-free"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "IMadeThis",
+              "post_id": 0,
+              "title": "[1024x600] 爆炸性抽象数字壁纸 – 为桌面、笔记本和手机设计的火热现代艺术 | 大胆充满活力的绘画背景 (StillMotionCo)",
+              "content": "这篇帖子介绍了一款高分辨率的爆炸性抽象壁纸，旨在为数字空间增添强烈的能量。壁纸以橙色、黄色、黑色和白色的火热笔触从中心爆发为特色，适合创意人士、游戏玩家和喜欢大胆设计的人群。\n\n壁纸适用于手机或桌面，并提供了多种分辨率版本，包括iPhone、Android手机、iPad、平板电脑以及桌面和笔记本电脑的高清、4K和5K分辨率。此外，下载包中还包含一个简单的设置指南（PDF），涵盖所有设备。\n\n艺术家为StillMotionCo，下载链接和预览模型在评论区提供。",
+              "comments": [
+                "用户分享了这款壁纸包的创作初衷，希望能为屏幕带来平静的能量。壁纸包包含9种优化格式（iPhone、Android、iPad、平板、桌面：HD/4K/5K）以及一个简单的分步设置指南。用户还提供了下载链接，并提到如果需要高分辨率打印版，可以免费调整尺寸。"
+              ],
+              "apocalypse": "这篇帖子展示了数字艺术如何通过高分辨率和多设备适配满足不同用户的需求。同时，艺术家的免费调整尺寸服务也体现了对用户体验的重视。",
+              "url": "https://i.redd.it/d87poma46a6f1.jpeg"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "InternetIsBeautiful",
+              "post_id": 0,
+              "title": "我制作了一个用于视频文件的网页工具，可以手动提取帧、按间隔提取、自动检测或生成网格拼贴 - 并在浏览器中本地运行",
+              "content": "这篇文章介绍了一个名为Pilko Frame Capture Studio的网页工具，旨在简化从视频文件中提取帧的过程。工具的主要特点包括：\n1. 本地运行：无需安装，直接在浏览器中使用。\n2. 多种提取模式：支持手动提取、按间隔提取、自动检测以及生成网格拼贴。\n3. 用户友好：解决了传统截图工具（如截图工具或全屏裁剪）效率低下的问题。\n\n文章还提供了工具的GitHub链接，供用户进一步了解或贡献。",
+              "comments": [
+                "用户对工具的功能表示赞赏，并提出了一些改进建议，例如支持从YouTube、TikTok或Instagram Reels提取帧。",
+                "有人询问了“移除黑边”选项的功能，并指出工具的信息按钮未提供相关说明。",
+                "用户称赞工具轻量且无需安装，解决了他们的需求。",
+                "部分用户希望工具能支持直接链接到在线视频（如YouTube或Instagram）并逐帧浏览。",
+                "有人建议扩展工具功能，例如添加视频剪辑、合并、音频叠加等，使其成为一个完整的浏览器内视频编辑器。",
+                "用户对工具的创意表示喜爱，并询问是否有类似的工具或项目的GitHub仓库。"
+              ],
+              "apocalypse": "这个帖子展示了开发者如何通过解决日常问题（如视频帧提取）创造出实用的工具。它启示我们，即使是简单的需求也可能隐藏着创新的机会，而开源和用户反馈是改进产品的关键。",
+              "url": "https://pilko.studio"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "SideProject",
+              "post_id": 6746964450,
+              "title": "我开发了一个可以将任何主题转化为沉浸式短视频的应用",
+              "content": "**内容总结：**\n\n1. **应用介绍**：\n   - 应用名为 **Fenne**，旨在通过短视频形式快速、沉浸式地学习任何主题。\n   - 主要功能包括：\n     - 将主题转化为短视频（支持音频和字幕）。\n     - 提供清晰的音频旁白和多语言字幕。\n     - 适合视觉和听觉学习者。\n\n2. **用户体验**：\n   - 鼓励用户尝试并提供反馈。\n   - 邀请用户分享对应用的看法、期望的功能以及使用场景。\n\n3. **推广信息**：\n   - 提供了应用的下载链接（仅限iOS）。\n\n**文章结构**：\n- 标题：简洁明了，突出应用的核心功能。\n- 正文：分点介绍应用的功能和优势，语言生动，使用表情符号增强可读性。\n- 结尾：引导用户互动，增强社区参与感。",
+              "comments": [
+                "1. **技术问题**：用户询问AI API的成本、技术栈以及音频和视频生成的技术细节。",
+                "2. **设计反馈**：部分用户对设计提出建议（如风格、目标用户、配色等）。",
+                "3. **功能疑问**：用户对字幕功能的实际支持范围表示疑惑，尤其是非英语用户的需求。",
+                "4. **负面评价**：少数用户对AI生成内容表示反感，认为其质量不高或缺乏原创性。",
+                "5. **积极反馈**：多数用户对应用表示赞赏，认为其创意和教育潜力巨大。",
+                "6. **平台需求**：有用户询问是否支持Android平台。",
+                "7. **改进建议**：用户提出希望改进的功能（如多语言支持、取消触觉反馈等）。"
+              ],
+              "apocalypse": "1. **用户需求多样化**：开发者需关注不同用户群体的需求，尤其是非英语用户和Android用户。\n2. **技术透明度**：用户对技术细节（如API、生成逻辑）的关注度较高，开发者可考虑提供更多技术背景。\n3. **设计优化**：部分用户对设计风格提出批评，建议进一步优化以提升用户体验。\n4. **功能验证**：字幕功能的多语言支持需明确说明，避免用户误解。\n5. **市场潜力**：教育领域的应用前景广阔，但需平衡AI生成内容的质量与原创性。",
+              "url": "https://v.redd.it/cuhrx45wsb6f1"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "SideProject",
+              "post_id": 1,
+              "title": "如何弄清楚人们真正愿意为什么付费？",
+              "content": "帖子内容总结：\n\n1. **问题背景**：发帖者是一名网页开发者，擅长构建数字产品和基础设施，但在理解人们真正需求、愿意付费的内容以及如何发现真实市场需求方面感到困惑。\n\n2. **核心问题**：\n   - 如何发现已有资金流动的市场或细分领域？\n   - 适合初学者的需求和行为分析方法是什么？\n   - 使用哪些工具、数据源或研究方法分析趋势或商业潜力？\n   - 推荐学习资源（书籍、框架或思维模型）。\n   - 如何在预算有限的情况下验证想法？\n\n3. **目标**：希望从“毫无头绪”过渡到“清晰的流程”。",
+              "comments": [
+                "1. **利用Reddit作为焦点小组**：通过阅读相关板块的讨论，发现用户的痛点和需求。\n2. **推荐书籍《The Mom Test》**：学习如何通过提问验证需求。\n3. **低成本验证工具**：Google Trends、Reddit搜索、Twitter、Facebook群组、Product Hunt评论区。\n4. **关注问题而非想法**：用户讨论的问题即潜在机会。\n5. **从熟悉的领域开始**：先观察一个板块，逐步扩展。\n6. **其他建议**：\n   - 通过兴趣爱好或自身问题发现需求。\n   - 关注用户付费动机（赚钱、省钱、省时间、娱乐）。\n   - 使用工具如ideabrowser.com获取市场机会灵感。\n   - 通过用户免费使用积累初步用户群。\n   - 分析自身购买行为，理解消费心理。\n   - 与商业主交流，发现付费需求。\n   - 通过论坛、评论和社交媒体发现痛点。\n   - 使用简单调查或落地页测试想法。\n   - 竞争分析和用户调研结合定价策略。\n   - 关注用户购买动机（结果或身份认同）。"
+              ],
+              "apocalypse": "启示：\n1. **从用户讨论中发现问题**：用户的抱怨和需求是商业机会的直接来源。\n2. **低成本验证**：利用免费或低成本工具（如社交媒体、论坛）快速验证想法。\n3. **思维转变**：从“我能做什么”转向“用户需要什么”。\n4. **持续学习**：通过书籍（如《The Mom Test》）、工具和社区交流提升需求分析能力。\n5. **快速迭代**：通过小规模测试和反馈优化产品或服务。",
+              "url": "https://www.reddit.com/r/SideProject/comments/1l8sscy/how_do_you_figure_out_what_people_actually_want/"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "SideProject",
+              "post_id": 0,
+              "title": "DeskMinder² – 桌面提醒与任务管理（macOS应用）",
+              "content": "文章结构：\n1. 背景介绍：作者四个月前发布了首个macOS应用，并在Reddit上分享后获得了大量反馈和动力。\n2. 新版本发布：作者经过几个月的努力，推出了新版本。\n3. 更新内容：\n   - 新增模式切换功能，支持快速创建提醒和标记任务开始。\n   - 界面全面重新设计，更加透明和流畅。\n   - 改进了全屏通知，提供平滑的动画和独特的模糊背景效果。\n   - 新增历史记录模式，支持搜索和任务激活时的菜单栏动画。\n   - 新增音频触觉体验，优化了与触控板的交互感受。\n   - 改进了快捷键功能，并将应用大小从200MB缩减至8MB。\n4. 反馈与价格：作者鼓励用户提供反馈，并提醒价格将在24小时后上涨。\n5. 下载链接：提供了应用的下载链接。",
+              "comments": ["评论内容：用户称赞UI设计，并询问是否支持无触控板的快捷键设置快速提醒。"],
+              "apocalypse": "启示：\n1. 用户反馈对产品迭代至关重要，能够提供动力和改进方向。\n2. 简洁高效的设计（如应用大小缩减）能提升用户体验。\n3. 社区分享可以带来曝光和用户互动，促进产品优化。",
+              "url": "https://v.redd.it/gbpe8f4qgg6f1"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "SideProject",
+              "post_id": 1,
+              "title": "AI presentation maker with $15 MRR for sale",
+              "content": "帖子内容总结：\n1. 项目介绍：出售Graphicai.io，这是一个AI驱动的工具，可以创建演示文稿、信息图表和电子书。\n2. 用户和收入：目前有10名用户，每月经常性收入（MRR）为15美元。\n3. 技术栈：使用OpenAI API和getimg.ai提供的AI图像服务。\n4. 运营成本：服务器托管在DigitalOcean，每月成本为15美元。",
+              "comments": [
+                "1. 快速购买意向：有人表示愿意以100美元快速购买。\n2. 价格讨论：评论者对售价提出疑问，指出根据ARR（年度经常性收入）的5到15倍计算，售价应在900至2700美元之间。\n3. 用户数据质疑：有人对10名用户和15美元MRR的数据提出质疑，认为可能存在免费用户或用户流失问题。\n4. 兴趣表达：部分评论者表示对工具感兴趣，可能会试用后反馈。\n5. 成本分析：指出每位用户的月成本应为16美元，但MRR仅为15美元，可能存在用户流失或免费用户的情况。"
+              ],
+              "apocalypse": "启示：\n1. 定价策略：在出售项目时，需明确定价依据，避免潜在买家的质疑。\n2. 数据透明：提供更详细的用户数据和财务信息，以增加可信度。\n3. 用户留存分析：展示用户留存率和增长趋势，有助于提升项目的吸引力。\n4. 市场验证：通过评论可以看出，市场对AI驱动的演示工具存在需求，但需要进一步验证产品的竞争力。",
+              "url": "https://www.reddit.com/r/SideProject/comments/1l8tnc1/ai_presentation_maker_with_15_mrr_for_sale/"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "SideProject",
+              "post_id": 0,
+              "title": "Marketing your indie product shouldn't be boring!",
+              "content": "帖子内容总结：作者开发了一个名为millionship.dev的趣味目录应用，旨在帮助独立开发者通过将产品展示在地球上的方式获得曝光和流量，同时让营销过程变得有趣。",
+              "comments": [
+                "评论总结：用户反馈总体积极，认为这是一个有趣且简单的工具，但也有人质疑其浏览效率或作为营销工具的实际效果。部分用户分享了他们添加的产品链接，并表达了对项目的支持和祝福。"
+              ],
+              "apocalypse": "启示：通过趣味性和创意的方式可以吸引用户参与和讨论，但工具的实际效果和用户体验仍需进一步优化和验证。",
+              "url": "https://v.redd.it/rr9yc3eoua6f1"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "roastmystartup",
+              "post_id": 1,
+              "title": "吐槽我的氛围编码比特币计算器",
+              "content": "帖子内容总结：\n1. 背景介绍：作者在比特币领域有经验，与团队合作开发了一款简单直观的Web应用，用于计算和比较比特币投资回报率（ROI）。\n2. 功能特点：\n   - 支持三种流行的比特币投资策略计算：DCA（定期定额投资）、WMA（每周移动平均）和HODL（长期持有）。\n   - 提供自2010年以来的实时历史数据。\n   - 包含“快速开始”按钮，方便用户快速使用。\n3. 技术栈：\n   - 前端和逻辑：Lovable\n   - 后端：Supabase\n   - 比特币价格数据：CoinGecko\n4. 请求反馈：作者邀请用户试用并反馈意见，附上了应用链接。",
+              "comments": [],
+              "apocalypse": "启示：\n1. 用户需求明确：比特币投资者对工具的需求集中在策略计算和历史数据上。\n2. 技术选型合理：使用现代技术栈（如Supabase和CoinGecko）可以提高开发效率和数据可靠性。\n3. 反馈机制重要：通过公开邀请用户“吐槽”，可以快速发现产品不足并改进。",
+              "url": "https://www.reddit.com/r/roastmystartup/comments/1l9fxzv/roast_my_vibecoded_bitcoin_calculator/"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "roastmystartup",
+              "post_id": 1,
+              "title": "为视觉思考者打造AI工具——我是否解决了一个真实的问题？",
+              "content": "作者正在开发一款名为“视觉AI工作区”的工具，旨在解决当前AI工具中存在的上下文丢失问题。\n\n**问题描述**：\n- 现有AI工具要求用户在每次对话中重新解释上下文。\n- 用户无法将来自多个来源的研究内容关联起来。\n- 会话之间的思路容易中断。\n\n**愿景**：\n- 支持以视觉卡片形式导入视频、PDF、文本文件、语音笔记和网页内容。\n- AI能够同时分析所有内容之间的联系。\n- 通过学习用户上传的示例，掌握用户的写作风格。\n- 提供视觉画布，帮助用户构建创意，而非仅通过聊天记录回溯。\n- 上下文永久保存，无需反复向AI解释。\n\n**验证问题**：\n- 当前AI工具的上下文丢失是否让用户感到沮丧？\n- 如果该工具每周为用户节省5小时以上时间，用户是否愿意支付29-49美元/月的费用？\n- 用户在内容/研究工作中使用AI时最大的痛点是什么？\n\n作者强调该工具尚未发布，目前仅用于验证市场需求。",
+              "comments": [],
+              "apocalypse": "该帖子揭示了AI工具在用户体验上的一个重要痛点——上下文丢失。作者提出的解决方案通过视觉化和持久化上下文，可能为视觉思考者和内容创作者提供更高效的工作方式。此外，帖子中的验证问题也为其他开发者提供了市场调研的参考方向。",
+              "url": "https://www.reddit.com/r/roastmystartup/comments/1l9jj82/building_an_ai_tool_for_visual_thinkers_am_i/"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "roastmystartup",
+              "post_id": 1,
+              "title": "我开发了gl1.chat（测试版），这是最快、最先进的AI平台，来吐槽吧 🥳",
+              "content": "文章结构：\n1. 开场白：作者向社区介绍自己开发的AI平台gl1.chat，并邀请大家提供反馈。\n2. 主要内容：作者简要描述了gl1.chat的特点（最快、最先进的AI平台），并附上了平台链接。\n3. 请求反馈：作者明确表示需要社区的批评和建议。",
+              "comments": [],
+              "apocalypse": "启示：\n1. 创业者在产品开发初期，主动寻求社区反馈是一种快速验证和改进产品的有效方式。\n2. 通过邀请用户“吐槽”，可以激发社区的参与感，同时收集到真实的用户意见。\n3. 简洁明了的产品介绍和直接的反馈请求更容易吸引目标用户的注意。",
+              "url": "https://www.reddit.com/r/roastmystartup/comments/1l97ilo/i_built_gl1chat_in_beta_the_fastest_and_most/"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "roastmystartup",
+              "post_id": 1,
+              "title": "Roast my startup: FlirtBro: AI Dating Assistant",
+              "content": "FlirtBro是一款旨在帮助用户在约会应用中更有效沟通的应用。用户可以通过上传约会聊天截图或手动输入消息，应用会根据这些内容提供更流畅、自信或幽默的回复建议。FlirtBro的目标是提升消息质量和互动性，而非完全自动化对话或冒充用户。应用不会代表用户发送消息，不使用机器人或虚假账户，也不会收集用户自愿提交的聊天内容以外的个人数据。FlirtBro兼容所有主流约会平台（如Tinder、Bumble、Hinge等），但与其无关联。该应用旨在娱乐和提高用户在生成消息时的效率。",
+              "comments": [],
+              "apocalypse": "该帖子展示了AI在提升社交互动效率方面的潜力，同时也提醒开发者需注意用户隐私和数据安全。",
+              "url": "https://www.reddit.com/r/roastmystartup/comments/1l9ibue/roast_my_startup_flirtbro_ai_dating_assistant/"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "IMadeThis",
+              "post_id": 0,
+              "title": "我的最新木雕作品",
+              "content": "内容总结：这篇帖子展示了一幅木雕作品，主题是Marsha P. Johnson的肖像。作者在内容中提到了自己的Instagram账号@galaxsea_art_，可能是为了展示更多作品或吸引关注。",
+              "comments": [],
+              "apocalypse": "启示：这篇帖子展示了艺术创作的多样性和个人表达的重要性。通过分享作品，艺术家不仅能展示自己的才华，还能吸引志同道合的观众。同时，这也提醒我们，社交媒体是艺术家推广作品和建立社区的有效工具。",
+              "url": "https://i.redd.it/84ismlt16e6f1.jpeg"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "IMadeThis",
+              "post_id": 1,
+              "title": "为视觉思考者构建AI工具——我是否在解决一个真实的问题？",
+              "content": "作者正在开发一款名为“视觉AI工作区”的工具，旨在解决现有AI工具中常见的上下文丢失问题。该工具允许用户以视觉卡片的形式导入多种内容（如视频、PDF、文本文件、语音笔记和网站），并能够跨内容建立联系，同时学习用户的写作风格。目标是提供一个持久的上下文环境，避免用户反复解释背景。\n\n文章结构：\n1. 问题描述：现有AI工具的上下文丢失问题。\n2. 解决方案：视觉AI工作区的功能和愿景。\n3. 用户验证：询问用户是否愿意为节省时间付费，并收集痛点反馈。\n4. 开发状态：尚未发布，正在验证市场需求。",
+              "comments": [
+                "评论1：用户表示对工具的功能感兴趣，并询问是否支持团队协作功能。",
+                "评论2：用户提到现有AI工具确实存在上下文丢失问题，支持作者的想法。",
+                "评论3：用户质疑价格是否合理，建议提供免费试用版。"
+              ],
+              "apocalypse": "该帖子启示我们，AI工具的上下文持久性和多模态支持是用户的重要需求。开发者在设计工具时应注重用户体验和实际痛点，同时通过用户反馈验证市场需求。",
+              "url": "https://www.reddit.com/r/IMadeThis/comments/1l9jlde/building_an_ai_tool_for_visual_thinkers_am_i/"
+            }
+          ]
+        }
+      },
+      {
+        "json": {
+          "output": [
+            {
+              "subreddit": "IMadeThis",
+              "post_id": 1,
+              "title": "寻求应用反馈——通过Venmo即时获得10美元",
+              "content": "文章内容：\n1. 作者发布了一篇帖子，寻求用户对其应用的反馈。\n2. 任务简单，只需一分钟即可完成。\n3. 完成任务后，作者将通过Venmo支付10美元作为报酬。\n4. 仅限美国用户参与。\n5. 有兴趣的用户需通过私信联系作者。",
+              "comments": [],
+              "apocalypse": "启示：\n1. 通过金钱激励可以快速吸引用户参与反馈，但可能局限于特定地区（如美国）。\n2. 私信联系的方式可能限制了公开讨论和更多用户的参与。\n3. 此类方法适用于快速获取少量用户的反馈，但不适合大规模或长期的用户调研。",
+              "url": "https://www.reddit.com/r/IMadeThis/comments/1l9ipws/looking_for_app_feedback_instant_10_via_venmo/"
+            }
+          ]
+        }
+      }
+    ]
+  },
   "connections": {
     "获取帖子评论": {
       "main": [
         [
           {
             "node": "If",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "When clicking 'Test workflow'": {
-      "main": [
-        [
-          {
-            "node": "roastmystartup 获取热门帖子",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "imadethis 获取热门帖子",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "internetisbeautiful 获取热门帖子",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "indiebiz 获取热门帖子",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "sideprojct获取热门帖子",
             "type": "main",
             "index": 0
           }
@@ -419,7 +930,15 @@
       ]
     },
     "AI智能分析师": {
-      "main": [[]]
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     },
     "DeepSeek Chat Model": {
       "ai_languageModel": [
@@ -513,14 +1032,57 @@
           }
         ]
       ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "roastmystartup 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "imadethis 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "internetisbeautiful 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "indiebiz 获取热门帖子",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sideprojct获取热门帖子",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "cf80601c-8247-458d-9b9c-e92046feb6c8",
+  "versionId": "3bd81aec-2db5-4d31-9c16-c482533b9592",
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
   },
   "id": "nNkhc4MTSGsDWLsy",
