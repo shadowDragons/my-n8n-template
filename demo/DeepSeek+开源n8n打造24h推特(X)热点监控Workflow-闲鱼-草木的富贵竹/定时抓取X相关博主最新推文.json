@@ -1,0 +1,647 @@
+{
+  "name": "定时抓取X相关博主最新推文 copy",
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        20,
+        0
+      ],
+      "id": "a6e7a838-2375-43f1-abd4-d1d991819cc7",
+      "name": "No Operation, do nothing"
+    },
+    {
+      "parameters": {
+        "maxItems": 2
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -860,
+        320
+      ],
+      "id": "dc9f8ac3-fe8e-40ae-a819-041afa1b3bdb",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2e5fc709-730b-45f6-906e-9e221c008fb6",
+              "name": "users",
+              "value": "=[\"imxiaohu\",\"OpenAI\",\"hq4ai\",\"guizang.ai\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -2040,
+        80
+      ],
+      "id": "7228ade7-8ea2-41c7-b17b-79f0b5433c4e",
+      "name": "设置多个博主或者官媒"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "users",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -1840,
+        80
+      ],
+      "id": "df3b344b-ae7d-4692-90c4-502d8f317306",
+      "name": "分成多条"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -1520,
+        20
+      ],
+      "id": "bc3b3fb7-6d65-459a-a5fc-706015e02a50",
+      "name": "批量执行（每次一条）"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5edc7e67-200c-4da6-b9c0-666b519c1f66",
+              "name": "count",
+              "value": 1,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1220,
+        80
+      ],
+      "id": "be9b0da8-588b-4f28-911a-14c8c9e20a61",
+      "name": "设置计数"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "74c16187-0268-4451-ae1b-a4cb5d3fa50f",
+              "name": "counter",
+              "value": "={{ $json.count }}",
+              "type": "number"
+            },
+            {
+              "id": "ee7d6273-e36a-4351-a812-7ec2ce1df288",
+              "name": "cursor",
+              "value": "={{ $json.cursor }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -980,
+        60
+      ],
+      "id": "751f2edf-86de-4db0-9f50-8500ff6ee886",
+      "name": "计数和游标"
+    },
+    {
+      "parameters": {
+        "url": "https://api.twitterapi.io/twitter/user/last_tweets",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "userName",
+              "value": "={{ $('分成多条').item.json.users }}"
+            },
+            {
+              "name": "cursor",
+              "value": "={{ $json.cursor }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -780,
+        80
+      ],
+      "id": "2d08b91f-e355-4929-978d-3098c8ad95ab",
+      "name": "抓取博主最新推文",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "wJBLTCG7PAVS0mAP",
+          "name": "Header Auth account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "data.tweets",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        -580,
+        60
+      ],
+      "id": "06ef0ed4-8e4c-4dc3-a83c-b53e79873145",
+      "name": "分成多条推文"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1P02Wgqvz914bvWJa6ybywaUTx8ij6Yznc6XDqb3Jmvo",
+          "mode": "list",
+          "cachedResultName": "X最新推文",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P02Wgqvz914bvWJa6ybywaUTx8ij6Yznc6XDqb3Jmvo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P02Wgqvz914bvWJa6ybywaUTx8ij6Yznc6XDqb3Jmvo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "链接": "={{ $json.twitterUrl }}",
+            "内容": "={{ $json.text }}",
+            "点赞": "={{ $json.likeCount }}",
+            "阅读量": "={{ $json.viewCount }}",
+            "日期": "={{ $json.createdAt }}",
+            "评论": "={{ $json.replyCount }}",
+            "转发": "={{ $json.retweetCount }}",
+            "  x_id": "={{ $json.id }}",
+            "博主": "={{ $json.author.name }}",
+            "博主id": "={{ $json.author.userName }}"
+          },
+          "matchingColumns": [
+            "  x_id"
+          ],
+          "schema": [
+            {
+              "id": "  x_id",
+              "displayName": "  x_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "博主id",
+              "displayName": "博主id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "博主",
+              "displayName": "博主",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "链接",
+              "displayName": "链接",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "内容",
+              "displayName": "内容",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "点赞",
+              "displayName": "点赞",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "转发",
+              "displayName": "转发",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "评论",
+              "displayName": "评论",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "阅读量",
+              "displayName": "阅读量",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "日期",
+              "displayName": "日期",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        -360,
+        60
+      ],
+      "id": "a1fb60c7-2e30-48df-a0be-c2902b11c029",
+      "name": "每条推文相关信息插入表格",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oHMZuk3SCclhDIW3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2651980b-5328-479a-b46b-526e93a66fb3",
+              "leftValue": "={{ $('计数和游标').item.json.counter }}",
+              "rightValue": 1,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        60
+      ],
+      "id": "49b1a495-363f-4592-87f0-50f21973751f",
+      "name": "控制请求次数"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nreturn items.map(item =>{\n  let newCount = 1;\n  if(item.json && item.json.counter !==undefined){\n    newCount = item.json.counter + 1;\n  }\n  if(!item.json){\n    item.json = {}\n  }\n  item.json.count = newCount;\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -460,
+        320
+      ],
+      "id": "93eb1332-309a-4c3c-ac2b-c74e1f6d2fee",
+      "name": "请求次数+1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8e97911e-42c4-4d2a-b293-269c0eefff92",
+              "name": "counter",
+              "value": "={{ $('计数和游标').item.json.counter }}",
+              "type": "number"
+            },
+            {
+              "id": "c5223618-5160-4ebf-8e49-f9d114668eed",
+              "name": "cursor",
+              "value": "={{ $('抓取博主最新推文').item.json.next_cursor }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -660,
+        320
+      ],
+      "id": "6a075469-6f5d-4bc7-b9e9-d70b4a14664d",
+      "name": "获取下一次光标位置"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "256950a5-7b7e-4d20-b362-2415de0363c6",
+              "name": "count",
+              "value": "={{ $json.count }}",
+              "type": "number"
+            },
+            {
+              "id": "351951fe-a5ad-4462-b8bf-7bc0b985df7d",
+              "name": "cursor",
+              "value": "={{ $('获取下一次光标位置').item.json.cursor }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        320
+      ],
+      "id": "62f9c237-338b-4d02-9420-923de39be937",
+      "name": "设置+1后的count，和光标"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 30
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -2260,
+        80
+      ],
+      "id": "c3d55f35-beaa-4c9e-a4e7-773a95a4e2c6",
+      "name": "定时触发"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "批量执行（每次一条）",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "获取下一次光标位置",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "设置多个博主或者官媒": {
+      "main": [
+        [
+          {
+            "node": "分成多条",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "分成多条": {
+      "main": [
+        [
+          {
+            "node": "批量执行（每次一条）",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "批量执行（每次一条）": {
+      "main": [
+        [],
+        [
+          {
+            "node": "设置计数",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "设置计数": {
+      "main": [
+        [
+          {
+            "node": "计数和游标",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "计数和游标": {
+      "main": [
+        [
+          {
+            "node": "抓取博主最新推文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "抓取博主最新推文": {
+      "main": [
+        [
+          {
+            "node": "分成多条推文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "分成多条推文": {
+      "main": [
+        [
+          {
+            "node": "每条推文相关信息插入表格",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "每条推文相关信息插入表格": {
+      "main": [
+        [
+          {
+            "node": "控制请求次数",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "控制请求次数": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "请求次数+1": {
+      "main": [
+        [
+          {
+            "node": "设置+1后的count，和光标",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取下一次光标位置": {
+      "main": [
+        [
+          {
+            "node": "请求次数+1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "设置+1后的count，和光标": {
+      "main": [
+        [
+          {
+            "node": "计数和游标",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "定时触发": {
+      "main": [
+        [
+          {
+            "node": "设置多个博主或者官媒",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "dc8f309b-2c7a-4f82-98c5-b56db5f9f2d6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "636396f02b6571e40d8fe91cba550515c0cdc0e7d314c210e00b02256375a796"
+  },
+  "id": "Kdld0QDvnqQgYfDW",
+  "tags": []
+}

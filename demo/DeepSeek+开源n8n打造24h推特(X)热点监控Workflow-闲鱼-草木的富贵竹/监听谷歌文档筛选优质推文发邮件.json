@@ -1,0 +1,490 @@
+{
+  "name": "监听X博主最新推文 copy",
+  "nodes": [
+    {
+      "parameters": {
+        "model": "openai/gpt-4o",
+        "options": {
+          "responseFormat": "json_object"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        -600,
+        40
+      ],
+      "id": "0af175aa-2585-4fe8-9713-e130af32e7b0",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "wRQzJAdrkZrq8yB2",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{ \"摘要\": \"生成内容摘要\",\n  \"tags\": [\"标签1\", \"标签2\"],  \n  \"reason\": \"简要说明为什么该推文被打上这些标签\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        20
+      ],
+      "id": "eecf495c-bdbf-482e-a68e-6c74b14951b9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": "openai/gpt-4o",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        20,
+        0
+      ],
+      "id": "267fab77-3f8e-4fca-8b25-0429c53ffe96",
+      "name": "OpenRouter Chat Model1",
+      "credentials": {
+        "openRouterApi": {
+          "id": "wRQzJAdrkZrq8yB2",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1P02Wgqvz914bvWJa6ybywaUTx8ij6Yznc6XDqb3Jmvo",
+          "mode": "list",
+          "cachedResultName": "X最新推文",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P02Wgqvz914bvWJa6ybywaUTx8ij6Yznc6XDqb3Jmvo/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1P02Wgqvz914bvWJa6ybywaUTx8ij6Yznc6XDqb3Jmvo/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        -820,
+        -220
+      ],
+      "id": "071218a6-2993-4cbd-ac81-8caac0be35b1",
+      "name": "监听Google表格新增数据",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "A765Eba15lYtrKHK",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一个专业的内容筛选助手，负责从用户给出的Twitter推文中筛选出有价值的推文。\n\n## 任务描述\n### 总结内容摘要\n\n### 分析，判断其是否符合以下一个或多个标签：\n1. 【潜在爆款AI资讯】：AI相关的可能成为热点话题，引发广泛讨论的内容\n2. 【符合公众号调性】：符合\"袋鼠帝AI客栈\"技术公众号内容方向的推文\n\n## 袋鼠帝AI客栈 公众号调性定义\n技术流AI公众号，主要关注：\n- AI教程和测评\n- 效率工具介绍\n- 利用大模型API接入xxx\n- AI知识库建设\n- AI agent开发\n- 开源AI项目\n- AI工作流优化\n- AI新技术和应用\n\n## 输出要求\n对每条推文进行分析，如果符合任一标签，仅以JSON格式输出（用中文）：\n```\n{ \n  \"摘要\": \"生成内容摘要\",\n  \"tags\": [\"标签1\", \"标签2\", ...],  // 可能的值: \"潜在爆款\", \"符合公众号调性\"（可能包含单个，或两个，或者没有标签，没有标签的就过滤掉）\n  \"reason\": \"简要说明为什么该推文被打上这些标签\"\n}\n```\n\n用户提供的推文：{{ $json['内容'] }}：",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -600,
+        -220
+      ],
+      "id": "a969c62a-7fb3-4371-aa48-cd883cc1b2b6",
+      "name": "筛选有潜在价值的推文"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5fabf764-264b-4125-803c-3ed242fd9fc7",
+              "leftValue": "={{ $json.output.tags }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        -220
+      ],
+      "id": "c7028bd4-d818-4d5e-9b3d-a469dc2edd3a",
+      "name": "过滤没有价值的推文"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位专业的AI内容策划顾问，擅长分析热点内容并提供高质量的内容创作建议。\n\n## 任务描述\n基于筛选出的Twitter推文内容，为AI技术公众号提供：\n1. 内容创作方向建议（不超过3个）\n2. 每个方向对应的爆款标题建议（每个方向1-3个，总计不超过5个标题）\n\n## 公众号调性\n这是一个技术流的AI公众号，主要关注：\n- AI教程和测评\n- 效率工具介绍与使用指南\n- 大模型API调用方法与实践\n- AI知识库建设与应用\n- AI agent开发与定制\n- 开源AI项目解析与应用\n- AI工作流优化与自动化\n- AI新技术趋势与前沿应用\n\n## 输入内容\n系统将提供一组已筛选的Twitter推文，这些推文已被标记为\"潜在AI资讯爆款\"、\"符合公众号调性\"\n推文内容：{{ $('监听Google表格新增数据').item.json['内容'] }}\n标记：{{ $json.output.tags }}\n\n## 输出要求\n请以markdown格式输出你的建议：\n\n# 内容创作建议\n\n## 创作方向一：[方向名称]\n\n**建议标题**：\n- [爆款标题建议1]\n- [爆款标题建议2]\n\n## 创作方向二：[方向名称]\n\n**建议标题**：\n- [爆款标题建议3]\n\n## 创作方向三：[方向名称]（如果有）\n\n**建议标题**：\n- [爆款标题建议4]\n- [爆款标题建议5]\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.8,
+      "position": [
+        -20,
+        -220
+      ],
+      "id": "8352f6d3-ad21-402b-8ef6-717497f18f24",
+      "name": "对筛选出来的推文进行写作方向、标题建议"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1sDe_oTFhr3ypPJ4M-jY1IPMds_CgyRp8YI6lBSy44MM",
+          "mode": "list",
+          "cachedResultName": "价值推文表格",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sDe_oTFhr3ypPJ4M-jY1IPMds_CgyRp8YI6lBSy44MM/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1sDe_oTFhr3ypPJ4M-jY1IPMds_CgyRp8YI6lBSy44MM/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "x_id": "={{ $('监听Google表格新增数据').item.json['  x_id'] }}",
+            "标签": "={{ $('筛选有潜在价值的推文').item.json.output.tags }}",
+            "内容": "={{ $('监听Google表格新增数据').item.json['内容'] }}",
+            "链接": "={{ $('监听Google表格新增数据').item.json['链接'] }}",
+            "发布时间": "={{ $('监听Google表格新增数据').item.json['日期'] }}",
+            "筛选原因": "={{ $('筛选有潜在价值的推文').item.json.output.reason }}",
+            "写文方向、标题建议": "={{ $json.output }}",
+            "博主": "={{ $('监听Google表格新增数据').item.json['博主'] }}",
+            "创建时间": "={{$now.toFormat(\"yyyy-MM-dd HH:mm:ss\")}}",
+            "摘要": "={{ $('过滤没有价值的推文').item.json.output['摘要'] }}"
+          },
+          "matchingColumns": [
+            "x_id"
+          ],
+          "schema": [
+            {
+              "id": "x_id",
+              "displayName": "x_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "博主",
+              "displayName": "博主",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "标签",
+              "displayName": "标签",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "摘要",
+              "displayName": "摘要",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "内容",
+              "displayName": "内容",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "链接",
+              "displayName": "链接",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "筛选原因",
+              "displayName": "筛选原因",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "写文方向、标题建议",
+              "displayName": "写文方向、标题建议",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "发布时间",
+              "displayName": "发布时间",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "创建时间",
+              "displayName": "创建时间",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.5,
+      "position": [
+        340,
+        -220
+      ],
+      "id": "3b233f7d-7dc0-49a6-8110-c90480707dce",
+      "name": "存入另外一个表格",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "oHMZuk3SCclhDIW3",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nvar email_content = \"\"\nreturn items.map(item =>{\n  // 使用HTML格式构建邮件内容\n  email_content += \"<div style='margin-bottom: 15px;'>\" +\n                  \"<p><strong>摘要：</strong>\" + item.json['摘要'] + \"</p>\" + \n                  \"<p><strong>博主：</strong>\" + item.json['博主'] + \"</p>\" +\n                  \"<p><strong>链接：</strong><a href='\" + item.json['链接'] + \"'>\" + item.json['链接'] + \"</a></p>\" +\n                  \"<p><strong>日期：</strong>\" + item.json['发布时间'] + \"</p>\" +\n                  \"<hr>\" +\n                  \"</div>\";\n  \n  // 设置为HTML格式的邮件内容\n  item.json.email_content = \"<html><body>\" + email_content + \"</body></html>\";\n\n  return item;\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        -220
+      ],
+      "id": "8074c46f-199d-4521-9563-68c9e82bf368",
+      "name": "组装邮件内容"
+    },
+    {
+      "parameters": {
+        "sendTo": "kangarookingluohm@gmail.com",
+        "subject": "=实时AI热点资讯{{$now.toFormat(\"yyyy-MM-dd HH:mm:ss\")}}",
+        "message": "={{ $json.email_content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        940,
+        -220
+      ],
+      "id": "7f92671f-7c6d-485b-85b6-1a4386f868b5",
+      "name": "发送邮件",
+      "webhookId": "06918b74-7de7-43bd-80f1-a798124655da",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "hhVFQWW3arjhCYka",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "keep": "lastItems"
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        760,
+        -220
+      ],
+      "id": "169ee7fc-4d95-47e5-bb90-a2755889a817",
+      "name": "Limit"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "筛选有潜在价值的推文",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "筛选有潜在价值的推文",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "对筛选出来的推文进行写作方向、标题建议",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "监听Google表格新增数据": {
+      "main": [
+        [
+          {
+            "node": "筛选有潜在价值的推文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "筛选有潜在价值的推文": {
+      "main": [
+        [
+          {
+            "node": "过滤没有价值的推文",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "过滤没有价值的推文": {
+      "main": [
+        [
+          {
+            "node": "对筛选出来的推文进行写作方向、标题建议",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "对筛选出来的推文进行写作方向、标题建议": {
+      "main": [
+        [
+          {
+            "node": "存入另外一个表格",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "存入另外一个表格": {
+      "main": [
+        [
+          {
+            "node": "组装邮件内容",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "组装邮件内容": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "发送邮件",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "ec3cd9a0-d60a-4444-8bea-b746c8e14e51",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "636396f02b6571e40d8fe91cba550515c0cdc0e7d314c210e00b02256375a796"
+  },
+  "id": "hbybg8pPi9ertSXm",
+  "tags": []
+}
