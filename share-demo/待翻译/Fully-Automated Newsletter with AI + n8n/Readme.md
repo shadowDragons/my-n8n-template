@@ -1,0 +1,2 @@
+Super excited to share this one, we've been working on this automation for months and just got the video created walking through the whole system!
+In this video, we walk through how we used n8n + AI to fully automate a daily AI-focused newsletter that gets read by tens of thousands of people. From scraping hundreds of news articles across the internet every day, to generating bite-size content with custom prompting, this video shows exactly how you can automate an industry-specific newsletter for your niche!
