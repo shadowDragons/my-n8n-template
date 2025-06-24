@@ -1,0 +1,395 @@
+{
+  "name": "批量获取公众号历史文章",
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "fcc6b1bd-f6d7-4f8b-bd83-190a4fe5c8f1",
+      "name": "Start",
+      "type": "n8n-nodes-base.start",
+      "typeVersion": 1,
+      "position": [
+        -1540,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1d86f9a7-578d-4f1b-857e-3843d4677271",
+              "name": "page",
+              "value": 1,
+              "type": "number"
+            },
+            {
+              "id": "766289b4-b490-48e0-a4bd-b0f345591942",
+              "name": "all_articles",
+              "value": "=[]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "cd15b87f-e820-489d-9b91-b27695fb84ac",
+      "name": "初始化设置",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1340,
+        100
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "25f86440-ddb4-45dd-974f-9bff6ce514ea",
+      "name": "循环入口",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [
+        -1120,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://www.dajiala.com/fbmain/monitor/v3/post_history",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n        \"biz\": \"请填写公众号的biz\",\n        \"key\": \"请填写极致了平台的apikey\",\n        \"url\": \"https://mp.weixin.qq.com/s?__biz=请填写公众号的biz&mid=2652494556&idx=1&sn=4995d845ad2ef1205136936f65ae4adc&chksm=bd5b5d058a2cd4139bbd92c8cd23d52f65ef260eedf8cbc6d25a4ab0992f08d01da81#rd\",\n        \"name\": \"\",\n        \"page\": {{ $json.page }},\n        \"verifycode\": \"\"\n    }",
+        "options": {}
+      },
+      "id": "81939b95-0168-4e0c-8c5c-ee4fa20947bc",
+      "name": "循环获取每页数据",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -900,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $json.page }}",
+              "rightValue": "={{ $('循环获取每页数据').item.json.body.total_page }}",
+              "operator": {
+                "type": "number",
+                "operation": "lower"
+              },
+              "id": "943e20fd-7dd7-4029-aca4-791eb76729cb"
+            },
+            {
+              "id": "3af536b7-92e8-47c0-9099-caddae52be05",
+              "leftValue": "={{ $json.page }}",
+              "rightValue": "={{ $('循环获取每页数据').item.json.total_page }}",
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "id": "7b894736-0c0f-4464-a94f-6d7e64258239",
+      "name": "是否还有下一页?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -480,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2702435f-14fc-4f0e-8594-e85cc12b5003",
+              "name": "page",
+              "value": "={{ $json.page + 1 }}",
+              "type": "number"
+            },
+            {
+              "id": "a933f769-12b7-4a00-9833-281b37d8004f",
+              "name": "all_articles",
+              "value": "={{ $json.all_articles }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5fcab11d-25c0-437c-9fd6-f6089b9a9b52",
+      "name": "设置下一页页码",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        440
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "84de3701-4431-4e78-9a3d-a4170e5b7cdd",
+              "name": "all_articles",
+              "value": "={{ $('循环入口').item.json.all_articles.concat($json.data) }}",
+              "type": "array"
+            },
+            {
+              "id": "f501b87a-364e-4f7f-8c35-8664052f7596",
+              "name": "page",
+              "value": "={{ $json.now_page }}",
+              "type": "number"
+            },
+            {
+              "id": "d1770d40-919b-4870-b14c-d23dadb9503c",
+              "name": "total_page",
+              "value": "={{ $json.total_page }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ccb1445b-e050-46c9-a352-ce873b488853",
+      "name": "合并当页数据",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -700,
+        100
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst urls = items[0].json.all_articles.map(article => article.url).join('\\n');\n\n// 返回一个包含所有url字符串的对象\nreturn [{ json: { urls_string: urls } }];"
+      },
+      "id": "f30d147c-b396-4b30-a894-b6f28a4ffd12",
+      "name": "提取所有URL并格式化",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -180,
+        180
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/tmp/urls.txt",
+        "dataPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        260,
+        180
+      ],
+      "id": "11a574de-21de-4a44-b8b3-0d07639323ee",
+      "name": "Read/Write Files from Disk"
+    },
+    {
+      "parameters": {
+        "operation": "toText",
+        "sourceProperty": "urls_string",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        40,
+        180
+      ],
+      "id": "55cda4a2-1b6d-45dc-a1f3-f84dc70f1b0c",
+      "name": "Convert to File"
+    },
+    {
+      "parameters": {
+        "operation": "toJson",
+        "binaryPropertyName": "=data",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        -120,
+        -40
+      ],
+      "id": "4ea682b6-3efa-437d-83fc-63b72dca7ad8",
+      "name": "Convert to File1",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "/tmp/all_data.json",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.readWriteFile",
+      "typeVersion": 1,
+      "position": [
+        180,
+        -40
+      ],
+      "id": "566ab596-24e6-438b-8fb0-c5acf679ed98",
+      "name": "Read/Write Files from Disk1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Start": {
+      "main": [
+        [
+          {
+            "node": "初始化设置",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "初始化设置": {
+      "main": [
+        [
+          {
+            "node": "循环入口",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "循环入口": {
+      "main": [
+        [
+          {
+            "node": "循环获取每页数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "循环获取每页数据": {
+      "main": [
+        [
+          {
+            "node": "合并当页数据",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "是否还有下一页?": {
+      "main": [
+        [
+          {
+            "node": "设置下一页页码",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "提取所有URL并格式化",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Convert to File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "设置下一页页码": {
+      "main": [
+        [
+          {
+            "node": "循环入口",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "合并当页数据": {
+      "main": [
+        [
+          {
+            "node": "是否还有下一页?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "提取所有URL并格式化": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert to File": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Read/Write Files from Disk": {
+      "main": [
+        []
+      ]
+    },
+    "Convert to File1": {
+      "main": [
+        [
+          {
+            "node": "Read/Write Files from Disk1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "acf128c6-4f21-476e-916e-b5f1c01f7676",
+  "meta": {
+    "instanceId": "c7c5cb10001ff5a77cb3e9fc97c0e1e3eb7b63e1628fe8315b59cd78ccde0734"
+  },
+  "id": "uic36vW1SeWW1W25",
+  "tags": []
+}
