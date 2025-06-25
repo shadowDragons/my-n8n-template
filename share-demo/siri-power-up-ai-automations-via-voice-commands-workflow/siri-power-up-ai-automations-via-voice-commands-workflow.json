@@ -1,0 +1,407 @@
+{
+  "name": "Siri Power Up Mode N8N Workflow Blueprint",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        440,
+        520
+      ],
+      "id": "40325c0b-dd19-4c31-99ca-a6b85b1732ee",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "gFz2g11OiYePSRmi",
+          "name": "OpenAI Example Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "Sample Database",
+        "toolDescription": "Use this anytime the user ask to look up something in my database.",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "makeautomation",
+          "mode": "list",
+          "cachedResultName": "makeautomation"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1,
+      "position": [
+        420,
+        340
+      ],
+      "id": "28dc0b45-dd93-44f6-a03a-799d9e63c260",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "BQ8NJK5WJoQCppxw",
+          "name": "Sample PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -260,
+        320
+      ],
+      "id": "7ef586b9-b92f-472a-8899-2c82d648cc57",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gFz2g11OiYePSRmi",
+          "name": "OpenAI Example Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "test",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "977b4512-2fcd-4b0d-93ec-a82f1b9852a7",
+      "name": "User Request",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -180,
+        0
+      ],
+      "webhookId": "fe3fdf3d-99b2-42d2-8acf-0baadd3be472",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }}",
+        "options": {}
+      },
+      "id": "9291b719-c32e-4981-ba04-008b57458dbb",
+      "name": "Respond To User",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        520,
+        0
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "base": {
+          "__rl": true,
+          "value": "appz7uMjKDGpdm9sq",
+          "mode": "list",
+          "cachedResultName": "Super Siri Log",
+          "cachedResultUrl": "https://airtable.com/appz7uMjKDGpdm9sq"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblt07to2Luodj5n7",
+          "mode": "list",
+          "cachedResultName": "Chat Log",
+          "cachedResultUrl": "https://airtable.com/appz7uMjKDGpdm9sq/tblt07to2Luodj5n7"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "User Input": "={{ $('User Request').item.json.body.input }}",
+            "Super Siri Response": "={{ $json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "User Input",
+              "displayName": "User Input",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Super Siri Response",
+              "displayName": "Super Siri Response",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Created Time",
+              "displayName": "Created Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Last Modified Time",
+              "displayName": "Last Modified Time",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            },
+            {
+              "id": "Record ID",
+              "displayName": "Record ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        0
+      ],
+      "id": "848a86f6-2724-4a98-851c-3c9659ccc5f1",
+      "name": "Update Chat Log ",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "gvKMAAnJW1Baq12F",
+          "name": "Example Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body.input }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant that helps to carry out the task given by the user such as email management, calendar scheduling and searching the internet. \n\n---\n\n### **Context & Capabilities**\n- **Task Delegation:** The agent does not write emails, manage calendars, or perform searches itself but delegates tasks to specialized tools.\n- **Tool Selection:** Routes user queries to the appropriate tool based on the request type.\n- **Information Gathering:** Ensures required information, such as contact details, is retrieved before calling a tool.\n- **Error Handling:** If required information is missing, it prompts the user before proceeding.\n- **Response Management:** Confirms task completion to the user.\n\n---\n\n### **Tools & Their Functions**\n1. **emailAgent** → Handles email-related actions (sending, drafting, organizing emails).\n2. **calendarAgent** → Manages calendar events (creating, updating, deleting events).\n3. **contactAgent** → Retrieves, updates, or adds contact details.\n4. **Tavily** → Searches the internet for information.\n\n---\n\n### **Agent Workflow & Rules**\n1. **Identify the Action Type**\n   - Determine whether the request is related to email, calendar, contacts, or search.\n\n2. **Gather Required Information**\n   - If a task involves a contact, retrieve necessary details using `contactAgent` before proceeding.\n   - example: send a querie to contactAgent to request for contact information i.e \"can you retrieve for me Kelvin's email\".\n   - If contact information is missing, ask the user for details before proceeding.\n\n3. **Call the Correct Tool**\n   - Pass the user's request to the appropriate tool in a structured query format.\n\n4. **Confirm Task Completion**\n   - Provide a confirmation response once the tool has executed the action.\n   - If the tool requires more information, request it from the user before proceeding.\n\n---\n\n### **Examples of Agent Execution**\n#### **Example 1: Sending an Email**\n**User Input:** \"Send an email to Calvin to ask for a follow-up on his project.\"\n\n**Action Steps:**\n1. Use `contactAgent` to retrieve Calvin’s email address.\n2. \"Send Calvin (insert email address) an email to ask him what the project progress is so far.\"\n3. Respond to the user:\n   - \"The email has been sent to Calvin. What else can I do for you?\"\n\n---\n\n#### **Example 2: Scheduling a Meeting**\n**User Input:** \"Schedule a meeting with Sarah for next Monday at 10 AM about the marketing strategy.\"\n\n**Action Steps:**\n1. Use `contactAgent` to retrieve Sarah’s email.\n2. If email is available, call `calendarAgent` with the query:\n   - \"Schedule a meeting with Sarah (insert email address) on Monday at 10 AM regarding the marketing strategy.\"\n3. Respond to the user:\n   - \"The meeting has been scheduled with Sarah for next Monday at 10 AM. Anything else I can assist with?\"\n\n---\n\n#### **Example 3: Searching the Internet**\n**User Input:** \"Find the latest news about electric cars.\"\n\n**Action Steps:**\n1. Call `Tavily` with the query: \"Find the latest news about electric cars.\"\n2. Provide the user with search results.\n\n---\n\n### **Error Handling & Clarifications**\n- **Missing Contact Information:**\n  - If an action requires an email and it's not found, stop and ask the user before proceeding.\n- **Tool-Specific Errors:**\n  - If a tool fails to execute an action, notify the user and provide alternative suggestions.\n- **Ambiguous Requests:**\n  - If a request is unclear, ask the user for clarification.\n\n---\n\n### **Final Notes**\n- The agent never composes emails or takes actions itself; it strictly calls the appropriate tool.\n- It ensures proper data retrieval before passing requests to a tool.\n- Always confirms task completion or requests additional information from the user if needed.\n- Respond to user in a conversational manner, short and clear format without use of \\n\\n or add in any links or syntaxes, optimized for voice delivery. \n- Here is the current date/time: {{ $now }}\n\n---"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.7,
+      "position": [
+        40,
+        0
+      ],
+      "id": "c8a323d2-2963-4c21-bb7e-7d082e5bceb2",
+      "name": "Super Siri"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        360,
+        0
+      ],
+      "id": "546b0142-af46-4e73-9362-f7828dcca8a7",
+      "name": "Wait",
+      "webhookId": "adb5c519-6d45-4f53-a9fd-00844be25659"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('User Request').item.json.body.input }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -80,
+        320
+      ],
+      "id": "8606e141-c1d8-461f-abbb-176de5cff9c9",
+      "name": "Window Buffer Memory"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to search the internet",
+        "method": "POST",
+        "url": "https://api.tavily.com/search",
+        "sendHeaders": true,
+        "parametersHeaders": {
+          "values": [
+            {
+              "name": "Authorization",
+              "valueProvider": "fieldValue",
+              "value": "Bearer yourkeygoeshere"
+            },
+            {
+              "name": "Content-Type",
+              "valueProvider": "fieldValue",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"query\": \"{searchResult}\",\n  \"max_results\": 4\n}",
+        "placeholderDefinitions": {
+          "values": [
+            {
+              "name": "searchResult",
+              "description": "What the user has requested to search the internet for",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "typeVersion": 1.1,
+      "position": [
+        200,
+        340
+      ],
+      "id": "412c4187-1457-4030-bae4-4df857f450fa",
+      "name": "Tavily"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User Request": {
+      "main": [
+        [
+          {
+            "node": "Super Siri",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Respond To User": {
+      "main": [
+        [
+          {
+            "node": "Update Chat Log ",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Super Siri",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Super Siri",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Super Siri": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Respond To User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Window Buffer Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Super Siri",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tavily": {
+      "ai_tool": [
+        [
+          {
+            "node": "Super Siri",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a2656f5b-c253-4c8d-9a0c-ec458844ef8d",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "6febcf0a568ffc8ea12af2d82abe18d04a8dd584f808cbcd77a562c362e4894e"
+  },
+  "id": "XjLghY6IguSOywPL",
+  "tags": []
+}
