@@ -1,0 +1,466 @@
+{
+  "name": "Meta AI Workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "content": "## Must Have To Run. \n\n-Twilio API KEY ( For 1st Step )\n-OpenAI API KEY ( For AI Agent )\n-For responses add Twilio, WhatsApp, Telegram etc at the end of each workflow. ",
+        "height": 260,
+        "width": 360
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -900,
+        -220
+      ],
+      "id": "f42fc001-bb24-4675-8797-c7ce4ce53668",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"sonar\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"Highlight the main content of the page\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Find the most important information on this page: {{ $json.organic_queries }} \"\n    }\n  ],\n  \"max_tokens\": 500,\n  \"temperature\": 0.2,\n  \"top_p\": 0.9,\n  \"stream\": false,\n  \"presence_penalty\": 0,\n  \"frequency_penalty\": 1\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1020,
+        300
+      ],
+      "id": "ba1cee03-b62d-430b-8aec-c77e75be09b1",
+      "name": "Research URLS"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "authentication": "genericCredentialType",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "Bearer (API KEY GOES HERE)"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "=json",
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "jsonBody": "={\n  \"model\": \"sonar-reasoning\",\n  \"messages\": [\n    {\"role\": \"user\", \"content\": \"Obey this comm {{ $('Webhook').item.json.body.Body }} \"}\n  ],\n  \"max_tokens\": 600\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        40,
+        300
+      ],
+      "id": "0a982b8d-4a84-4ad6-956f-063193d61ac3",
+      "name": "HTTP Request1",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract links from filtered_organic_results\nconst organicQueries = $json.filtered_organic_results\n  .filter(item => item)  // Ensure item exists\n  .map(item => item);  // Directly map the URLs (no need to split)\n\n// Return the search queries as output\nreturn {\n  json: {\n    organic_queries: organicQueries\n  }\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        300
+      ],
+      "id": "afe4fc9a-a157-4513-b040-5e004fd80026",
+      "name": "Filter Data"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if organic_results is defined\nif ($json.organic_results) {\n  // Extract positions 1 to 3 (index 0 to 2) from organic_results\n  const filteredOrganicResults = $json.organic_results.slice(0, 2);\n\n  return {\n    json: {\n      filtered_organic_results: filteredOrganicResults\n    }\n  };\n} else {\n  // Return an empty array if 'organic_results' is not available\n  return {\n    json: {\n      filtered_organic_results: []\n    }\n  };\n}"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        440,
+        300
+      ],
+      "id": "a4c9839e-778a-41cc-a1f7-48c0e1ca410c",
+      "name": "Extract Data"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "organic_queries",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        800,
+        300
+      ],
+      "id": "50cc8379-e401-4588-aa68-ddfb631b5f22",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8412aa05-9a52-4e60-9fc6-f994d099b778",
+              "name": "organic_results",
+              "value": "={{ $json.citations }}",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        300
+      ],
+      "id": "16088a9d-5c7b-440b-953a-7ca1126ddc83",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "afbf4933-16c4-4fc6-91d0-ce7bdeefb734",
+              "leftValue": "={{ $('AI Agent').item.json.output }}",
+              "rightValue": "online",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ee0b7f8b-5e02-4f52-b4a4-77225998e7a2",
+              "leftValue": "={{ $('AI Agent').item.json.output }}",
+              "rightValue": "internet",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "1de46ebd-3762-412d-bd2e-37897e8687b5",
+              "leftValue": "={{ $('AI Agent').item.json.output }}",
+              "rightValue": "research",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -220,
+        420
+      ],
+      "id": "a911f42e-ece5-482e-b1ac-07527e0d8228",
+      "name": "If Research Command",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ff162baa-0469-471e-9506-d908da1a50ae",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "email",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -180,
+        120
+      ],
+      "id": "8062c5f0-edd1-4e6d-94ac-aa4e016cb333",
+      "name": "If Email Command"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Example of modified function to ensure proper structure:\nfunction extractEmailData(command) {\n    const emailRegex = /send a test email to ([\\w.-]+@[\\w.-]+)/i;\n    const subject = \"Test Email\";\n    const body = \"This is the body of the test email.\";\n\n    const match = command.match(emailRegex);\n    if (match) {\n        const title = \"Send Test Email\";\n        const description = \"This command is to send a test email.\";\n        const email = {\n            To: match[1],  // Extracted email address\n            Subject: subject,\n            Body: body\n        };\n\n        return [\n            {\n                \"Title\": title,\n                \"Description\": description,\n                \"Email\": email  // Make sure the Email object is included\n            }\n        ];\n    }\n\n    return [\n        {\n            \"Title\": \"Unknown Command\",\n            \"Description\": \"No valid email address found.\",\n            \"Email\": {}  // Ensure Email object is always returned\n        }\n    ];\n}\n\n// Ensure to return the result in the correct structure\nconst result = extractEmailData(\"Send a test email to shaneperryseo@gmail.com\");\nreturn result;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "98e57fae-e522-4d72-84e3-d985feb7526f",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email.To }}",
+        "subject": "={{ $json.Email.Subject }}",
+        "message": "={{ $json.Email.Body }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        200,
+        0
+      ],
+      "id": "8c14032c-b2db-4f67-a9ec-f8f4b7d49f21",
+      "name": "Gmail",
+      "webhookId": "8133c3a1-f77c-447a-a2e2-399edd724690",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "vYeF0pKZXhU8DHkT",
+          "name": "Gmail account test"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -580,
+        360
+      ],
+      "id": "f4fc68e8-d9b4-4321-ab09-1033ca421dec",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "gFz2g11OiYePSRmi",
+          "name": "OpenAI Example Account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an AI Agent tasked with analyzing this message {{ $json.body.Body }} and generating conditions for the next IF node. The message you receive will contain a command or instruction. Based on the content of the message, create conditions and actions for the IF node.\n\n1. Examine the message for keywords or phrases that indicate specific actions (e.g., \"send email,\" \"schedule a meeting,\" \"log an error\").\n2. Output the condition in the following format:\n    - **Condition Type**: (e.g., \"contains,\" \"equals,\" \"starts with\")\n    - **Condition Value**: The value to match (e.g., \"email,\" \"shaneperryseo@gmail.com\")\n    - **Next Action**: The action to be triggered if the condition is met (e.g., \"send email,\" \"log error\")\n\nIf the message includes a command for sending a test email:\n- Condition Type: \"contains\"\n- Condition Value: \"email\"\n- Next Action: \"Send Test Email\"\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.9,
+      "position": [
+        -580,
+        140
+      ],
+      "id": "8e636ebf-5a76-4142-aef2-512ab392ab13",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "testitout",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        140
+      ],
+      "id": "ffa4ddb1-430f-4983-bb47-00fcdec27201",
+      "name": "Webhook",
+      "webhookId": "b0835dcd-0caf-473b-adf0-3ee5c9fe1992"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Research URLS": {
+      "main": [
+        []
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Data": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Data": {
+      "main": [
+        [
+          {
+            "node": "Filter Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Research URLS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Extract Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Research Command": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Email Command": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If Research Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If Email Command",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "79a897c7-04f4-4fe6-a70c-3eddf4bf45a0",
+  "meta": {
+    "instanceId": "6febcf0a568ffc8ea12af2d82abe18d04a8dd584f808cbcd77a562c362e4894e"
+  },
+  "id": "BzqdCkKUxAzU0Gt0",
+  "tags": []
+}

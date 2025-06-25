@@ -1,0 +1,869 @@
+{
+  "name": "Psynalytics Research Proposal Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4.1-nano-2025-04-14",
+          "mode": "list",
+          "cachedResultName": "gpt-4.1-nano-2025-04-14"
+        },
+        "options": {}
+      },
+      "id": "51c4debd-9f81-4289-b96e-e4ed468b74da",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        600,
+        -100
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "7sudvDHR49yAjpnK",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $execution.id }}",
+        "contextWindowLength": 50
+      },
+      "id": "741a3ecd-922c-43d5-94b5-1963f8915959",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        720,
+        -100
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"output\": {\n    \"topic\": \"emerging trends in organizational wellbeing 2025\",\n    \"searchQueries\": [\n      \"emerging trends in organizational wellbeing 2025 meta-analysis\",\n      \"psychological safety initiatives 2025 in workplaces\",\n      \"employee engagement predictors 2025 organizational psychology\",\n      \"wellbeing measurement scales reliability validity 2025\",\n      \"impact of remote work on employee wellbeing 2025\",\n      \"resilience training program effectiveness 2025\",\n      \"ethical considerations in workplace wellbeing research 2025\",\n      \"positive psychology interventions for workplace wellbeing 2025\"\n    ]\n  }\n}"
+      },
+      "id": "845741ab-097f-4b19-821e-80e5810f1cea",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        400,
+        -100
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "title, introduction_background, problem_statement, problem_statement_structure, literature_review_themes, research_questions, methodology_approach, ethics_considerations, expected_outcomes,  references, suggested_reading",
+        "options": {}
+      },
+      "id": "c710d5f7-e321-4547-a4ac-3c0c33dff82b",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        1380,
+        -320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the output string from the Research AI Agent\nconst outputString = $input.first().json.output;\n\n// Parse the string into a JSON object\nconst parsedOutput = JSON.parse(outputString);\n\n// Return the parsed JSON as a single item\nreturn [{\n  json: parsedOutput\n}];"
+      },
+      "id": "8b9f942b-6875-4960-a677-24255a12bfcf",
+      "name": "Parse Research Output",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1160,
+        -320
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "/*****************************************************************\n *  MERGE proposal split items  *****************************************************************/\n\nconst merged = {\n  /* single‑value strings */\n  title: '',\n  introduction_background: '',\n  problem_statement: '',\n  ethics_considerations: '',\n  expected_outcomes: '',\n\n  /* arrays */\n  problem_statement_structure: [],\n  literature_review_themes: [],\n  research_questions: [],\n  references: [],\n  suggested_reading: [],\n\n  /* object */\n  methodology_approach: {}\n};\n\n/* ---------- loop through every split item ---------- */\n$input.all().forEach(item => {\n  const d = item.json;\n\n  /* scalar fields (last one wins) */\n  if (d.title)                     merged.title                   = d.title;\n  if (d.introduction_background)   merged.introduction_background = d.introduction_background;\n  if (d.problem_statement)         merged.problem_statement       = d.problem_statement;\n  if (d.ethics_considerations)     merged.ethics_considerations   = d.ethics_considerations;\n  if (d.expected_outcomes)         merged.expected_outcomes       = d.expected_outcomes;\n\n  /* array fields (accumulate) */\n  const pushArray = (field) => {\n    if (d[field]) {\n      const arr = Array.isArray(d[field]) ? d[field] : [d[field]];\n      merged[field].push(...arr);\n    }\n  };\n\n  [\n    'problem_statement_structure',\n    'literature_review_themes',\n    'research_questions',\n    'references',\n    'suggested_reading'\n  ].forEach(pushArray);\n\n  /* methodology_approach – first complete object wins */\n  if (d.methodology_approach && !Object.keys(merged.methodology_approach).length) {\n    merged.methodology_approach = d.methodology_approach;\n  }\n});\n\n/* ---------- deduplicate arrays ---------- */\n[\n  'problem_statement_structure',\n  'literature_review_themes',\n  'research_questions',\n  'references',\n  'suggested_reading'\n].forEach(key => {\n  merged[key] = [...new Set(merged[key])];\n});\n\n/* ---------- output ---------- */\nreturn [{ json: merged }];\n"
+      },
+      "id": "c76fe477-5f8a-431c-84e9-3adb7b34a7b4",
+      "name": "Merge Split Items",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1600,
+        -320
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "jsCode": "/*********************************************************************\n * NWU  RESEARCH  PROPOSAL\n *********************************************************************/\n\n/* ---------- helpers ---------- */\nconst esc = s => typeof s==='string'\n  ? s.replace(/&/g,'&amp;').replace(/</g,'&lt;')\n     .replace(/>/g,'&gt;').replace(/\"/g,'&quot;')\n     .replace(/'/g,'&#039;')\n  : s;\n\n/* ---------- palette & fonts ---------- */\n// Brand Guidelines Mandated Colors\nconst P='#6C3D91';  // Primary Purple\nconst TQ='#00889C'; // Secondary Turquoise\nconst GY='#78848E'; // Grey\nconst TXT='#2F373D';// Dark Text\nconst BG='#F8FAFC'; // Light Background\n\n// Font Stacks (Prioritizing Professional & Widely Available)\nconst HEADING_FONT='\"Trebuchet MS\", Trebuchet, Arial, sans-serif';\n// **Changed to Times New Roman**\nconst BODY_FONT='\"Times New Roman\", Times, serif';\n\n/* ---------- proposal JSON ---------- */\nconst p = $('Parse Research Output').first().json;\n\n/* ---------- file meta ---------- */\nconst today = new Date().toISOString().slice(0, 10);\n// Add basic check for p.title before using it\nconst titleForSlug = p && p.title ? p.title : 'proposal';\nconst slug = titleForSlug.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');\nconst fileName = `nwu-proposal-${slug}-${today}.pdf`;\n\n/* ---------- html ---------- */\nconst htmlContent = `\n<!DOCTYPE html>\n<html lang=\"en\">\n<head>\n<meta charset=\"UTF-8\">\n<title>${esc(p?.title)}</title>\n<style>\n/* =====  GLOBAL RESET  ===== */\n*, *::before, *::after { box-sizing:border-box; }\n\n/* =====  PAGED‑MEDIA  ===== */\n@page {\n  size:A4;\n  margin:10px;\n  /* margin boxes (Prince / AH / Vivliostyle) */\n  @top-center  { content: element(runningHeader); }\n  @bottom-center{\n      content: counter(page);\n      font:8pt \"Times New Roman\",Times,serif;\n      color:#78848E;\n  }\n}\n\n/* =====  BASE  ===== */\nhtml,body{height:100%;margin:0;}\nbody{\n  font:11pt/1.5 \"Times New Roman\",Times,serif;\n  color:#2F373D;\n  background:#fff;\n  -webkit-font-smoothing:antialiased;\n  -moz-osx-font-smoothing:grayscale;\n}\n/* =====  TYPOGRAPHY  ===== */\nh1,h2,h3,h4,h5,h6{\n  font-family:\"Trebuchet MS\",Trebuchet,Arial,sans-serif;\n  margin:0 0 .5em 0;font-weight:600;color:#6C3D91;text-align:left;\n}\nh1{font-size:28pt;letter-spacing:.5px;text-transform:uppercase;line-height:1.3;}\nh2{font-size:16pt;font-variant:small-caps;border-bottom:2px solid #00889C;\n    padding-bottom:8px;margin:1em 0 24px 0;}\nh3{font-size:14pt;color:#00889C;margin-bottom:16px;text-align:left;}\n\np,li{page-break-inside:avoid;text-align:left;margin-bottom:1em;}\np:last-child,li:last-child{margin-bottom:0;}\nul{list-style:disc;margin:0 0 1em 0;padding-left:25px;}\nli{margin-bottom:.6em;padding-left:5px;}\n\n/* =====  COVER PAGE  ===== */\n.cover {\n  page-break-after: always;\n  width: 100%;\n  min-height: 100%; /* Ensures full vertical fill */\n  display: flex;\n  flex-direction: column;\n  justify-content: center;\n  align-items: center;\n  background: linear-gradient(135deg, #6C3D91 0%, #00889C 100%);\n  color: #fff;\n  text-align: center;\n}\n.cover .logo-box{\n  background:rgba(255,255,255,.95);border-radius:6px;padding:15px 35px;\n  margin-bottom:40px;box-shadow:0 4px 15px rgba(0,0,0,.1);\n}\n.cover .logo-box img{height:65px;display:block;}\n.cover h1{font-size:26pt;margin-bottom:15px;color:#fff; margin: 0 20mm 15px 20mm; text-align: center;}\n.cover p.date{font-size:12pt;opacity:.9;margin:0;color:#fff;text-align: center;}\n\n/* =====  RUNNING HEADER  ===== */\n.header-bar{\n  position:running(runningHeader);   /* captured for margin box */\n  display:none;                      /* remove from normal flow */\n}\n.header-bar-content{                 /* visible header clone */\n  height:40px;background:#6C3D91;color:#fff;\n  display:flex;align-items:center;padding:0 20mm;font-size:9pt;\n}\n.header-bar-content img{height:22px;margin-right:12px;}\n.header-bar-content span{\n  font-family:\"Trebuchet MS\",Trebuchet,Arial,sans-serif;\n  font-variant:small-caps;letter-spacing:.5px;overflow:hidden;\n  white-space:nowrap;text-overflow:ellipsis;\n  text-align:left;\n}\n\n/* =====  FRONT‑MATTER  ===== */\n.frontmatter{\n  padding:25mm 20mm 0 20mm;\n  page-break-inside:avoid;\n  page-break-after:always;\n}\n.toc,.summary{margin-bottom:30px;page-break-inside:avoid;}\n\n/* TOC */\n.toc h3{color:#00889C;margin-bottom:15px;}\n.toc ul{\n  columns:2 200px;column-gap:30px;list-style:none;margin:0;padding:0;\n  counter-reset:item;\n}\n.toc li{margin-bottom:8px;font-size:10.5pt;break-inside:avoid-column;}\n.toc li::before{\n  content:counters(item,\\\".\\\")\\\" \\\";counter-increment:item;\n  color:#6C3D91;font-weight:600;min-width:20px;display:inline-block;\n}\n\n/* SUMMARY PANELS */\n.summary{border-left:5px solid #00889C;background:#F8FAFC;padding:20px 25px;}\n.summary h3{margin-bottom:12px;}\n.summary p{font-size:10.5pt;line-height:1.5;}\n.summary ul{margin:0;padding-left:25px;}\n\n/* =====  MAIN WRAPPER  ===== */\n.wrap{padding:calc(40px + 20mm) 20mm 25mm 20mm;} /* top padding = header height */\n\n/* SECTIONS */\n.section{margin-bottom:40px;}\n.section h2{margin-top:0;}\n.cols2{columns:2 200px;column-gap:30px;margin:0 0 1em 0;}\n.cols2 li{break-inside:avoid-column;padding-left:5px;}\n\n/* TABLE */\n.table{\n  width:100%;border-collapse:collapse;font-size:10.5pt;margin:15px 0 1em 0;\n}\n.table td{border:1px solid #ddd;padding:10px 12px;vertical-align:top;line-height:1.5;}\n.table td.head{\n  background:#6C3D91;color:#fff;font-family:\\\"Trebuchet MS\\\",Trebuchet,Arial,sans-serif;\n  font-variant:small-caps;font-size:10pt;width:25%;border-color:#6C3D91;\n}\n\n/* REFERENCES */\n.ref-list{list-style:none;padding-left:0;font-size:10pt;line-height:1.5;}\n.ref-list li{padding-left:2.5em;text-indent:-2.5em;margin-bottom:.8em;}\n</style>\n</head>\n<body>\n\n<!-- =====  COVER  ===== -->\n<div class=\"cover\">\n  <div class=\"logo-box\">\n    <img src=\"https://services.nwu.ac.za/sites/services.nwu.ac.za/files/files/designs-branding/NWU-holding-shape-digital-white.png\" alt=\"NWU Logo\">\n  </div>\n  <h1>${esc(p?.title)}</h1>\n  <p class=\"date\">${today}</p>\n</div>\n\n<!-- =====  RUNNING HEADER SOURCE (hidden)  ===== -->\n<div class=\"header-bar\">\n  <!-- nothing; this element is captured by running(runningHeader) -->\n</div>\n\n<!-- =====  VISIBLE HEADER ON EVERY PAGE  ===== -->\n<div class=\"header-bar-content\">\n  <img src=\"https://services.nwu.ac.za/sites/services.nwu.ac.za/files/files/designs-branding/NWU-holding-shape-digital-white.png\" alt=\"NWU\">\n  <span>${esc(p?.title)}</span>\n</div>\n\n<!-- =====  FRONT‑MATTER  ===== -->\n<div class=\"frontmatter\">\n  <div class=\"toc section\">\n    <h3>Contents</h3>\n    <ul>\n      <li>Background &amp; Rationale</li><li>Research Questions</li>\n      <li>Core Literature Themes</li><li>Methodology Overview</li>\n      <li>Ethics &amp; Governance</li><li>Expected Contributions</li>\n      <li>References</li><li>Suggested Reading</li>\n    </ul>\n  </div>\n\n  <div class=\"summary\">\n    <h3>Executive Summary</h3>\n    <p>${esc(p?.problem_statement)}</p>\n  </div>\n\n  <div class=\"summary\">\n    <h3>Problem‑Statement Blueprint</h3>\n    <ul>\n      ${p?.problem_statement_structure?.map(b => `<li>${esc(b)}</li>`).join('') ?? '<li>[Blueprint data missing]</li>'}\n    </ul>\n  </div>\n</div>\n\n<!-- =====  MAIN BODY  ===== -->\n<div class=\"wrap\">\n\n  <!-- 1 -->\n<div class=\"section\" style=\"page-break-before: always;\">\n  <h2>1 · Background &amp; Rationale</h2>\n  <p>${esc(p?.introduction_background)}</p>\n</div>\n\n\n  <!-- 2 -->\n  <div class=\"section\">\n    <h2>2 · Research Questions</h2>\n    <ul class=\"cols2\">\n      ${p?.research_questions?.map(q => `<li>${esc(q)}</li>`).join('') ?? '<li>[Questions missing]</li>'}\n    </ul>\n  </div>\n\n  <!-- 3 -->\n  <div class=\"section\">\n    <h2>3 · Core Literature Themes</h2>\n    <ul class=\"cols2\">\n      ${p?.literature_review_themes?.map(t => `<li>${esc(t)}</li>`).join('') ?? '<li>[Themes missing]</li>'}\n    </ul>\n  </div>\n\n  <!-- 4 -->\n  <div class=\"section\">\n    <h2>4 · Methodology Overview</h2>\n    <table class=\"table\">\n      <tr><td class=\"head\">Design</td><td>${esc(p?.methodology_approach?.research_design)}</td></tr>\n      <tr><td class=\"head\">Participants &amp; Sampling</td><td>${esc(p?.methodology_approach?.participants_sampling)}</td></tr>\n      <tr><td class=\"head\">Data Collection</td><td>${esc(p?.methodology_approach?.data_collection)}</td></tr>\n      <tr><td class=\"head\">Data Analysis</td><td>${esc(p?.methodology_approach?.data_analysis)}</td></tr>\n    </table>\n  </div>\n\n  <!-- 5 -->\n  <div class=\"section\">\n    <h2>5 · Ethics &amp; Governance</h2>\n    <p>${esc(p?.ethics_considerations)}</p>\n  </div>\n\n  <!-- 6 -->\n  <div class=\"section\">\n    <h2>6 · Expected Contributions</h2>\n    <p>${esc(p?.expected_outcomes)}</p>\n  </div>\n\n  <!-- 7 -->\n  <div class=\"section\">\n    <h2>7 · References</h2>\n    <ul class=\"ref-list\">\n      ${p?.references?.map(r => `<li>${esc(r)}</li>`).join('') ?? '<li>[References missing]</li>'}\n    </ul>\n  </div>\n\n  <!-- 8 -->\n  <div class=\"section\">\n    <h2>8 · Suggested Reading</h2>\n    <ul class=\"ref-list\">\n      ${p?.suggested_reading?.map(r => `<li>${esc(r)}</li>`).join('') ?? '<li>[Reading list missing]</li>'}\n    </ul>\n  </div>\n\n</div>\n</body>\n</html>`;\n\n/* ---------- return to n8n ---------- */\nreturn [{ json: { htmlContent, fileName, title: p?.title } }]; // Added optional chaining to title in return"
+      },
+      "id": "7949e346-d0ef-44a1-8bd9-d218ad992ee0",
+      "name": "Generate PDF HTML",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        2040,
+        -320
+      ],
+      "typeVersion": 2,
+      "notes": "Here we create the proposal from the content we generated. It adds it in a neat format (in this case with the NWU University Branding). You can change the branding colours to your liking"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.pdfshift.io/v3/convert/pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "authorization",
+              "value": "Basic ADD_YOUR_OWN_PDFSHIFT_API_HERE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=source",
+              "value": "={{ $json.htmlContent }}"
+            },
+            {
+              "name": "landscape",
+              "value": "false"
+            },
+            {
+              "name": "use_print",
+              "value": "false"
+            },
+            {
+              "name": "filename",
+              "value": "={{ $json.fileName }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "9987b91a-2289-4acc-9ce2-5182b25d6cfd",
+      "name": "Convert HTML to PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2260,
+        -320
+      ],
+      "typeVersion": 4.2,
+      "notes": "#Using PDFShift to covert the HTML into a PDF"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "fc9b54ea-6b19-4541-b10a-246daeed6292",
+      "name": "Aggregate",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        1820,
+        -320
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.url }}",
+        "options": {
+          "response": {
+            "response": {}
+          }
+        }
+      },
+      "id": "57b53a62-934e-458d-8d83-1a3a049cabae",
+      "name": "Download PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        2480,
+        -320
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -940,
+        -420
+      ],
+      "id": "29b4a195-1f06-4d31-b2d4-99031209ac72",
+      "name": "Telegram Trigger",
+      "webhookId": "67eb3f7f-890d-4879-a6c9-d812a200caa0",
+      "credentials": {
+        "telegramApi": {
+          "id": "yBU8n9Vkc8zNP168",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "89c0786e-6d6d-4f62-bf3f-d39de3503db6",
+              "leftValue": "={{$json[\"message\"][\"text\"]}}",
+              "rightValue": "/start",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -720,
+        -420
+      ],
+      "id": "3711a327-2f4f-4acf-85bc-d5887e523ed1",
+      "name": "If",
+      "notes": "In this case if the user first starts the bot with the /start command, it will send the welcome message and the instructions"
+    },
+    {
+      "parameters": {
+        "chatId": "CHAT_ID_HERE",
+        "text": "=🤖 Hello and welcome!   \n\nI’m Opti Bot, your friendly research‑proposal assistant from North‑West University.  \n\nI’m here to help you:  \n\n🟣 Generate a scholarly research‑proposal outline based on your topic \n🟣 Polish it into a fully branded PDF—cover page, headers, layouts and all \n🟣 Email the finished document directly to your inbox (or share it over chat) \n🟣 Iterate on any section: problem statement, methodology, references—you name it  \n\nGetting started is easy:  \n\n1️⃣ Tell me your topic in a sentence or two. \n2️⃣ I’ll refine it, pull together theory, gaps, methods, questions, and more. \n3️⃣ You’ll get a draft outline, then I’ll transform it into a polished PDF. \n4️⃣ Finally, let me know if you’d like any tweaks or additions!   \n\nJust type your research topic with as much detail as you currently have. Think about the title, the methods etc. Just hit send whenever you’re ready—and let’s get your proposal started!",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -500,
+        -520
+      ],
+      "id": "1aa6a0c1-657d-4184-abd1-605561927469",
+      "name": "Welcome Message",
+      "webhookId": "4133fb6d-3ab3-4dea-a486-e5799e64374a",
+      "credentials": {
+        "telegramApi": {
+          "id": "yBU8n9Vkc8zNP168",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Sends Welcome Message to User"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        280,
+        -100
+      ],
+      "id": "ae0356bc-1681-46b8-9297-9dde5242f10b",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "9e98100e-926f-4b8c-ad4b-e2ba3f573c70",
+              "name": "query",
+              "value": "={{ $json.query }}",
+              "type": "string"
+            },
+            {
+              "id": "8549b3fa-71e7-4340-b66e-07d46e41338c",
+              "name": "=sessionID",
+              "value": "={{ $json.message.from.id }}",
+              "type": "string"
+            },
+            {
+              "id": "e178247e-0855-4cf4-b0b6-f6ba2bf6c5ef",
+              "name": "name",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -280,
+        -320
+      ],
+      "id": "6f9f0b1e-0d1a-494d-9b56-22ab2087dd9c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Google Scholar Search Engine",
+        "url": "=https://serpapi.com/search?engine=google_scholar&q={{ encodeURIComponent( $json.refined_query ) }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "serpApi",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "num",
+              "valueProvider": "fieldValue",
+              "value": "15"
+            }
+          ]
+        },
+        "optimizeResponse": true
+      },
+      "id": "08ecf636-8875-48de-963d-b22f8a23098c",
+      "name": "Google Scholar",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "position": [
+        840,
+        -100
+      ],
+      "typeVersion": 1.1,
+      "credentials": {
+        "serpApi": {
+          "id": "CVHgrTkxPH7ZJ8qO",
+          "name": "SerpAPI account"
+        }
+      },
+      "notes": "This searches google scholar via the SERApi"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Searches the Web for The Articles. You need to add your API key here",
+        "url": "=https://www.googleapis.com/customsearch/v1?key=\"INSERTOWNAPI\"={{ encodeURIComponent($input.query) }}",
+        "sendQuery": true,
+        "parametersQuery": {
+          "values": [
+            {
+              "name": "num",
+              "valueProvider": "fieldValue",
+              "value": "10"
+            }
+          ]
+        },
+        "optimizeResponse": true
+      },
+      "id": "12116896-9f8c-4809-bb8e-a43a6ad219ab",
+      "name": "Google Web",
+      "type": "@n8n/n8n-nodes-langchain.toolHttpRequest",
+      "position": [
+        960,
+        -100
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "operation": "sendDocument",
+        "chatId": "CHAT_ID_HERE",
+        "binaryData": true,
+        "binaryPropertyName": "=data",
+        "additionalFields": {}
+      },
+      "id": "84506ddc-0765-4c22-89fc-e1f10bb161ac",
+      "name": "Send PDF to Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        2920,
+        -120
+      ],
+      "webhookId": "a414e908-da29-441c-8d53-a8d31363ac18",
+      "typeVersion": 1.2,
+      "credentials": {
+        "telegramApi": {
+          "id": "yBU8n9Vkc8zNP168",
+          "name": "Telegram account"
+        }
+      },
+      "notes": "Here we send the proposal to Telegram"
+    },
+    {
+      "parameters": {
+        "chatId": "CHAT_ID_HERE",
+        "text": "✨ Great news! ✨\n\nYour research proposal has been successfully generated. The polished PDF document is being prepared and will arrive in your chat momentarily.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2700,
+        -320
+      ],
+      "id": "cfa984ec-7e16-4df3-a230-6e97712e96c9",
+      "name": "Send Confirmation",
+      "webhookId": "2188e91d-00ca-4b06-a36f-d7b7d0b33b01",
+      "credentials": {
+        "telegramApi": {
+          "id": "yBU8n9Vkc8zNP168",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 0.5
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2700,
+        -120
+      ],
+      "id": "178fb078-3412-4f8d-8179-8d5b7aac7369",
+      "name": "Wait",
+      "webhookId": "8b87011f-e50c-4955-87b2-5524d81dbea5"
+    },
+    {
+      "parameters": {
+        "sendTo": "EMAIL_ID_HERE",
+        "subject": "=Research Proposal: {{ $('Aggregate').item.json.data[0].title }}",
+        "message": "=<!-- NWU‑Branded Email -->\n<div style=\"font-family: Arial, Helvetica, sans-serif; color: #2F373D; background-color: #F8FAFC; padding: 0; margin: 0;\">\n  <!-- Header Bar -->\n  <div style=\"background-color: #6C3D91; padding: 10px 20px; display: flex; align-items: center;\">\n    <img src=\"https://services.nwu.ac.za/sites/services.nwu.ac.za/files/files/designs-branding/NWU-holding-shape-digital-white.png\"\n         alt=\"NWU Logo\"\n         style=\"height: 40px; margin-right: 12px;\">\n    <h1 style=\"color: #FFF; font-size: 18px; margin: 0; line-height: 1.2; font-variant: small-caps;\">\n      Research Proposal Delivery\n    </h1>\n  </div>\n\n  <!-- Body -->\n  <div style=\"padding: 20px;\">\n    <p>Dear <strong>Colleague</strong>,</p>\n\n    <p>I am pleased to share the attached research proposal,  \n    <strong style=\"color: #00889C;\">“{{ $('Aggregate').item.json.data[0].title }}”</strong>.\n\n    <p style=\"border-left: 4px solid #00889C; background-color: #FFFFFF; padding: 15px; margin: 20px 0;\">\n      Here’s what’s new and noteworthy:<br>\n      <ul style=\"margin: 10px 0 0 20px; padding: 0; list-style: disc inside;\">\n        <li><strong>Executive Summary</strong> that crisply frames the urgency of your study.</li>\n        <li><strong>Problem‑Statement Blueprint</strong>—actionable bullets to sharpen your statement.</li>\n        <li>Fully branded NWU layout: cover page, running headers, two‑column lists, and more.</li>\n      </ul>\n    </p>\n\n    <p>Please review and let me know if you’d like any further tweaks.</p>\n\n    <p>Warm regards,</p>\n    <p style=\"margin-top: 30px;\">\n      <span style=\"display: block; font-weight: bold; color: #6C3D91;\">Prof. Llewellyn E. van Zyl (Ph.D)</span>\n      <span style=\"display: block; color: #78848E;\">North‑West University</span>\n    </p>\n  </div>\n\n  <!-- Footer Bar -->\n  <div style=\"background-color: #6C3D91; color: #FFF; padding: 8px 20px; text-align: center; font-size: 10px;\">\n    North‑West University | www.nwu.ac.za\n  </div>\n</div>\n",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2700,
+        -520
+      ],
+      "id": "ea21ae0d-7cd0-4708-8323-dff79aff2b63",
+      "name": "Send Proposal via Email",
+      "webhookId": "1697f502-5c57-412a-9731-224017506d28",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "rf3g3z7fY4hnP8gx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "627fe9d6-c3cf-4eae-8011-ad8a2ebe6b9c",
+              "name": "query",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "be8fccb1-2506-4aa8-a78d-14f54479c060",
+              "name": "message.from.id",
+              "value": "={{ $json.message.chat.id }}",
+              "type": "string"
+            },
+            {
+              "id": "012560b8-5768-4261-8be9-685b092308fd",
+              "name": "name",
+              "value": "={{ $json.message.from.first_name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -500,
+        -320
+      ],
+      "id": "450b5a33-9a1d-441e-96ab-529e1cf5e69b",
+      "name": "Rename Functions"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Validate input and prepare for processing\nconst query = $input.all()[0].json.query;\nconst name = $input.all()[0].json.name;\n\nif (!query || query.trim().length < 1) {\n  throw new Error('Research query must be at least 3 characters long');\n}\n\nreturn {\n  json: {\n    originalQuery: query,\n    cleanedQuery: query.trim().toLowerCase(),\n    timestamp: new Date().toISOString(),\n    name: name,\n  }\n};"
+      },
+      "id": "13d1a1fd-a231-4206-a092-7082b764d63b",
+      "name": "Input Validation and Querry Clearning",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -60,
+        -320
+      ],
+      "typeVersion": 2,
+      "notes": "Here we check if there is actually content in the querry and then we extract it, and clean the data by putting everything into lower case"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a specialist Academic “Search‑Strategist” librarian who supports systematic reviews.\n\nOBJECTIVE  \nGiven the user’s clean topic, output EXACTLY eight (8) sophisticated search phrases\nthat together surface: theory, gaps, instruments, methods, populations, ethics,\ngrey literature, and open controversies.\n\nOutput format (no markdown, no extra keys):\n{\n  \"topic\": \"<verbatim cleanedQuery>\",\n  \"searchQueries\": [\"<query1>\", … \"<query8>\"]\n}\n\nDesign rules for each query\n1 — **Foundational theory / models**  \n2 — **Recent empirical evidence (2020‑2025) AND identified research gaps**  \n3 — **Measurement or instrumentation validation**  \n4 — **Methodological debates or critiques**  \n5 — **Target population & context** (e.g. “sub‑Saharan adolescents”, “gig‑economy workers”)  \n6 — **Ethical or policy considerations**  \n7 — **Grey literature & preprints** (e.g. white paper, preprint, policy brief)  \n8 — **Emerging controversies / future directions**  \n\nUse advanced operators where helpful (e.g., “title:(systematic review)”,\n“intitle:meta‑analysis”, “filetype:pdf”). Do NOT exceed 120 characters per query.\n\nRefined Query: {{ $json.cleanedQuery }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "e56ace3d-c1ba-4caa-abb7-ee8df1a62c68",
+      "name": "Refine Instructions",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        192,
+        -320
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=**ROLE**\nYou are a world leading academic researcher with over 1000 publications in high quality and high impact factor journals. Your primary job is to help young researchers clarify their research ideas and strcuture them into an executable research strategy that culminates in a publishable research proposal.\n\n**TASK**\nYour primary task is to perform an exhaustive scholarly review and write a high quality, publishable research proposal on:\n\"{{ $('Rename Functions').item.json.query }}\"\n\nUsing ALL search queries from the previous step ({{ $json.output }}), perform a\ntargeted literature reconnaissance and craft a complete research‑proposal\noutline as JSON.\n\nRequired schema (use these keys only):\n\n{\n  \"title\": \"...\",\n  \"introduction_background\": \"...\",\n  \"problem_statement\": \"...\",\n  \"problem_statement_structure\": [\"...\"],\n  \"research_questions\": [\"...\"],\n  \"literature_review_themes\": [\"...\"],\n  \"methodology_approach\": {\n    \"research_design\": \"...\",\n    \"participants_sampling\": \"...\",\n    \"data_collection\": \"...\",\n    \"data_analysis\": \"...\"\n  },\n  \"ethics_considerations\": \"...\",\n  \"expected_outcomes\": \"...\",\n  \"references\": [\"<APA‑7 citations 2018‑2025 (authors, year, title, journal, volume(issue), page number. doi)>\"],\n  \"suggested_reading\": [\"<concise recommended articles/books 2018‑2025>\"]\n }\n}\n\n**Detailed instructions**\n\n◆ *title* – 10‑15 words, capture IV, DV, context, and method if relevant.  \n◆ *introduction_background* – 4-5 sentences situating the topic in current\n   scholarly conversation (cite landmark theory names, but no inline refs).  \n◆ *problem_statement* – 5-6 sentences: (1) what’s known, (2) what’s missing,\n   (3) why it matters theoretically & practically.  \n◆ *problem_statement_structure* – Give 2‑4 actionable bullets\n  (e.g., “Open with the real‑world urgency…”, “Show the knowledge\n  gap quantitatively…”, “End with the practical payoff for X\n  stakeholders”). Do NOT repeat the actual problem statement text.\n◆ *research_questions* – 2‑4 numbered, each directly solving part of the gap.\n   Avoid “How does X affect Y?” clichés; be precise (e.g., moderation: \"Does Gender moderatate the relatationship between X and Y\", mediation: \"Does meaning indirectly affect the relationship between X and Y\", comparative, longitudinal etc). The research questions must directly flow from the topic.  \n◆ *literature_review_themes* – 5-7 bullet concepts that the reader can use to structure their literature review. It follows a logical order, providing context to the problems being investigated and the variables as well as how these variables relate. It provides theoretical context to the study and builds on existing theoretical frameworks,\n   classic theory/framework tags (e.g., “Job Demands‑Resources theory”).   \n◆ *methodology_approach*  \n   • *research_design* – name an exact reserch design matching the research questions (e.g., “Explanatory sequential mixed‑methods”; “3‑wave longitudinal survey”).  \n   • *participants_sampling* – who, N target, sampling frame, justification.  \n   • *data_collection* – instruments (validated scales) OR qualitative\n     protocols; include citation shorthand (e.g., “UWES‑9” or \"MHC-SF\"). Provide the EXACT scales to use. These Scales should allign 100% with the intended research questions and objectives. \n   • *data_analysis* – match questions & data (SEM, multi‑level modelling,\n     Reflexive Thematic Analysis, etc.).  \n◆ *ethics_considerations* – 2‑3 sentences on consent, anonymity, risk\n   mitigation, data security, vulnerable groups if any.  \n◆ *expected_outcomes* – 3-5 sentences: theoretical contribution + applied value\n   (organisational policy, intervention design, social impact).\n+◆ *references* – 8‑10 APA‑7 references from peer‑reviewed sources (2018‑2025 only).  \n+◆ *suggested_reading* – 8‑10 additional resources (may overlap with references) that readers should consult next; use concise citation strings.\n\n**Rules**\n\n* Search CrossRef, Scopus, Web of Science, PubMed, Google Scholar, plus grey\n  literature (e.g., arXiv, SSRN) for 2020‑2025.  \n* Identify at least **one explicit research gap** before generating questions.  \n* Output ONLY the JSON. No markdown, no commentary, no citations.  \n* Every array must contain ≥ 3 items.  \n* Use plain ASCII quotes.\n* Always ensure you keep to the highest level of scientific integrity and ensure everything you write is 100% accurate.\n* Make sure there is a golden thread running through the entire proposal. Each section should build on the last to tell a complete academic story.\n* The proposal outline should be of such a high-quality that its directly publishable.\n\n\n**Strict Rules**\n\n* Adhere to field names exactly—no extras, no omissions.  \n* Use APA in‑text citations in `key_findings` and journal‑formatted citations in `scholarly_insights`.  \n* Do **not** mention these instructions or your methodology in the output.\n",
+        "options": {
+          "systemMessage": "=You are a world leading academic researcher with over 1000 publications in high quality and high impact factor journals. Your primary job is to help young researchers clarify their research ideas and strcuture them into an executable research strategy that culminates in a publishable research proposal.\n\n**TASK**\nYour primary task is to perform an exhaustive scholarly review and write a high quality, publishable research proposal on:\n\n\"{{ $('Rename Functions').item.json.query }}\"\n\nUse *all* search queries returned by the previous “Refine Instructions” step: {{ $json.output }}, and perform a targeted academic literature search and craft a complete research-proposal outline as JSON.\n\nFollow this research workflow:\n\n1. **Databases** – Search CrossRef, Scopus, Web of Science, PubMed, Google Scholar, plus grey literature (e.g., arXiv, SSRN) for 2020-2025.  \n2. **Grey literature** – check preprint servers (arXiv, SSRN) for cutting‑edge studies. 3. **Authoritative summaries** – consult encyclopaedic sources (e.g., Wikipedia or Stanford Encyclopedia of Philosophy) for historical context.  \n4. **Industry/News** – scan NewsAPI (2024‑2025) for practical or policy developments only when they illuminate academic debate.  \n5. Triangulate findings; discard weak or non‑scholarly sources.\n6. Identify at least **one explicit research gap** before generating questions.\n7. Every array *must contain ≥ 3 items*.\n8. Use plain ASCII quotes.\n9. **DO NOT HALLUCINATE** \n\nReturn **only** the raw JSON object below (no markdown, no wrapper, no commentary).  \n*Every array must meet its minimum length; add further searches if needed.*\n\n{\n  \"title\": \"...\",\n  \"introduction_background\": \"...\",\n  \"problem_statement\": \"...\",\n  \"problem_statement_structure\": [\"...\"],\n  \"research_questions\": [\"...\"],\n  \"literature_review_themes\": [\"...\"],\n  \"methodology_approach\": {\n    \"research_design\": \"...\",\n    \"participants_sampling\": \"...\",\n    \"data_collection\": \"...\",\n    \"data_analysis\": \"...\"\n  },\n  \"ethics_considerations\": \"...\",\n  \"expected_outcomes\": \"...\",\n  \"references\": [\"<APA‑7 citations 2018‑2025 (authors, year, title, journal, volume(issue), page number. doi)>\"],\n  \"suggested_reading\": [\"<concise recommended articles/books 2018-2025>\"]\n}\n\n**Detailed instructions**\n\n◆ *title* – 10-15 words, capture IV, DV, context, and method if relevant.  \n◆ *introduction_background* – 4-5 sentences situating the topic in current\n   scholarly conversation (cite landmark theory names, but no inline refs).  \n◆ *problem_statement* – 5-6 sentences: (1) what’s known, (2) what’s missing,\n   (3) why it matters theoretically & practically.  \n◆ *problem_statement_structure* – Give 2-4 actionable bullets\n  (e.g., “Open with the real-world urgency…”, “Show the knowledge\n  gap quantitatively…”, “End with the practical payoff for X\n  stakeholders”). Do NOT repeat the actual problem statement text.\n◆ *research_questions* – 2-4 numbered, each directly solving part of the gap.\n   Avoid “How does X affect Y?” clichés; be precise (e.g., moderation, mediation,\n   comparative, longitudinal).  \n◆ *literature_review_themes* – 5-7 bullet concepts that the reader can use to structure their literature review. It follows a logical order, providing context to the problems being investigated and the variables as well as how these variables relate. It provides theoretical context to the study and builds on existing theoretical frameworks,\n   classic theory/framework tags (e.g., “Job Demands‑Resources theory”).   \n◆ *methodology_approach* \n   • *research_design* – name an exact research design and approach matching the research questions (e.g., \"Cross-sectional survey-based design\", “Explanatory sequential mixed-methods”; “3-wave longitudinal survey”).  \n   • *participants_sampling* – who, N target, sampling frame, justification.  \n   • *data_collection* – instruments (only suggest validated scales like the MHC (Keyes, 2002) OR qualitative protocols; include citation shorthand (e.g., “UWES-9”). Provide the **EXACT** instruments that are 100% alligned to the research questions (e.g. If the topic is the relationship between happiness and performance, then suggest\" The Authentic Happiness Scale, Seligman, 2004\" and \"The Task Performance Scale (Koopman et al., 2014)\")  \n   • *data_analysis* – provide analytics strategy that match research questions & data (SEM, multi-level modelling,Reflexive Thematic Analysis, etc.). Be specific and provide information about each analytics strategy and eveluation criteria (e.g. \"r = 0.3, p<0.01 medium effect\")  \n◆ *ethics_considerations* – 2-3 sentences on consent, anonymity, risk\n   mitigation, data security, vulnerable groups if any.  \n◆ *expected_outcomes* – 3-5 sentences: theoretical contribution + applied value\n   (organisational policy, intervention design, social impact).  \n◆ *references* – 8-10 APA-7 references from peer-reviewed sources (2018-2025 only).  \n◆ *suggested_reading* – 8-10 additional resources (may overlap with references) that readers should consult next; use concise citation strings.\n\n\n**Strict Rules**\n\n* Adhere to field names exactly—no extras, no omissions.  \n* Use APA in‑text citations in `key_findings` and journal‑formatted citations in `scholarly_insights`.  \n* Do **not** mention these instructions or your methodology in the output.\n"
+        }
+      },
+      "id": "29ae7a6c-52f8-4f3c-b1ff-c25ca5b47073",
+      "name": "Optentia Bot",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        692,
+        -320
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        160,
+        -100
+      ],
+      "id": "5f308e20-a4b4-480e-990f-c619455fcfdc",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "7sudvDHR49yAjpnK",
+          "name": "OpenAi account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Merge Split Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download PDF": {
+      "main": [
+        [
+          {
+            "node": "Send Proposal via Email",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send Confirmation",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Optentia Bot",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF HTML": {
+      "main": [
+        [
+          {
+            "node": "Convert HTML to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge Split Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Optentia Bot",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert HTML to PDF": {
+      "main": [
+        [
+          {
+            "node": "Download PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Research Output": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Refine Instructions",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Welcome Message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Rename Functions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "Refine Instructions",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Input Validation and Querry Clearning",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Scholar": {
+      "ai_tool": [
+        [
+          {
+            "node": "Optentia Bot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Web": {
+      "ai_tool": [
+        [
+          {
+            "node": "Optentia Bot",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Confirmation": {
+      "main": [
+        []
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Send PDF to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Rename Functions": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Welcome Message": {
+      "main": [
+        []
+      ]
+    },
+    "Input Validation and Querry Clearning": {
+      "main": [
+        [
+          {
+            "node": "Refine Instructions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refine Instructions": {
+      "main": [
+        [
+          {
+            "node": "Optentia Bot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Optentia Bot": {
+      "main": [
+        [
+          {
+            "node": "Parse Research Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Refine Instructions",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "callerPolicy": "workflowsFromSameOwner",
+    "errorWorkflow": "RECrBoRx1ZjFt3TG",
+    "saveExecutionProgress": true
+  },
+  "versionId": "387e4dd4-1ff1-4492-883f-579ed516d889",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dd4881efb9a4e3c518ac0000b1a6e629e9a99d72503ca586c5c3eabd894c0ef7"
+  },
+  "id": "tPI2CfG6BqTcf1Dy",
+  "tags": []
+}

@@ -1,0 +1,1369 @@
+{
+  "name": "Deep Web Scrapper + RAG",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "What site to scrape?",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "URL",
+              "placeholder": "https://www.google.com",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -740,
+        -20
+      ],
+      "id": "ca480ac4-8ea9-46f8-9ebc-9254a5b1333f",
+      "name": "On form submission",
+      "webhookId": "37787556-a89c-4846-8206-879095eb85bf"
+    },
+    {
+      "parameters": {
+        "options": {
+          "reset": "={{ $prevNode.name === 'Split Out' }}"
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        3040,
+        -60
+      ],
+      "id": "b7bf8af5-c826-4259-9a59-bdf4933cf8ff",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "links",
+        "options": {
+          "destinationFieldName": "url"
+        }
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        2740,
+        -60
+      ],
+      "id": "4c23fff1-ab56-4f94-a488-10d0b783cf57",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "tableId": "links",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "link",
+              "fieldValue": "={{ $json.URL }}"
+            },
+            {
+              "fieldId": "domain",
+              "fieldValue": "={{ $json.URL }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -440,
+        -20
+      ],
+      "id": "f694ae61-a73d-4fc5-996f-adbee0bade1d",
+      "name": "Add to Supabase",
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Supabase Config\n\nCREATE EXTENSION IF NOT EXISTS vector WITH SCHEMA public;\n\nCREATE TABLE public.links (\n  id BIGSERIAL NOT NULL,\n  link TEXT NULL,\n  domain TEXT NULL,\n  status TEXT NULL default 'created'::text,\n  CONSTRAINT link_pkey PRIMARY KEY (id)\n) TABLESPACE pg_default;\n\nCREATE TABLE public.documents (\n  id BIGSERIAL NOT NULL,\n  content TEXT NULL,\n  metadata JSONB NULL,\n  embedding public.vector NULL,\n  CONSTRAINT documents_pkey PRIMARY KEY (id)\n) TABLESPACE pg_default;\n\n",
+        "height": 620,
+        "width": 660
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -420,
+        -1180
+      ],
+      "id": "729fbff7-23c8-435b-ae0d-aea03a400916",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "links",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "created"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -20
+      ],
+      "id": "6f7da06b-19bf-4497-8a5f-51de5902d2bf",
+      "name": "Check Supabase",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 5
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        820,
+        -20
+      ],
+      "id": "4c817b62-9e25-425d-958f-5678d097078c",
+      "name": "Get page",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "tableId": "links",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "link",
+              "fieldValue": "={{ $('Loop Over Items').item.json.url }}"
+            },
+            {
+              "fieldId": "domain",
+              "fieldValue": "={{ $('Check Supabase').item.json.domain }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        4300,
+        40
+      ],
+      "id": "0089c4a2-3b2c-4553-acc2-fdaa1b19637f",
+      "name": "Save to Supabase",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "links",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Limit').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "error"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        220
+      ],
+      "id": "40019002-81be-4931-b026-bf0be18b5257",
+      "name": "Supabase",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "documents",
+          "mode": "list",
+          "cachedResultName": "documents"
+        },
+        "options": {
+          "queryName": "match_documents"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.1,
+      "position": [
+        4320,
+        -1000
+      ],
+      "id": "9f03d5a1-8a94-4e87-ae40-80a4206e34da",
+      "name": "Supabase Vector Store",
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        4200,
+        -620
+      ],
+      "id": "600025a0-db40-41c7-bcf9-23f0456ac7fe",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "gzGPqo0PA1B9P4l3",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1,
+      "position": [
+        4460,
+        -740
+      ],
+      "id": "2cb4c808-1dcc-4a69-9315-36ae0badb927",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "chunkSize": 800,
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        4420,
+        -560
+      ],
+      "id": "d622fb79-6420-4069-b957-c96ad3a72663",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ef5167cf-aa3d-45ce-b098-af9fa4826b18",
+              "leftValue": "={{ $('Limit').item.json.link }}",
+              "rightValue": ".pdf",
+              "operator": {
+                "type": "string",
+                "operation": "endsWith"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        -260
+      ],
+      "id": "e7f3b7ad-b6db-4c33-b751-19e5dbd3aa3e",
+      "name": "If PDF"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "links",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Limit').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "done"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        5000,
+        -560
+      ],
+      "id": "e2ebd315-b9d7-4293-8743-6b42bd1df864",
+      "name": "Update Supabase",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        3320,
+        -840
+      ],
+      "id": "678b13a4-f2e8-4194-b288-bfabc5c82791",
+      "name": "Extract from PDF"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bd7764f7-09c2-4d46-841c-14cfb0361764",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1080,
+        -20
+      ],
+      "id": "87f1111c-078e-4298-a10f-5728263c2033",
+      "name": "If SUCCESS"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "links",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "link",
+              "keyValue": "={{ $json.url }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        3420,
+        -40
+      ],
+      "id": "6c8fb159-7ec9-42bb-a043-03343a7f2587",
+      "name": "Check Already in Supabase",
+      "alwaysOutputData": true,
+      "retryOnFail": true,
+      "maxTries": 2,
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "80adb033-dd4f-471c-b772-ab489e4d9cdf",
+              "leftValue": "={{ $('Check Already in Supabase').item.json}}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        3780,
+        -40
+      ],
+      "id": "e9065520-1ba4-4f78-aaf5-2f71beda754f",
+      "name": "If NOT EXIST"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        520,
+        -20
+      ],
+      "id": "30e8ddfe-ec20-4695-be84-6721500c03b0",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "88911fa7-8275-4129-aa69-7a719ced892c",
+              "leftValue": "={{ $('Check Supabase').item.json}}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        180,
+        -20
+      ],
+      "id": "d0a6ed68-3235-4506-8e11-3ed4f1268fff",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c6b1fe5f-f786-4228-89d2-8013fa985fd6",
+              "name": "data",
+              "value": "={{ $('Extract Text & Links & Emails').item.json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3320,
+        -320
+      ],
+      "id": "0f20b984-11e1-4480-b64c-a9ee6608fd27",
+      "name": "Prepare Content",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        4060,
+        40
+      ],
+      "id": "ec6318f4-db83-45ae-96fd-e1849a15452e",
+      "name": "Wait",
+      "webhookId": "3a6ca57d-2070-41b4-b605-a0b124bc6678"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        5200,
+        -560
+      ],
+      "id": "5529d005-3b6e-4c29-9b65-70e97d80b1a6",
+      "name": "Slow down",
+      "webhookId": "3648b5bd-0318-4ddc-b264-5fe97d24489c"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1580,
+        220
+      ],
+      "id": "9fba2af0-3c8d-4b9c-bc2a-f04ffd7b7b06",
+      "name": "Tea time",
+      "webhookId": "b5fdbe92-6b44-4b66-8670-bf97393844bf"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1320,
+        680
+      ],
+      "id": "a5376403-3064-4bbf-b775-391780253d6e",
+      "name": "When clicking ‘Test workflow’"
+    },
+    {
+      "parameters": {
+        "content": "## Web scrapper \n* First run launch it via form trigger\n* Consequent runs launch it via click trigger",
+        "height": 1980,
+        "width": 6480,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -1020,
+        -1260
+      ],
+      "id": "54f4e11b-6661-40bf-9ea7-32dfa936af88",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "tableId": "links",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "error"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -340,
+        1220
+      ],
+      "id": "68e02572-15d0-4152-bfc6-4af71f03f4f4",
+      "name": "Check Supabase Errors",
+      "alwaysOutputData": true,
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "88911fa7-8275-4129-aa69-7a719ced892c",
+              "leftValue": "={{ $('Check Supabase Errors').item.json}}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -80,
+        1220
+      ],
+      "id": "a4d6d70a-5984-4f3f-af51-aeef6a22732a",
+      "name": "If ERRORs Exist"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        220,
+        1220
+      ],
+      "id": "6b9c0562-d2e9-479b-a17d-e544027ebd6f",
+      "name": "Limit One Error"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.link }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 3
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        500,
+        1220
+      ],
+      "id": "3575eef2-a2d5-4486-b4c8-d2d86501c5c0",
+      "name": "Check Page",
+      "retryOnFail": true,
+      "maxTries": 2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "bd7764f7-09c2-4d46-841c-14cfb0361764",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "object",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        740,
+        1220
+      ],
+      "id": "5e7da300-cb95-4ee1-831c-aca4b4cfd99d",
+      "name": "If Page Exist"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "links",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Limit One Error').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "created"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        940
+      ],
+      "id": "92a1baee-11e7-4cd4-b962-666a236133b0",
+      "name": "Supabase Reactivate Page",
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "links",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Limit One Error').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "=dead-{{ $('Check Page').item.json.error.status }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1140,
+        1420
+      ],
+      "id": "0cce83ce-ac05-4820-b4d1-4922654c38dc",
+      "name": "Supabase Deactivate Page",
+      "credentials": {
+        "supabaseApi": {
+          "id": "MPRfCA3ytS2GYM90",
+          "name": "Supabase Web Scrap"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Reactivation of URLs \n** Checks all URLs marked as ERROR and either re-activate them (set status to CREATED) or permanently marks them as DEAD",
+        "height": 1020,
+        "width": 2280,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -780,
+        780
+      ],
+      "typeVersion": 1,
+      "id": "efa1e4cf-193c-4b7a-8df3-864d01e7c641",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "let html = $('Get page').item.json.data;\nlet baseDomain = $('Limit').item.json.domain \n\n// 0. Vibe coding starts here:\nconst links = new Set();\nconst scriptTextSnippets = [];\nconst emails = new Set();\n\n// 1. Extract <a href=\"...\">\nhtml.replace(/<a\\b[^>]*href=[\"']([^\"']+)[\"']/gi, (_, href) => {\n  href = href.trim();\n  if (href.startsWith('/') && href != '/' && !href.includes('login') && !href.includes('signup') && !href.includes('signin') && !href.includes('password')) {\n    links.add(baseDomain + href);\n  } else if (/^https?:\\/\\/.+\\.pdf$/i.test(href)) {\n    links.add(href);\n  }\n  return '';\n});\n\n// 2. Extract url: \"/...\" and full PDF URLs from JS blocks\nhtml.replace(/url\\s*:\\s*[\"']([^\"']+)[\"']/gi, (_, url) => {\n  url = url.trim();\n  if (url.startsWith('/') && url != '/' && !url.includes('login') && !url.includes('signup') && !url.includes('signin') && !url.includes('password')) {\n    links.add(baseDomain + url);\n  } else if (/^https?:\\/\\/.+\\.pdf$/i.test(url)) {\n    links.add(url);\n  }\n  return '';\n});\n\n// 3. Extract content=\"/...\" or content=\"https://...pdf\"\nhtml.replace(/content\\s*=\\s*[\"']([^\"']+)[\"']/gi, (_, contentUrl) => {\n  contentUrl = contentUrl.trim();\n  if (contentUrl.startsWith('/') && contentUrl != '/' && !contentUrl.includes('login') && !contentUrl.includes('signup') && !contentUrl.includes('signin') && !contentUrl.includes('password')) {\n    links.add(baseDomain + contentUrl);\n  } else if (/^https?:\\/\\/.+\\.pdf$/i.test(contentUrl)) {\n    links.add(contentUrl);\n  }\n  return '';\n});\n\n// 4. Extract text from <script> blocks with `text: \"...\"` only\nhtml.replace(/<script[^>]*>([\\s\\S]*?)<\\/script>/gi, (_, scriptContent) => {\n  const matches = scriptContent.match(/text\\s*:\\s*\"([^\"]+)\"/g);\n  if (matches) {\n    matches.forEach(match => {\n      const value = match.match(/text\\s*:\\s*\"([^\"]+)\"/);\n      if (value && value[1]) {\n        scriptTextSnippets.push(value[1].trim());\n      }\n    });\n  }\n\n  // Also extract emails from inside script\n  const emailMatches = scriptContent.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,}/gi);\n  if (emailMatches) {\n    emailMatches.forEach(email => emails.add(email.toLowerCase()));\n  }\n  return '';\n});\n\n// 5. Clean visible HTML text (remove unwanted tags)\nlet visibleHtml = html\n  .replace(/<script[^>]*>[\\s\\S]*?<\\/script>/gi, '')\n  .replace(/<style[^>]*>[\\s\\S]*?<\\/style>/gi, '')\n  .replace(/<head[^>]*>[\\s\\S]*?<\\/head>/gi, '')\n  .replace(/<!--[\\s\\S]*?-->/g, '')\n  .replace(/<\\/?[^>]+>/g, ' ');\n\n// 6. Normalize visible text\nconst visibleText = visibleHtml.replace(/\\s+/g, ' ').trim();\n\n// 7. Merge visible text + extracted script text\nconst fullText = (visibleText + ' ' + scriptTextSnippets.join(' ')).replace(/\\s+/g, ' ').trim();\n\n// 8. Extract emails from visible text\nconst emailMatches = visibleText.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-z]{2,}/gi);\nif (emailMatches) {\n  emailMatches.forEach(email => emails.add(email.toLowerCase()));\n}\n\n// 9. Final output\nreturn {\n  \"text\": fullText,\n  \"links\": Array.from(links),\n  \"emails\": Array.from(emails)\n};\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1840,
+        -60
+      ],
+      "id": "ad94c466-4e55-4015-bcce-8c23f3a74851",
+      "name": "Extract Text & Links & Emails"
+    },
+    {
+      "parameters": {
+        "content": "## Supabase match_documents\n\n-- Create a function to search for documents\ncreate function match_documents (\n  query_embedding vector,\n  match_count int default null,\n  filter jsonb DEFAULT '{}'\n) returns table (\n  id bigint,\n  content text,\n  metadata jsonb,\n  similarity float\n)\nlanguage plpgsql\nas $$\n#variable_conflict use_column\nbegin\n  return query\n  select\n    id,\n    content,\n    metadata,\n    1 - (documents.embedding <=> query_embedding) as similarity\n  from documents\n  where metadata @> filter\n  order by documents.embedding <=> query_embedding\n  limit match_count;\nend;\n$$;",
+        "height": 620,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        300,
+        -1180
+      ],
+      "typeVersion": 1,
+      "id": "b4960829-d3f5-407b-95ff-5a03dee9b75d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "beb1ad7c-f4e1-4deb-8874-8ee735178bfd",
+              "leftValue": "={{ $json.links }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "95f0b7dc-ed1c-4592-b104-9ae308c2cc17",
+              "leftValue": "={{ $json.links }}",
+              "rightValue": "",
+              "operator": {
+                "type": "array",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        2060,
+        -60
+      ],
+      "id": "ecfe6284-ae10-4587-9d24-759ffc218bed",
+      "name": "If1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Add to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Prepare Content",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Check Already in Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Add to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Check Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Supabase": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get page": {
+      "main": [
+        [
+          {
+            "node": "If SUCCESS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Supabase": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase": {
+      "main": [
+        [
+          {
+            "node": "Tea time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store": {
+      "main": [
+        [
+          {
+            "node": "Update Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If PDF": {
+      "main": [
+        [
+          {
+            "node": "Extract from PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Extract Text & Links & Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from PDF": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If SUCCESS": {
+      "main": [
+        [
+          {
+            "node": "If PDF",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Already in Supabase": {
+      "main": [
+        [
+          {
+            "node": "If NOT EXIST",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If NOT EXIST": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Get page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Supabase": {
+      "main": [
+        [
+          {
+            "node": "Slow down",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare Content": {
+      "main": [
+        [
+          {
+            "node": "Supabase Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Save to Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slow down": {
+      "main": [
+        [
+          {
+            "node": "Check Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Tea time": {
+      "main": [
+        [
+          {
+            "node": "Check Supabase",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Check Supabase Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Supabase Errors": {
+      "main": [
+        [
+          {
+            "node": "If ERRORs Exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If ERRORs Exist": {
+      "main": [
+        [
+          {
+            "node": "Limit One Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit One Error": {
+      "main": [
+        [
+          {
+            "node": "Check Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Page": {
+      "main": [
+        [
+          {
+            "node": "If Page Exist",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If Page Exist": {
+      "main": [
+        [
+          {
+            "node": "Supabase Reactivate Page",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Supabase Deactivate Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Reactivate Page": {
+      "main": [
+        [
+          {
+            "node": "Check Supabase Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Deactivate Page": {
+      "main": [
+        [
+          {
+            "node": "Check Supabase Errors",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Text & Links & Emails": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Prepare Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "52234833-d5d2-469c-b9a5-e416017a31bd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "0cb54d480a700e8ba0b3efc80c70e1e613067c5ae3fab0e22eef7a961586f5f1"
+  },
+  "id": "Y7uTdl0Aa4A6ofcH",
+  "tags": [
+    {
+      "createdAt": "2025-05-12T23:38:53.835Z",
+      "updatedAt": "2025-05-12T23:38:53.835Z",
+      "id": "1OT9PDukLm4iyTez",
+      "name": "Web"
+    },
+    {
+      "createdAt": "2025-05-12T23:38:49.922Z",
+      "updatedAt": "2025-05-12T23:38:49.922Z",
+      "id": "m9zeCtudjhyB9Dq0",
+      "name": "RAG"
+    }
+  ]
+}
