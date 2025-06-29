@@ -1,0 +1,463 @@
+{
+  "name": "reddit-summary-sub",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "postComment",
+        "operation": "getAll",
+        "subreddit": "={{ $json.subreddit }}",
+        "postId": "={{ $json.id }}",
+        "returnAll": true
+      },
+      "id": "ee25d966-231f-4cc8-a2ff-d55f8f29d2de",
+      "name": "获取帖子评论",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        -1140,
+        560
+      ],
+      "alwaysOutputData": true,
+      "notesInFlow": false,
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "36265828-655a-4242-95d9-010abd39c684",
+              "name": "selftext",
+              "value": "={{ $json.selftext }}",
+              "type": "string"
+            },
+            {
+              "id": "3c94d606-a7bc-4340-b9b6-c5d94fe4df40",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "022f7955-6ff0-4cfd-b878-d1ac73056146",
+              "name": "subreddit",
+              "value": "={{ $json.subreddit }}",
+              "type": "string"
+            },
+            {
+              "id": "c135b37a-0d68-4815-b0a8-e2506b3c8ef8",
+              "name": "post_id",
+              "value": "={{ $json.name }}",
+              "type": "string"
+            },
+            {
+              "id": "afba3f94-d6fa-4482-8145-b96a4ab0b96c",
+              "name": "ups",
+              "value": "={{ $json.ups }}",
+              "type": "number"
+            },
+            {
+              "id": "d923a43e-a6bb-4899-a63b-ef35d6a3b323",
+              "name": "num_comments",
+              "value": "={{ $json.num_comments }}",
+              "type": "number"
+            },
+            {
+              "id": "75ce3aba-1470-43d7-ba16-ffe03ea2eb65",
+              "name": "url",
+              "value": "={{ $json.url }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -1140,
+        200
+      ],
+      "id": "f66589ed-6eaa-40ea-a1c2-69fd393c3b4f",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fb0087e5-aafc-4fd6-9877-9c8705be3a56",
+              "leftValue": "={{ $json.distinguished }}",
+              "rightValue": "moderator",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -920,
+        520
+      ],
+      "id": "cea373e2-f4fc-49fc-b025-4501f1424914",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ecf4bf52-143c-4053-af57-f286e0911b4b",
+              "name": "post_id",
+              "value": "={{ $json.link_id }}",
+              "type": "string"
+            },
+            {
+              "id": "525a6e27-880f-4248-84ec-fd2fe7e282d4",
+              "name": "comment_body",
+              "value": "={{ $json.body }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {
+          "ignoreConversionErrors": true
+        }
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -660,
+        400
+      ],
+      "id": "cec0e9e5-881c-4f1a-855e-00584a2b9ecf",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "fieldsToMatchString": "post_id",
+        "joinMode": "enrichInput1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.1,
+      "position": [
+        -300,
+        80
+      ],
+      "id": "c146a2c3-e0b5-4e39-a51e-5f26e332810d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all(); const groupedPosts = {}; for (const item of items) { const currentItemJson = item.json; const postId = currentItemJson.post_id; if (!groupedPosts[postId]) { groupedPosts[postId] = { post_id: postId, comments: [] }; } groupedPosts[postId].comments.push(currentItemJson.comment_body); } const output = Object.values(groupedPosts).map(post => ({ json: post })); return output;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -420,
+        440
+      ],
+      "id": "a170c5e5-f057-431c-971f-4b9fcbbadedf",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一个专业的Reddit内容分析师。请根据以下Python社区热门帖子数据，生成一份详细的中文分析报告。\n板块(subreddit):{{ $json.subreddit }}\n链接(url):{{ $json.url }}\n标题(title):标题翻译成中文\n内容(content):对内容的总结，文章结构要清晰。\n评论(comments)：要对评论内容做总结，如果没有评论内容，则留空\n启示(apocalypse):通过这个帖子的启示\n---\n帖子数据：\n标题：{{ $json.title }}\n内容：{{ $json.selftext }}\n评论内容：{{ $json.comments }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "c246f2bd-fcfd-45ad-9b56-66ca1ba3060e",
+      "name": "AI智能分析师",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 1.6,
+      "position": [
+        -60,
+        -120
+      ]
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        -20,
+        160
+      ],
+      "id": "6e92bb39-ce11-40cb-9dd5-c32597644429",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "[\n  {\n    \"subreddit\": \"python\",\n  \t\"post_id\": 1,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\",\n    \"url\": \"url\"\n  },\n  {\n    \"subreddit\": \"python\",\n    \"post_id\": 2,\n    \"title\": \"title\",\n\t\"content\": \"content\",\n    \"comments\": [\n    \t\"comment1\",\n    \t\"comment2\"\n    ],\n    \"apocalypse\": \"apocalypse\",\n    \"url\": \"url\"\n  }\n]"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        180,
+        200
+      ],
+      "id": "fc072256-0d8a-4a29-8fc7-7ab774ba0152",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "sendTo": "shadowdragon4399@gmail.com",
+        "subject": "=reddit总结-{{ $json.reddit }}",
+        "emailType": "text",
+        "message": "={{ $json.markdown }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        100
+      ],
+      "id": "b828c3c2-5fec-41d9-8ba6-b537187e3d82",
+      "name": "Gmail",
+      "webhookId": "643ca605-a969-458e-a9c0-c879376bae8c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 获取输入的所有数据项\nconst items = $input.all();\n\n// 初始化markdown内容\nlet markdownContent = \"# Reddit 帖子分析报告\\n\\n\";\nmarkdownContent += `生成时间：${new Date().toLocaleString('zh-CN')}\\n\\n`;\nmarkdownContent += \"---\\n\\n\";\n\nlet reddit = \"\"\n\n// 遍历每个数据项\nitems.forEach((item, index) => {\n  const data = item.json;\n  \n  // 检查是否有output字段\n  if (data.output && Array.isArray(data.output)) {\n    data.output.forEach((post, postIndex) => {\n      // 帖子标题\n      markdownContent += `## ${post.title}\\n\\n`;\n\n      reddit = `${post.subreddit}`\n      \n      // 基本信息\n      markdownContent += `**板块：** r/${post.subreddit}\\n\\n`;\n      markdownContent += `**链接：** [查看原帖](${post.url})\\n\\n`;\n      \n      // 内容摘要\n      markdownContent += `### 📝 内容摘要\\n\\n`;\n      markdownContent += `${post.content}\\n\\n`;\n      \n      // 评论分析\n      markdownContent += `### 💬 评论分析\\n\\n`;\n      if (post.comments && post.comments.length > 0) {\n        post.comments.forEach((comment, commentIndex) => {\n          markdownContent += `${commentIndex + 1}. ${comment}\\n\\n`;\n        });\n      } else {\n        markdownContent += `暂无评论内容\\n\\n`;\n      }\n      \n      // 启示\n      markdownContent += `### 💡 启示与洞察\\n\\n`;\n      markdownContent += `${post.apocalypse}\\n\\n`;\n      \n      // 分隔线\n      markdownContent += `---\\n\\n`;\n    });\n  }\n});\n\n// 返回markdown格式的文本\nreturn [{ json: { markdown: markdownContent , reddit: reddit} }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        460,
+        260
+      ],
+      "id": "8de2f147-bb6b-475e-bc8f-93c6f5776e74",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "workflowInputs": {
+          "values": [
+            {
+              "name": "subreddit"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2080,
+        260
+      ],
+      "id": "457d03d9-db3d-4460-96d0-5e4035298adb",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "={{ $json.subreddit }}",
+        "limit": 10,
+        "filters": {
+          "category": "top"
+        }
+      },
+      "id": "e72c46c5-598f-40d8-bdbd-30e30a5b137b",
+      "name": "获取热门帖子",
+      "type": "n8n-nodes-base.reddit",
+      "typeVersion": 1,
+      "position": [
+        -1760,
+        160
+      ],
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "KnPW2HNGMYje2G0S",
+          "name": "Reddit account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "获取帖子评论": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI智能分析师",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI智能分析师": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI智能分析师",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI智能分析师",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "获取热门帖子",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "获取热门帖子": {
+      "main": [
+        [
+          {
+            "node": "获取帖子评论",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7b0d6f9b-bd3d-4521-8c9c-491f8b957de2",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "EqTMBgRhcqhMf7VG",
+  "tags": []
+}

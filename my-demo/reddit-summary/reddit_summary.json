@@ -1,0 +1,182 @@
+{
+  "name": "reddit-summary",
+  "nodes": [
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "EqTMBgRhcqhMf7VG",
+          "mode": "list",
+          "cachedResultName": "reddit-summary-sub"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "subreddit": "imadethis"
+          },
+          "matchingColumns": [
+            "subreddit"
+          ],
+          "schema": [
+            {
+              "id": "subreddit",
+              "displayName": "subreddit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        -140
+      ],
+      "id": "634db38b-1098-4def-b95a-f9490e07b420",
+      "name": "imadethis"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "EqTMBgRhcqhMf7VG",
+          "mode": "list",
+          "cachedResultName": "reddit-summary-sub"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "subreddit": "sideproject"
+          },
+          "matchingColumns": [
+            "subreddit"
+          ],
+          "schema": [
+            {
+              "id": "subreddit",
+              "displayName": "subreddit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        100
+      ],
+      "id": "d86beeca-774c-4e64-8d79-822a7cfafc44",
+      "name": "sideproject"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "EqTMBgRhcqhMf7VG",
+          "mode": "list",
+          "cachedResultName": "reddit-summary-sub"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "subreddit": "indiehackers"
+          },
+          "matchingColumns": [
+            "subreddit"
+          ],
+          "schema": [
+            {
+              "id": "subreddit",
+              "displayName": "subreddit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "canBeUsedToMatch": true,
+              "type": "string",
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        220,
+        280
+      ],
+      "id": "016edae8-1d5e-4dec-bfb0-0ae33d60752e",
+      "name": "indiehackers"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "fb4ecba5-0a3c-463f-902c-92ebf230384a",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "imadethis",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "sideproject",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "indiehackers",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "e4fc4197-0c87-4bbf-9c9f-bd8631c97438",
+  "meta": {
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "frt0grKa5hVo23VO",
+  "tags": []
+}
