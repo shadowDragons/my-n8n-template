@@ -11,7 +11,7 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        80,
+        300,
         -160
       ],
       "id": "85931368-9d53-4b5c-985a-1eb0f969cb00",
@@ -294,6 +294,48 @@
       ],
       "id": "a1fe0aad-767b-4815-b922-9ad0c4fe4dc2",
       "name": "twitter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "29024b85-4c6f-4543-9eaa-81e93648c55d",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "raycast",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "db11bc45-7aac-4971-a8d0-5b19015f8e3e",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "raycast",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -220,
+        -60
+      ],
+      "id": "4b1434c6-5b6a-4884-9a90-b69f5d0b2ad4",
+      "name": "Filter2"
     }
   ],
   "pinData": {},
@@ -357,7 +399,7 @@
       "main": [
         [
           {
-            "node": "Send a message",
+            "node": "Filter2",
             "type": "main",
             "index": 0
           }
@@ -374,13 +416,24 @@
           }
         ]
       ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "d3a821a4-46ef-444d-a3fb-20e8fb6f1122",
+  "versionId": "541c7d03-2f14-489c-93a3-d97f77355477",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
