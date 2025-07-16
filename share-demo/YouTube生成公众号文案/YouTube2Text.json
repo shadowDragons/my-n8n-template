@@ -1,0 +1,417 @@
+{
+  "name": "YouTube2Text",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const extractYoutubeId = (url) => {\n  // Regex pattern that matches both youtu.be and youtube.com URLs\n  const pattern = /(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^\"&?\\/\\s]{11})/;\n  const match = url.match(pattern);\n  return match ? match[1] : null;\n};\n\n// Input URL from previous node\nconst youtubeUrl = items[0].json.youtubeUrl; // Adjust this based on your workflow\n\n// Process the URL and return the video ID\nreturn [{\n  json: {\n    videoId: extractYoutubeId(youtubeUrl)\n  }\n}];\n"
+      },
+      "id": "165f14ea-6621-4df2-92a5-3329629634b3",
+      "name": "YouTube Video ID",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        400,
+        -60
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.videoId }}",
+        "options": {}
+      },
+      "id": "8717ec67-d148-4ccc-9a23-e6548709c593",
+      "name": "Get YouTube Video",
+      "type": "n8n-nodes-base.youTube",
+      "position": [
+        600,
+        -60
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "6QoiIZ7qOadG9L1P",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=请基于用户输入的文本内容改写成适合微信公众号发布的文案，要求风格轻松易懂，逻辑清晰，符合新媒体阅读习惯，并以 markdown 格式输出（非代码块）。文案书写要求：\n- 文案编写作者为芋头小宝\n- 开头用提问或故事引入\n- 文案合适位置可提供配图建议\n- 结尾引导读者留言互动或者关注转发\n- 内容完整，排版优美\n\n\n用户输入文本内容如下: \n{{ $json.transcript }}"
+      },
+      "id": "b423fda3-dcbb-4a1e-a783-297cef06d47b",
+      "name": "Summarize & Analyze Transcript",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        540,
+        240
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        560,
+        420
+      ],
+      "id": "b42c9076-89ad-4045-b01c-a7c8c1691bb4",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "agj3zD5JwsHbvIrc",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7653a859-556d-4e00-bafa-6f70f90de0d7",
+              "name": "transcript",
+              "type": "string",
+              "value": "={{ $json.cleanedTranscript }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "af9ddbe4-fea5-4a5d-9f16-8370771c487f",
+      "name": "cleanedTranscript",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1160,
+        -60
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract and process the transcript\nconst data = $input.first().json;\n\nif (!data.transcript && !data.text) {\n  return {\n    json: {\n      success: false,\n      message: 'No transcript available for this video',\n      videoUrl: $input.first().json.body?.videoUrl || 'Unknown'\n    }\n  };\n}\n\n// Process the transcript text\nlet transcriptText = '';\n\n// Handle different API response formats\nif (data.transcript) {\n  // Format for array of transcript segments\n  if (Array.isArray(data.transcript)) {\n    data.transcript.forEach(segment => {\n      if (segment.text) {\n        transcriptText += segment.text + ' ';\n      }\n    });\n  } else if (typeof data.transcript === 'string') {\n    transcriptText = data.transcript;\n  }\n} else if (data.text) {\n  // Format for single transcript object with text property\n  transcriptText = data.text;\n}\n\n// Clean up the transcript (remove extra spaces, normalize punctuation)\nconst cleanedTranscript = transcriptText\n  .replace(/\\s+/g, ' ')\n  .replace(/\\s([.,!?])/g, '$1')\n  .trim();\n\nreturn {\n  json: {\n    success: true,\n    videoUrl: $input.first().json.body?.videoUrl || 'From transcript',\n    rawTranscript: data.text || data.transcript,\n    cleanedTranscript,\n    duration: data.duration,\n    offset: data.offset,\n    language: data.lang\n  }\n};"
+      },
+      "id": "a5c7e5fb-7493-42de-a581-f49c95afdeb2",
+      "name": "processTranscript",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        980,
+        -60
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://youtube-transcript3.p.rapidapi.com/api/transcript",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "videoId",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "youtube-transcript3.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "aa2332a194msh96d1cf51376ee8cp1deb54jsn8ed9847499a3"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "url",
+              "value": "={{ $('Edit Fields').item.json.youtubeUrl }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "170baa7e-f49e-43a4-8dd2-ca1b132308bd",
+      "name": "extractTranscript",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        780,
+        -60
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "sendTo": "3782498863@qq.com",
+        "subject": "微信公众号文案",
+        "message": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1220,
+        420
+      ],
+      "id": "0b1d40e1-0f81-4daf-ab4d-026b91c40231",
+      "name": "Gmail",
+      "webhookId": "9e073849-7a13-4907-948c-de373cbbf7ea",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "bQJiM4w661XwJ9en",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $('Summarize & Analyze Transcript').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        940,
+        240
+      ],
+      "id": "aa32996e-15d0-454c-b216-fbcdc4c6d09e",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "google-sheet-update",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        40,
+        -60
+      ],
+      "id": "cbee3678-db54-4add-850d-971c7611ace2",
+      "name": "Webhook",
+      "webhookId": "658cb508-fc3f-41e6-bd5d-cdc799027c82"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.3,
+      "position": [
+        1180,
+        140
+      ],
+      "id": "c1924c53-5875-4a73-a459-bb78e2650826",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "512df9fa-d1f5-4dab-80e3-bcfca4fdb19d",
+              "name": "youtubeUrl",
+              "value": "={{$json[\"body\"][\"values\"][2]}}\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        -60
+      ],
+      "id": "28262a7d-addc-4c91-a9fc-7fa2b785a91d",
+      "name": "Edit Fields"
+    }
+  ],
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "c8e7-134-231-178-53.ngrok-free.app",
+            "user-agent": "Mozilla/5.0 (compatible; Google-Apps-Script; beanserver; +https://script.google.com; id: UAEmdDd8uYUcu2Qq2GQpkVUv9NRcclkDwDjQ)",
+            "content-length": "75",
+            "accept-encoding": "gzip, deflate, br",
+            "content-type": "application/json",
+            "x-forwarded-for": "107.178.224.194",
+            "x-forwarded-host": "c8e7-134-231-178-53.ngrok-free.app",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "row": 5,
+            "values": [
+              "",
+              "",
+              "https://www.youtube.com/watch?v=hbXc3vXnh1U",
+              ""
+            ]
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/google-sheet-update",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "connections": {
+    "YouTube Video ID": {
+      "main": [
+        [
+          {
+            "node": "Get YouTube Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize & Analyze Transcript": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get YouTube Video": {
+      "main": [
+        [
+          {
+            "node": "extractTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize & Analyze Transcript",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "processTranscript": {
+      "main": [
+        [
+          {
+            "node": "cleanedTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extractTranscript": {
+      "main": [
+        [
+          {
+            "node": "processTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleanedTranscript": {
+      "main": [
+        [
+          {
+            "node": "Summarize & Analyze Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "YouTube Video ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "06036232-0920-49bb-adc5-7417d4c42ef6",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "42a342be3dfc280973d90a7713c72894d9838ae6ddce3119653e9bd6cf94bb6e"
+  },
+  "id": "pdrGCneVMZoIBwNv",
+  "tags": [
+    {
+      "createdAt": "2025-06-10T04:36:35.119Z",
+      "updatedAt": "2025-06-10T04:36:35.119Z",
+      "id": "VYXDDE4gxJSMdMDt",
+      "name": "webhook"
+    }
+  ]
+}

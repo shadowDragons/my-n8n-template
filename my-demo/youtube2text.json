@@ -1,0 +1,323 @@
+{
+  "name": "youtube2text",
+  "nodes": [
+    {
+      "parameters": {
+        "jsCode": "const extractYoutubeId = (url) => {\n  // Regex pattern that matches both youtu.be and youtube.com URLs\n  const pattern = /(?:youtube\\.com\\/(?:[^\\/]+\\/.+\\/|(?:v|e(?:mbed)?)\\/|.*[?&]v=)|youtu\\.be\\/)([^\"&?\\/\\s]{11})/;\n  const match = url.match(pattern);\n  return match ? match[1] : null;\n};\n\n// Input URL from previous node\nconst youtubeUrl = $input.first().json.url; // Adjust this based on your workflow\n\n// Process the URL and return the video ID\nreturn [{\n  json: {\n    videoId: extractYoutubeId(youtubeUrl)\n  }\n}];\n"
+      },
+      "id": "c0c0e2e4-5a3c-43f6-8d93-781042ed8ce8",
+      "name": "YouTube Video ID",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        360,
+        0
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.videoId }}",
+        "options": {}
+      },
+      "id": "49a3eaa8-161b-4309-aa5f-d47a29bd6895",
+      "name": "Get YouTube Video",
+      "type": "n8n-nodes-base.youTube",
+      "position": [
+        560,
+        0
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "B1VIBsl4dcbZLcRc",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=请基于用户输入的文本内容改写成适合微信公众号发布的文案，要求风格轻松易懂，逻辑清晰，符合新媒体阅读习惯，并以 markdown 格式输出（非代码块）。文案书写要求：\n- 文案编写作者为芋头小宝\n- 开头用提问或故事引入\n- 文案合适位置可提供配图建议\n- 结尾引导读者留言互动或者关注转发\n- 内容完整，排版优美\n\n\n用户输入文本内容如下: \n{{ $json.transcript }}"
+      },
+      "id": "0726e822-06d3-4260-8015-caccad4abcac",
+      "name": "Summarize & Analyze Transcript",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        500,
+        300
+      ],
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        500,
+        460
+      ],
+      "id": "4382caf8-42c8-41bd-be88-8eb3a072449c",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7653a859-556d-4e00-bafa-6f70f90de0d7",
+              "name": "transcript",
+              "type": "string",
+              "value": "={{ $json.cleanedTranscript }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a8ece9ae-22c9-4636-a440-050efc6386eb",
+      "name": "cleanedTranscript",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1120,
+        0
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract and process the transcript\nconst data = $input.first().json;\n\nif (!data.transcript && !data.text) {\n  return {\n    json: {\n      success: false,\n      message: 'No transcript available for this video',\n      videoUrl: $input.first().json.body?.videoUrl || 'Unknown'\n    }\n  };\n}\n\n// Process the transcript text\nlet transcriptText = '';\n\n// Handle different API response formats\nif (data.transcript) {\n  // Format for array of transcript segments\n  if (Array.isArray(data.transcript)) {\n    data.transcript.forEach(segment => {\n      if (segment.text) {\n        transcriptText += segment.text + ' ';\n      }\n    });\n  } else if (typeof data.transcript === 'string') {\n    transcriptText = data.transcript;\n  }\n} else if (data.text) {\n  // Format for single transcript object with text property\n  transcriptText = data.text;\n}\n\n// Clean up the transcript (remove extra spaces, normalize punctuation)\nconst cleanedTranscript = transcriptText\n  .replace(/\\s+/g, ' ')\n  .replace(/\\s([.,!?])/g, '$1')\n  .trim();\n\nreturn {\n  json: {\n    success: true,\n    videoUrl: $input.first().json.body?.videoUrl || 'From transcript',\n    rawTranscript: data.text || data.transcript,\n    cleanedTranscript,\n    duration: data.duration,\n    offset: data.offset,\n    language: data.lang\n  }\n};"
+      },
+      "id": "a758217a-be89-4de4-8284-31d2e59243da",
+      "name": "processTranscript",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        940,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://youtube-transcript3.p.rapidapi.com/api/transcript",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "videoId",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "youtube-transcript3.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "5230d7b76fmsheb407ac6cb96efap1c703cjsnd3f8f5715b27"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "13e442c9-dc2b-43a5-88f6-f58a802d43fb",
+      "name": "extractTranscript",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        740,
+        0
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $('Summarize & Analyze Transcript').item.json.text }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        820,
+        300
+      ],
+      "id": "cc18abe6-dfa6-498e-9535-2ba1d34f09b4",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "sendTo": "shadowdragon4399@gmail.com",
+        "subject": "微信公众号文案",
+        "message": "={{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1000,
+        300
+      ],
+      "id": "d7f7f5ba-25aa-48a0-b215-f6464899fec6",
+      "name": "Send a message",
+      "webhookId": "9e073849-7a13-4907-948c-de373cbbf7ea",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Toutube",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "url",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        140,
+        0
+      ],
+      "id": "f2b369ce-7823-4719-a9e1-80805ea1d969",
+      "name": "On form submission",
+      "webhookId": "efe304c0-8666-42d7-87ed-8804c0c14570"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "YouTube Video ID": {
+      "main": [
+        [
+          {
+            "node": "Get YouTube Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize & Analyze Transcript": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get YouTube Video": {
+      "main": [
+        [
+          {
+            "node": "extractTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize & Analyze Transcript",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "processTranscript": {
+      "main": [
+        [
+          {
+            "node": "cleanedTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extractTranscript": {
+      "main": [
+        [
+          {
+            "node": "processTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleanedTranscript": {
+      "main": [
+        [
+          {
+            "node": "Summarize & Analyze Transcript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "YouTube Video ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f58ec9d8-dfd0-482d-b3ef-e66f7b9de454",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "s2KhDy5iVzIVmUvr",
+  "tags": []
+}
