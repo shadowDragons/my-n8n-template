@@ -1,0 +1,208 @@
+{
+  "name": "tool push",
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "14cbfc15-6863-800c-a6ff-f113eeaba247",
+          "mode": "list",
+          "cachedResultName": "字节工具导航站",
+          "cachedResultUrl": "https://www.notion.so/14cbfc156863800ca6fff113eeaba247"
+        },
+        "returnAll": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2.2,
+      "position": [
+        220,
+        -20
+      ],
+      "id": "381c3efb-a816-4ebd-ad1b-51044d86764a",
+      "name": "Get many database pages",
+      "credentials": {
+        "notionApi": {
+          "id": "p0vBw93aPC87iHmp",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "af54d140-8ba8-42dc-966a-62d1e9f9d455",
+              "leftValue": "={{ $json.property_type }}",
+              "rightValue": "Post",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        420,
+        -20
+      ],
+      "id": "d9b6c8e1-3080-4e22-88b0-4fd1e839247f",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "jsCode": "const randomIndex = Math.floor(Math.random() *  $input.all().length);\nreturn $input.all()[randomIndex];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        620,
+        -20
+      ],
+      "id": "00c59ae6-bd3d-431b-8abe-ac5403e1e228",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "chatId": "-1002677235789",
+        "text": "={{ $json.name }}\n\n介绍：{{ $json.property_summary }}\n\n标签：#{{ $json.property_category }}\n\n链接：https://tool.directory.cab/article/{{ $json.property_slug }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        860,
+        -120
+      ],
+      "id": "ee308bb6-5ad8-4811-b46a-5e4be5bc45e2",
+      "name": "Send a text message",
+      "webhookId": "d95aedae-4f69-4a3f-8b6a-5c77b4948ff0",
+      "credentials": {
+        "telegramApi": {
+          "id": "jgd53Ex4Vf3d2xMr",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shadowdragon4399@gmail.com",
+        "subject": "=每日工具推荐- {{ $json.name }}",
+        "message": "=#每日工具推荐<br><br>\n\n{{ $json.name }}<br><br>\n\n{{ $json.property_summary }}<br><br>\n\n工具链接见评论区👇\n\n工具链接👉：<a href=\"https://tool.directory.cab/article/{{ $json.property_slug }}\">https://tool.directory.cab/article/{{ $json.property_slug }}</a><br><br>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        860,
+        80
+      ],
+      "id": "ed5480af-0c53-4fe6-8b81-6b2aa12d689c",
+      "name": "Send a message",
+      "webhookId": "51ad8c30-e53f-46db-94b5-c97c8466189f",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        20,
+        -20
+      ],
+      "id": "d81f8081-2350-445b-afe4-b670040046b7",
+      "name": "Schedule Trigger"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get many database pages": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get many database pages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "9f703913-95fb-4d83-a6f3-ce24966820d3",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "ig20Wdk0Wt3imdfS",
+  "tags": []
+}
