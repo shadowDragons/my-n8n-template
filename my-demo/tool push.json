@@ -17,10 +17,7 @@
       },
       "type": "n8n-nodes-base.notion",
       "typeVersion": 2.2,
-      "position": [
-        220,
-        -20
-      ],
+      "position": [220, -20],
       "id": "381c3efb-a816-4ebd-ad1b-51044d86764a",
       "name": "Get many database pages",
       "credentials": {
@@ -57,10 +54,7 @@
       },
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
-      "position": [
-        420,
-        -20
-      ],
+      "position": [400, -20],
       "id": "d9b6c8e1-3080-4e22-88b0-4fd1e839247f",
       "name": "Filter"
     },
@@ -70,10 +64,7 @@
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [
-        620,
-        -20
-      ],
+      "position": [580, -20],
       "id": "00c59ae6-bd3d-431b-8abe-ac5403e1e228",
       "name": "Code"
     },
@@ -87,10 +78,7 @@
       },
       "type": "n8n-nodes-base.telegram",
       "typeVersion": 1.2,
-      "position": [
-        860,
-        -120
-      ],
+      "position": [1080, -120],
       "id": "ee308bb6-5ad8-4811-b46a-5e4be5bc45e2",
       "name": "Send a text message",
       "webhookId": "d95aedae-4f69-4a3f-8b6a-5c77b4948ff0",
@@ -105,15 +93,12 @@
       "parameters": {
         "sendTo": "shadowdragon4399@gmail.com",
         "subject": "=每日工具推荐- {{ $json.name }}",
-        "message": "=#每日工具推荐<br><br>\n\n{{ $json.name }}<br><br>\n\n{{ $json.property_summary }}<br><br>\n\n工具链接见评论区👇\n\n工具链接👉：<a href=\"https://tool.directory.cab/article/{{ $json.property_slug }}\">https://tool.directory.cab/article/{{ $json.property_slug }}</a><br><br>",
+        "message": "=#每日工具推荐<br><br>\n\n{{ $('AI Agent').first().json.output }}<br/><br/>\n\n工具链接见评论区�<br><br>\n\n工具链接�：<a href=\"https://tool.directory.cab/article/{{ $json.property_slug }}\">https://tool.directory.cab/article/{{ $json.property_slug }}</a><br><br>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
-      "position": [
-        860,
-        80
-      ],
+      "position": [1320, 80],
       "id": "ed5480af-0c53-4fe6-8b81-6b2aa12d689c",
       "name": "Send a message",
       "webhookId": "51ad8c30-e53f-46db-94b5-c97c8466189f",
@@ -127,19 +112,42 @@
     {
       "parameters": {
         "rule": {
-          "interval": [
-            {}
-          ]
+          "interval": [{}]
         }
       },
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
-      "position": [
-        20,
-        -20
-      ],
+      "position": [20, -20],
       "id": "d81f8081-2350-445b-afe4-b670040046b7",
       "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=你是一位推荐工具的爆款推特写作专家，请针对该产品名称和产品简介，写一篇推文，字数限制在60以内，以痛点问题开头，不要加标签，不要任何多余信息\n\n产品名称：{{ $json.name }}\n产品信息：{{ $json.property_summary }}\n\n\n ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [860, 120],
+      "id": "a998d7a1-3319-4b0f-9c22-9a2636b61bbf",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [760, 260],
+      "id": "22fbd7fe-7471-4021-ac3a-544cb6ada3c9",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -175,6 +183,11 @@
             "index": 0
           },
           {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
             "node": "Send a message",
             "type": "main",
             "index": 0
@@ -192,13 +205,35 @@
           }
         ]
       ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": false,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "9f703913-95fb-4d83-a6f3-ce24966820d3",
+  "versionId": "74fbc1c9-a7ee-487d-be6d-db55dbf15ab1",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
