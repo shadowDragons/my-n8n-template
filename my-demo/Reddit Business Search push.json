@@ -1,0 +1,170 @@
+{
+  "name": "Reddit Business Search push",
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1NoJFHSlvmyygvzcVLH6T4sPTTcXjCefDpdiBdo2Ytks",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1NoJFHSlvmyygvzcVLH6T4sPTTcXjCefDpdiBdo2Ytks/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Is_Bussiness",
+              "lookupValue": "yes"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        -100,
+        -20
+      ],
+      "id": "b40531a3-0d8e-4c88-b8a5-5b73145dbc0a",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Nl41fcUY0NozeVjw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const randomIndex = Math.floor(Math.random() *  $input.all().length);\nreturn $input.all()[randomIndex];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        100,
+        -20
+      ],
+      "id": "32fcc29c-04ea-456a-b14f-8b52260b4d09",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "sendTo": "shadowdragon4399@gmail.com",
+        "subject": "商业",
+        "message": "=<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n            line-height: 1.6;\n            color: #2c3e50;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n        }\n        .email-container {\n            background-color: white;\n            border-radius: 12px;\n            padding: 35px;\n            box-shadow: 0 8px 32px rgba(0,0,0,0.15);\n            border: 1px solid rgba(255,255,255,0.2);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 35px;\n        }\n        .title {\n            background: linear-gradient(135deg, #667eea, #764ba2);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n            background-clip: text;\n            font-size: 26px;\n            font-weight: bold;\n            margin-bottom: 15px;\n            padding-bottom: 15px;\n            border-bottom: 3px solid #667eea;\n        }\n        .content-item {\n            margin-bottom: 25px;\n            padding: 20px;\n            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);\n            border-radius: 10px;\n            border-left: 5px solid #667eea;\n            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);\n        }\n        .label {\n            font-weight: 600;\n            color: #4a5568;\n            margin-bottom: 8px;\n            font-size: 14px;\n            text-transform: uppercase;\n            letter-spacing: 0.5px;\n        }\n        .value {\n            color: #2d3748;\n            margin-bottom: 15px;\n            font-size: 15px;\n        }\n        .sentiment {\n            display: inline-block;\n            padding: 4px 12px;\n            border-radius: 20px;\n            font-size: 13px;\n            font-weight: 500;\n        }\n        .sentiment.positive {\n            background-color: #c6f6d5;\n            color: #22543d;\n        }\n        .sentiment.negative {\n            background-color: #fed7d7;\n            color: #742a2a;\n        }\n        .sentiment.neutral {\n            background-color: #e2e8f0;\n            color: #4a5568;\n        }\n        .summary {\n            background: linear-gradient(135deg, #e8f4fd 0%, #d6eaff 100%);\n            padding: 20px;\n            border-radius: 10px;\n            margin: 20px 0;\n            border: 1px solid #bee3f8;\n        }\n        .business-solution {\n            background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);\n            padding: 20px;\n            border-radius: 10px;\n            margin: 20px 0;\n            border: 1px solid #9ae6b4;\n        }\n        .link {\n            color: #667eea;\n            text-decoration: none;\n            font-weight: 500;\n            word-break: break-all;\n        }\n        .link:hover {\n            text-decoration: underline;\n            color: #764ba2;\n        }\n        .footer {\n            text-align: center;\n            margin-top: 35px;\n            padding-top: 25px;\n            border-top: 2px solid #e2e8f0;\n            color: #718096;\n            font-size: 13px;\n        }\n        .date {\n            color: #a0aec0;\n            font-size: 14px;\n            font-weight: 500;\n        }\n        .tag {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea, #764ba2);\n            color: white;\n            padding: 4px 10px;\n            border-radius: 15px;\n            font-size: 12px;\n            margin-right: 8px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"email-container\">\n        <div class=\"header\">\n            <div class=\"title\">Reddit商业探测器</div>\n        </div>\n        \n        <div class=\"content-item\">\n            <div class=\"label\">标题</div>\n            <div class=\"value\">{{ $json.Title_chinese }}</div>\n            \n            <div class=\"label\">情感分析</div>\n            <div class=\"value\">\n                <span class=\"sentiment {{ $json.sentiment || 'positive' }}\">\n                    {{ $json.sentiment === 'positive' ? '正面' : \n                       $json.sentiment === 'negative' ? '负面' : \n                       $json.sentiment === 'neutral' ? '中性' : '正面' }}\n                </span>\n            </div>\n            \n            <div class=\"summary\">\n                <div class=\"label\">摘要</div>\n                <div class=\"value\">{{ $json.Post_summary }}</div>\n            </div>\n            \n            <div class=\"business-solution\">\n                <div class=\"label\">商业方案</div>\n                <div class=\"value\">{{ $json.data }}</div>\n            </div>\n            \n            <div class=\"label\">链接</div>\n            <div class=\"value\">\n                <a href=\"{{ $json.Post_url }}\" class=\"link\">\n                    {{ $json.Post_url }}\n                </a>\n            </div>\n            \n            <div class=\"label\">发布时间</div>\n            <div class=\"value date\">{{ $now.toFormat(\"yyyy-MM-dd HH:mm:ss\") }}</div>\n        </div>\n        \n        <div class=\"footer\">\n            <p>📧 此邮件由 n8n 自动化工作流生成</p>\n            <p>🤖 智能工具推荐系统 | 让AI成为你的专属助理</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        540,
+        -20
+      ],
+      "id": "2591d5ff-5dfa-4534-a06a-745c2e75efb6",
+      "name": "Send a message",
+      "webhookId": "0d5d1445-9249-4692-8425-425c745ffbe9",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -360,
+        -20
+      ],
+      "id": "08a9f7c5-bbc7-452d-b57d-e5048aa0829a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.Post_solution }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        320,
+        -20
+      ],
+      "id": "a297e656-7203-47d7-94ab-2660a69a1c6d",
+      "name": "Markdown"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "f900cc71-547a-49be-89a9-ebbd8807f139",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "vV43yRS5FPF91f96",
+  "tags": []
+}
