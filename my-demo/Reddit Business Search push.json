@@ -56,14 +56,14 @@
     {
       "parameters": {
         "sendTo": "shadowdragon4399@gmail.com",
-        "subject": "商业",
-        "message": "=<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n            line-height: 1.6;\n            color: #2c3e50;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n        }\n        .email-container {\n            background-color: white;\n            border-radius: 12px;\n            padding: 35px;\n            box-shadow: 0 8px 32px rgba(0,0,0,0.15);\n            border: 1px solid rgba(255,255,255,0.2);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 35px;\n        }\n        .title {\n            background: linear-gradient(135deg, #667eea, #764ba2);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n            background-clip: text;\n            font-size: 26px;\n            font-weight: bold;\n            margin-bottom: 15px;\n            padding-bottom: 15px;\n            border-bottom: 3px solid #667eea;\n        }\n        .content-item {\n            margin-bottom: 25px;\n            padding: 20px;\n            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);\n            border-radius: 10px;\n            border-left: 5px solid #667eea;\n            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);\n        }\n        .label {\n            font-weight: 600;\n            color: #4a5568;\n            margin-bottom: 8px;\n            font-size: 14px;\n            text-transform: uppercase;\n            letter-spacing: 0.5px;\n        }\n        .value {\n            color: #2d3748;\n            margin-bottom: 15px;\n            font-size: 15px;\n        }\n        .sentiment {\n            display: inline-block;\n            padding: 4px 12px;\n            border-radius: 20px;\n            font-size: 13px;\n            font-weight: 500;\n        }\n        .sentiment.positive {\n            background-color: #c6f6d5;\n            color: #22543d;\n        }\n        .sentiment.negative {\n            background-color: #fed7d7;\n            color: #742a2a;\n        }\n        .sentiment.neutral {\n            background-color: #e2e8f0;\n            color: #4a5568;\n        }\n        .summary {\n            background: linear-gradient(135deg, #e8f4fd 0%, #d6eaff 100%);\n            padding: 20px;\n            border-radius: 10px;\n            margin: 20px 0;\n            border: 1px solid #bee3f8;\n        }\n        .business-solution {\n            background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);\n            padding: 20px;\n            border-radius: 10px;\n            margin: 20px 0;\n            border: 1px solid #9ae6b4;\n        }\n        .link {\n            color: #667eea;\n            text-decoration: none;\n            font-weight: 500;\n            word-break: break-all;\n        }\n        .link:hover {\n            text-decoration: underline;\n            color: #764ba2;\n        }\n        .footer {\n            text-align: center;\n            margin-top: 35px;\n            padding-top: 25px;\n            border-top: 2px solid #e2e8f0;\n            color: #718096;\n            font-size: 13px;\n        }\n        .date {\n            color: #a0aec0;\n            font-size: 14px;\n            font-weight: 500;\n        }\n        .tag {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea, #764ba2);\n            color: white;\n            padding: 4px 10px;\n            border-radius: 15px;\n            font-size: 12px;\n            margin-right: 8px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"email-container\">\n        <div class=\"header\">\n            <div class=\"title\">Reddit商业探测器</div>\n        </div>\n        \n        <div class=\"content-item\">\n            <div class=\"label\">标题</div>\n            <div class=\"value\">{{ $json.Title_chinese }}</div>\n            \n            <div class=\"label\">情感分析</div>\n            <div class=\"value\">\n                <span class=\"sentiment {{ $json.sentiment || 'positive' }}\">\n                    {{ $json.sentiment === 'positive' ? '正面' : \n                       $json.sentiment === 'negative' ? '负面' : \n                       $json.sentiment === 'neutral' ? '中性' : '正面' }}\n                </span>\n            </div>\n            \n            <div class=\"summary\">\n                <div class=\"label\">摘要</div>\n                <div class=\"value\">{{ $json.Post_summary }}</div>\n            </div>\n            \n            <div class=\"business-solution\">\n                <div class=\"label\">商业方案</div>\n                <div class=\"value\">{{ $json.data }}</div>\n            </div>\n            \n            <div class=\"label\">链接</div>\n            <div class=\"value\">\n                <a href=\"{{ $json.Post_url }}\" class=\"link\">\n                    {{ $json.Post_url }}\n                </a>\n            </div>\n            \n            <div class=\"label\">发布时间</div>\n            <div class=\"value date\">{{ $now.toFormat(\"yyyy-MM-dd HH:mm:ss\") }}</div>\n        </div>\n        \n        <div class=\"footer\">\n            <p>📧 此邮件由 n8n 自动化工作流生成</p>\n            <p>🤖 智能工具推荐系统 | 让AI成为你的专属助理</p>\n        </div>\n    </div>\n</body>\n</html>",
+        "subject": "Reddit商业探测器",
+        "message": "=<html>\n<head>\n    <meta charset=\"UTF-8\">\n    <style>\n        body {\n            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;\n            line-height: 1.6;\n            color: #2c3e50;\n            max-width: 600px;\n            margin: 0 auto;\n            padding: 20px;\n            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n        }\n        .email-container {\n            background-color: white;\n            border-radius: 12px;\n            padding: 35px;\n            box-shadow: 0 8px 32px rgba(0,0,0,0.15);\n            border: 1px solid rgba(255,255,255,0.2);\n        }\n        .header {\n            text-align: center;\n            margin-bottom: 35px;\n        }\n        .title {\n            background: linear-gradient(135deg, #667eea, #764ba2);\n            -webkit-background-clip: text;\n            -webkit-text-fill-color: transparent;\n            background-clip: text;\n            font-size: 26px;\n            font-weight: bold;\n            margin-bottom: 15px;\n            padding-bottom: 15px;\n            border-bottom: 3px solid #667eea;\n        }\n        .content-item {\n            margin-bottom: 25px;\n            padding: 20px;\n            background: linear-gradient(135deg, #f8f9ff 0%, #f0f2ff 100%);\n            border-radius: 10px;\n            border-left: 5px solid #667eea;\n            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.1);\n        }\n        .label {\n            font-weight: 600;\n            color: #4a5568;\n            margin-bottom: 8px;\n            font-size: 14px;\n            text-transform: uppercase;\n            letter-spacing: 0.5px;\n        }\n        .value {\n            color: #2d3748;\n            margin-bottom: 15px;\n            font-size: 15px;\n        }\n        .sentiment {\n            display: inline-block;\n            padding: 4px 12px;\n            border-radius: 20px;\n            font-size: 13px;\n            font-weight: 500;\n        }\n        .sentiment.positive {\n            background-color: #c6f6d5;\n            color: #22543d;\n        }\n        .sentiment.negative {\n            background-color: #fed7d7;\n            color: #742a2a;\n        }\n        .sentiment.neutral {\n            background-color: #e2e8f0;\n            color: #4a5568;\n        }\n        .summary {\n            background: linear-gradient(135deg, #e8f4fd 0%, #d6eaff 100%);\n            padding: 20px;\n            border-radius: 10px;\n            margin: 20px 0;\n            border: 1px solid #bee3f8;\n        }\n        .business-solution {\n            background: linear-gradient(135deg, #f0fff4 0%, #e6fffa 100%);\n            padding: 20px;\n            border-radius: 10px;\n            margin: 20px 0;\n            border: 1px solid #9ae6b4;\n        }\n        /* Markdown 渲染样式 */\n        .summary h1, .summary h2, .summary h3,\n        .business-solution h1, .business-solution h2, .business-solution h3 {\n            color: #2d3748;\n            margin: 15px 0 10px 0;\n            font-weight: 600;\n        }\n        .summary h1, .business-solution h1 { font-size: 18px; }\n        .summary h2, .business-solution h2 { font-size: 16px; }\n        .summary h3, .business-solution h3 { font-size: 14px; }\n        .summary p, .business-solution p {\n            margin: 10px 0;\n            line-height: 1.6;\n        }\n        .summary ul, .summary ol,\n        .business-solution ul, .business-solution ol {\n            margin: 10px 0;\n            padding-left: 20px;\n        }\n        .summary li, .business-solution li {\n            margin: 5px 0;\n        }\n        .summary strong, .business-solution strong {\n            font-weight: 600;\n            color: #2d3748;\n        }\n        .summary em, .business-solution em {\n            font-style: italic;\n            color: #4a5568;\n        }\n        .summary code, .business-solution code {\n            background-color: #f7fafc;\n            padding: 2px 4px;\n            border-radius: 3px;\n            font-family: 'Monaco', 'Consolas', monospace;\n            font-size: 13px;\n        }\n        .summary blockquote, .business-solution blockquote {\n            border-left: 4px solid #667eea;\n            padding-left: 15px;\n            margin: 15px 0;\n            color: #4a5568;\n            font-style: italic;\n        }\n        .link {\n            color: #667eea;\n            text-decoration: none;\n            font-weight: 500;\n            word-break: break-all;\n        }\n        .link:hover {\n            text-decoration: underline;\n            color: #764ba2;\n        }\n        .footer {\n            text-align: center;\n            margin-top: 35px;\n            padding-top: 25px;\n            border-top: 2px solid #e2e8f0;\n            color: #718096;\n            font-size: 13px;\n        }\n        .date {\n            color: #a0aec0;\n            font-size: 14px;\n            font-weight: 500;\n        }\n        .tag {\n            display: inline-block;\n            background: linear-gradient(135deg, #667eea, #764ba2);\n            color: white;\n            padding: 4px 10px;\n            border-radius: 15px;\n            font-size: 12px;\n            margin-right: 8px;\n        }\n    </style>\n</head>\n<body>\n    <div class=\"email-container\">\n        <div class=\"header\">\n            <div class=\"title\">Reddit商业探测器</div>\n        </div>\n        \n        <div class=\"content-item\">\n            <div class=\"label\">标题</div>\n            <div class=\"value\">{{ $('Code').item.json.Title_chinese }}</div>\n            \n            <div class=\"label\">情感分析</div>\n            <div class=\"value\">\n                <span class=\"sentiment {{ $json.sentiment || 'positive' }}\">\n                    {{ $json.sentiment === 'positive' ? '正面' : \n                       $json.sentiment === 'negative' ? '负面' : \n                       $json.sentiment === 'neutral' ? '中性' : '正面' }}\n                </span>\n            </div>\n            \n            <div class=\"summary\">\n                <div class=\"label\">总结</div>\n                <div class=\"value\">{{ $('Edit Fields1').item.json.Post_summary_html }}</div>\n            </div>\n            \n            <div class=\"business-solution\">\n                <div class=\"label\">商业方案</div>\n                <div class=\"value\">{{ $('Edit Fields').first().json.Poat_solution_html }}</div>\n            </div>\n            \n            <div class=\"label\">链接</div>\n            <div class=\"value\">\n                <a href=\"{{ $('Code').item.json.Post_url }}\" class=\"link\">\n                    {{ $('Code').item.json.Post_url }}\n                </a>\n            </div>\n            \n            <div class=\"label\">发布时间</div>\n            <div class=\"value date\">{{ $now.toFormat(\"yyyy-MM-dd HH:mm:ss\") }}</div>\n        </div>\n        \n        <div class=\"footer\">\n            <p>📧 此邮件由 n8n 自动化工作流生成</p>\n            <p>🤖 智能工具推荐系统 | 让AI成为你的专属助理</p>\n        </div>\n    </div>\n</body>\n</html>",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        540,
+        780,
         -20
       ],
       "id": "2591d5ff-5dfa-4534-a06a-745c2e75efb6",
@@ -102,11 +102,83 @@
       "type": "n8n-nodes-base.markdown",
       "typeVersion": 1,
       "position": [
-        320,
-        -20
+        260,
+        -80
       ],
       "id": "a297e656-7203-47d7-94ab-2660a69a1c6d",
       "name": "Markdown"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -360,
+        140
+      ],
+      "id": "56eb548c-1a66-436b-9550-fc7edcf73503",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.Post_summary }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        300,
+        100
+      ],
+      "id": "c4ac2952-01ac-4bc8-bc16-593cb9082404",
+      "name": "Markdown1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "990b1634-107a-4eb9-9569-90233ab1ef81",
+              "name": "Poat_solution_html",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        -80
+      ],
+      "id": "90d4b3f9-f273-4e0d-afec-e78f910cda6d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e6e2966d-4f73-4925-af93-1582f7924f6d",
+              "name": "Post_summary_html",
+              "value": "={{ $json.data }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        520,
+        100
+      ],
+      "id": "c9396141-228d-4a42-a6aa-4bd58af54eec",
+      "name": "Edit Fields1"
     }
   ],
   "pinData": {},
@@ -129,6 +201,11 @@
             "node": "Markdown",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Markdown1",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -148,6 +225,50 @@
       "main": [
         [
           {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
             "node": "Send a message",
             "type": "main",
             "index": 0
@@ -160,7 +281,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "f900cc71-547a-49be-89a9-ebbd8807f139",
+  "versionId": "249857e5-b921-4659-bd00-dcff31ff37d3",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
