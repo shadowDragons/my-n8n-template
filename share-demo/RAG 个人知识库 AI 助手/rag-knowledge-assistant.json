@@ -1,0 +1,613 @@
+{
+    "name": "rag-knowledge-assistant",
+    "nodes": [
+      {
+        "parameters": {
+          "formTitle": "上传文件",
+          "formFields": {
+            "values": [
+              {
+                "fieldLabel": "data",
+                "fieldType": "file"
+              }
+            ]
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.formTrigger",
+        "typeVersion": 2.2,
+        "position": [
+          -680,
+          -360
+        ],
+        "id": "94f0f8b5-42d9-4270-997e-ac94a93664ad",
+        "name": "On form submission",
+        "webhookId": "e5cb8fe7-7ca5-4247-8938-04d253183542"
+      },
+      {
+        "parameters": {
+          "dataType": "binary",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+        "typeVersion": 1,
+        "position": [
+          -180,
+          -140
+        ],
+        "id": "dcb65d8a-5642-41b4-b171-9526ba918cc0",
+        "name": "Default Data Loader"
+      },
+      {
+        "parameters": {
+          "chunkOverlap": 200,
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+        "typeVersion": 1,
+        "position": [
+          -240,
+          20
+        ],
+        "id": "96ffae4e-6653-47ef-9822-653157867212",
+        "name": "Recursive Character Text Splitter"
+      },
+      {
+        "parameters": {
+          "public": true,
+          "mode": "webhook",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          820,
+          -460
+        ],
+        "id": "85aa2b5a-4b56-4430-91f6-3163df80c21a",
+        "name": "When chat message received",
+        "webhookId": "b9bcdc05-c663-4cef-8d44-71aebe2b96f9"
+      },
+      {
+        "parameters": {
+          "options": {
+            "systemMessage": "你是一个专业的企业知识助手，擅长基于内部文档回答问题。\n\n工作原则：\n1. 优先使用检索到的知识库内容回答问题\n2. 如果检索内容不足，明确告知并提供一般性建议\n3. 保持回答的专业性和准确性\n4. 当遇到敏感或超出范围的问题时，礼貌地引导用户\n\n回答风格：\n- 简洁明了，重点突出\n- 结构化表达，便于理解\n- 适当引用原文档内容\n- 提供后续建议或相关链接"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 2,
+        "position": [
+          1040,
+          -460
+        ],
+        "id": "43c80d43-4c4a-49e4-83ba-b49d7b4f6387",
+        "name": "AI Agent"
+      },
+      {
+        "parameters": {
+          "description": "使用此工具执行基于向量的相关文档检索"
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+        "typeVersion": 1.1,
+        "position": [
+          1340,
+          -280
+        ],
+        "id": "e9518843-f37e-42a4-9615-c7daa0efde16",
+        "name": "Answer questions with a vector store"
+      },
+      {
+        "parameters": {
+          "content": "## 📋 基本信息\n- **工作流名称**: 文档知识库构建器\n- **版本**: v1.0.0\n- **创建者**: 林月半子聊AI\n- **微信**：cloud-native-101\n- **公众号**: 林月半子的AI笔记\n- **用途**: 将文档转换为可检索的向量知识库\n- **触发方式**: 表单提交触发\n\n## 🎯 功能概述\n\n本工作流将上传的文档（PDF/Word/TXT等）自动处理成向量数据存储到知识库中。支持多种文档格式，自动提取文本内容并进行语义分割，为后续的智能问答做好数据准备。\n\n\n## 🔧 技术架构\n\n```\n文档输入 → 数据加载 → 文本分割 → 向量化   → 存储\n    ↓         ↓         ↓        ↓       ↓\n表单提交   格式解析   智能分块   AI嵌入   向量库\n```\n\n## ⚠️ 注意事项\n- 单文件大小限制：建议不超过10MB\n- Simple Vector Store 数据存储在内存中，重启后会丢失\n- 大文档处理可能需要较长时间\n- 确保 Ollama 服务正常运行且 qwen3-embedding 模型已加载",
+          "height": 1260,
+          "width": 1240,
+          "color": 5
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -1120,
+          -1060
+        ],
+        "id": "493c8af2-5552-4315-9ada-20d94418b415",
+        "name": "Sticky Note"
+      },
+      {
+        "parameters": {
+          "content": "## 📋 基本信息\n- **工作流名称**: 智能问答助手\n- **版本**: v1.0.0  \n- **创建者**: 林月半子聊AI\n- **微信**：cloud-native-101\n- **公众号**: 林月半子的AI笔记\n- **用途**: 基于知识库内容智能回答用户问题\n- **依赖**: 需要先运行左侧文档处理工作流构建知识库\n- **触发方式**: 聊天消息接收触发\n\n## 🎯 功能概述\n\n本工作流接收用户问题，在向量知识库中检索相关文档，结合大语言模型生成准确、有据可查的回答。所有回答都基于实际上传的文档内容。\n\n## 🔧 技术架构\n\n```\n用户消息 → AI代理  → 向量检索  → 知识融合  → 智能回答\n    ↓        ↓        ↓         ↓         ↓\n聊天输入   意图理解   相关检索   上下文整合   生成回复\n```\n\n\n## 🔗 依赖关系\n- **知识库**: 需要预先通过构建工作流创建向量知识库\n- **模型一致性**: 嵌入模型必须与构建时保持一致\n- **存储同步**: 确保访问相同的 Simple Vector Store 实例\n\n## ⚠️ 注意事项\n- 确保向量知识库已正确构建和填充\n- 两个工作流的 Simple Vector Store 需要使用相同的 Memory Key\n- Embedding 模型必须与文档处理工作流使用相同模型\n- Chat Model可替换为 Ollama 中的开源模型",
+          "height": 1260,
+          "width": 1540,
+          "color": 6
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          300,
+          -1060
+        ],
+        "id": "e1291b91-7da1-4219-8fd4-8da619081f6f",
+        "name": "Sticky Note1"
+      },
+      {
+        "parameters": {
+          "mode": "insert"
+        },
+        "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+        "typeVersion": 1.1,
+        "position": [
+          -420,
+          -360
+        ],
+        "id": "e3840b9e-2cdf-45da-8411-77aca90935f6",
+        "name": "Vector Store - 文档存储"
+      },
+      {
+        "parameters": {
+          "model": "qwen3-embedding:latest"
+        },
+        "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+        "typeVersion": 1,
+        "position": [
+          -520,
+          -100
+        ],
+        "id": "2b489e47-c235-459b-9b1b-635dd56d7924",
+        "name": "Embeddings - 文档向量化",
+        "credentials": {
+          "ollamaApi": {
+            "id": "MVgWiIjghhtcAsDC",
+            "name": "Ollama account"
+          }
+        }
+      },
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+        "typeVersion": 1.1,
+        "position": [
+          1220,
+          -80
+        ],
+        "id": "441a21f7-cfd4-4ba5-8f30-2437bd13ef5b",
+        "name": "Vector Store - 检索查询"
+      },
+      {
+        "parameters": {
+          "model": "qwen3-embedding:latest"
+        },
+        "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+        "typeVersion": 1,
+        "position": [
+          1100,
+          60
+        ],
+        "id": "c52ec696-bf09-47d7-bad5-d71475fbc84c",
+        "name": "Embeddings - 问题向量化",
+        "credentials": {
+          "ollamaApi": {
+            "id": "MVgWiIjghhtcAsDC",
+            "name": "Ollama account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-2.5-flash-preview-05-20",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          920,
+          -220
+        ],
+        "id": "8e99ceac-b619-4a3e-8e0c-e61df26591dc",
+        "name": "Google Gemini Chat Model1",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "VPhblWpwZNdpZljX",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-2.5-flash-preview-05-20",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          1660,
+          -60
+        ],
+        "id": "f932e5c1-f400-4130-9edf-e9f135d2ed5d",
+        "name": "Google Gemini Chat Model",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "VPhblWpwZNdpZljX",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "description": "使用此工具执行基于向量的相关文档检索"
+        },
+        "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+        "typeVersion": 1.1,
+        "position": [
+          560,
+          1000
+        ],
+        "id": "801a1426-b3ef-42f2-bd68-76ba3229f0d4",
+        "name": "Answer questions with a vector store1"
+      },
+      {
+        "parameters": {},
+        "type": "@n8n/n8n-nodes-langchain.vectorStoreInMemory",
+        "typeVersion": 1.1,
+        "position": [
+          440,
+          1200
+        ],
+        "id": "1d261cb6-0a27-4c4c-b6a3-8f675f67bd65",
+        "name": "Vector Store - 检索查询1"
+      },
+      {
+        "parameters": {
+          "model": "qwen3-embedding:latest"
+        },
+        "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+        "typeVersion": 1,
+        "position": [
+          320,
+          1340
+        ],
+        "id": "e0dd042b-24ec-4101-8b75-ae96f6f45f93",
+        "name": "Embeddings - 问题向量化1",
+        "credentials": {
+          "ollamaApi": {
+            "id": "MVgWiIjghhtcAsDC",
+            "name": "Ollama account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-2.5-flash-preview-05-20",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          140,
+          1060
+        ],
+        "id": "e31b1793-ea12-43b6-b978-e4aa5591a4d2",
+        "name": "Google Gemini Chat Model2",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "VPhblWpwZNdpZljX",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "modelName": "models/gemini-2.5-flash-preview-05-20",
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          880,
+          1220
+        ],
+        "id": "7d521f88-a15f-4de1-ae7a-0dee7ebcc29b",
+        "name": "Google Gemini Chat Model3",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "VPhblWpwZNdpZljX",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "chatId": "={{ $('Telegram消息接收器').item.json.message.chat.id }}",
+          "text": "={{ $json.output.formatted_report || $json.output }}",
+          "additionalFields": {
+            "appendAttribution": false,
+            "disable_web_page_preview": true,
+            "parse_mode": "Markdown"
+          }
+        },
+        "type": "n8n-nodes-base.telegram",
+        "typeVersion": 1.2,
+        "position": [
+          900,
+          820
+        ],
+        "id": "b5568a5a-10af-4bff-9b26-522ab074cdd3",
+        "name": "发送Telegram消息",
+        "webhookId": "de85f57f-829c-4344-ab5d-e13f9ebdbe67",
+        "credentials": {
+          "telegramApi": {
+            "id": "WdsXhutRML1sn6f6",
+            "name": "Telegram account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "content": "## 📋 基本信息\n- **工作流名称**: Telegram智能问答机器人\n- **版本**: v1.0.0  \n- **创建者**: 林月半子聊AI\n- **微信**：cloud-native-101\n- **公众号**: 林月半子的AI笔记\n- **用途**: 基于知识库为Telegram用户提供智能问答服务\n- **依赖**: 需要先运行文档处理工作流构建知识库\n\n## 🎯 功能概述\n\n本工作流接收 Telegram 用户的消息，在向量知识库中检索相关文档，结合大语言模型生成准确回答并发送回Telegram。实现了企业知识库的移动端智能问答服务。\n\n## 🔧 技术架构\n\n```\n消息接收 → AI代理 → 向量检索 → 知识融合 → 消息发送\n↓            ↓       ↓        ↓        ↓\nTelegram  意图理解  相关检索   上下文整合  回复推送\n```\n\n## ⚠️ 注意事项\n- 需要配置Telegram Bot Token和相关权限\n- 两个工作流的 Simple Vector Store 需要使用相同的 Memory Key\n- Embedding 模型必须与文档处理工作流使用相同模型",
+          "height": 1260,
+          "width": 1620,
+          "color": 7
+        },
+        "type": "n8n-nodes-base.stickyNote",
+        "typeVersion": 1,
+        "position": [
+          -520,
+          280
+        ],
+        "id": "eff29492-937d-4679-8192-211a99a3757f",
+        "name": "Sticky Note2"
+      },
+      {
+        "parameters": {
+          "updates": [
+            "message"
+          ],
+          "additionalFields": {}
+        },
+        "type": "n8n-nodes-base.telegramTrigger",
+        "typeVersion": 1.2,
+        "position": [
+          -40,
+          820
+        ],
+        "id": "fed4c1fc-5d34-482a-bc88-05a0d232e680",
+        "name": "Telegram消息接收器",
+        "webhookId": "bd78d268-588e-4c83-8107-8ad04748ad67",
+        "credentials": {
+          "telegramApi": {
+            "id": "WdsXhutRML1sn6f6",
+            "name": "Telegram account"
+          }
+        },
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "promptType": "define",
+          "text": "={{ $json.message.text }}",
+          "options": {
+            "systemMessage": "你是一个专业的企业知识助手，擅长基于内部文档回答问题。\n\n工作原则：\n1. 优先使用检索到的知识库内容回答问题\n2. 如果检索内容不足，明确告知并提供一般性建议\n3. 保持回答的专业性和准确性\n4. 当遇到敏感或超出范围的问题时，礼貌地引导用户\n\n回答风格：\n- 简洁明了，重点突出\n- 结构化表达，便于理解\n- 适当引用原文档内容\n- 提供后续建议或相关链接"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 2,
+        "position": [
+          260,
+          820
+        ],
+        "id": "e2fce018-8a65-4a1a-a2ce-a199c9501cbb",
+        "name": "智能问答代理"
+      }
+    ],
+    "pinData": {},
+    "connections": {
+      "On form submission": {
+        "main": [
+          [
+            {
+              "node": "Vector Store - 文档存储",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Default Data Loader": {
+        "ai_document": [
+          [
+            {
+              "node": "Vector Store - 文档存储",
+              "type": "ai_document",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Recursive Character Text Splitter": {
+        "ai_textSplitter": [
+          [
+            {
+              "node": "Default Data Loader",
+              "type": "ai_textSplitter",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "When chat message received": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Answer questions with a vector store": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vector Store - 文档存储": {
+        "main": [
+          []
+        ]
+      },
+      "Embeddings - 文档向量化": {
+        "ai_embedding": [
+          [
+            {
+              "node": "Vector Store - 文档存储",
+              "type": "ai_embedding",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vector Store - 检索查询": {
+        "ai_vectorStore": [
+          [
+            {
+              "node": "Answer questions with a vector store",
+              "type": "ai_vectorStore",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embeddings - 问题向量化": {
+        "ai_embedding": [
+          [
+            {
+              "node": "Vector Store - 检索查询",
+              "type": "ai_embedding",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini Chat Model1": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Answer questions with a vector store",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Answer questions with a vector store1": {
+        "ai_tool": [
+          [
+            {
+              "node": "智能问答代理",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Vector Store - 检索查询1": {
+        "ai_vectorStore": [
+          [
+            {
+              "node": "Answer questions with a vector store1",
+              "type": "ai_vectorStore",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Embeddings - 问题向量化1": {
+        "ai_embedding": [
+          [
+            {
+              "node": "Vector Store - 检索查询1",
+              "type": "ai_embedding",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini Chat Model2": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "智能问答代理",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini Chat Model3": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "Answer questions with a vector store1",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Telegram消息接收器": {
+        "main": [
+          [
+            {
+              "node": "智能问答代理",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "智能问答代理": {
+        "main": [
+          [
+            {
+              "node": "发送Telegram消息",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "active": true,
+    "settings": {
+      "executionOrder": "v1"
+    },
+    "versionId": "f373519f-74ef-4706-b30b-1a8e9aa0ed12",
+    "meta": {
+      "templateCredsSetupCompleted": true,
+      "instanceId": "1bcceb694542a87d03dcbfc74b010fcbb893175a18a9dab6ba2e57e028f57403"
+    },
+    "id": "bK6v2wliNgUdMMHN",
+    "tags": [
+      {
+        "name": "RAG",
+        "id": "SfupiEEf1xsxAkn9",
+        "createdAt": "2025-06-24T07:15:11.998Z",
+        "updatedAt": "2025-06-24T07:15:11.998Z"
+      }
+    ]
+  }
