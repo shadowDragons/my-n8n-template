@@ -63,8 +63,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        780,
-        -20
+        840,
+        0
       ],
       "id": "2591d5ff-5dfa-4534-a06a-745c2e75efb6",
       "name": "Send a message",
@@ -80,7 +80,9 @@
       "parameters": {
         "rule": {
           "interval": [
-            {}
+            {
+              "triggerAtHour": 5
+            }
           ]
         }
       },
@@ -179,6 +181,21 @@
       ],
       "id": "c9396141-228d-4a42-a6aa-4bd58af54eec",
       "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "69bad083-444a-4b9d-9583-43e451d1fa24",
+      "name": "Merge"
     }
   ],
   "pinData": {},
@@ -258,7 +275,7 @@
       "main": [
         [
           {
-            "node": "Send a message",
+            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -266,6 +283,17 @@
       ]
     },
     "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
       "main": [
         [
           {
@@ -281,7 +309,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "249857e5-b921-4659-bd00-dcff31ff37d3",
+  "versionId": "af6f3d60-e045-48cc-a73f-1335748244f7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
