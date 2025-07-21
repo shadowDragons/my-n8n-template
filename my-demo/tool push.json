@@ -71,8 +71,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        580,
-        -20
+        840,
+        -80
       ],
       "id": "00c59ae6-bd3d-431b-8abe-ac5403e1e228",
       "name": "Code"
@@ -152,7 +152,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        860,
+        920,
         120
       ],
       "id": "a998d7a1-3319-4b0f-9c22-9a2636b61bbf",
@@ -191,6 +191,117 @@
       ],
       "id": "c700dbc5-4c89-4048-b3bd-e132c2ed4ed9",
       "name": "Merge"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1el0YsmvvLrGo15gCfyqofNjbOH8TULitg-ILD2lUCVo",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1el0YsmvvLrGo15gCfyqofNjbOH8TULitg-ILD2lUCVo/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $json.url }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        1460,
+        -120
+      ],
+      "id": "8400813b-b2a3-447d-937e-6ba3b5f02a5b",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Nl41fcUY0NozeVjw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1el0YsmvvLrGo15gCfyqofNjbOH8TULitg-ILD2lUCVo",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1el0YsmvvLrGo15gCfyqofNjbOH8TULitg-ILD2lUCVo/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        580,
+        -200
+      ],
+      "id": "4558a154-16c9-4620-8df7-782e42331443",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Nl41fcUY0NozeVjw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "url",
+              "field2": "url"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input2",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        680,
+        -20
+      ],
+      "id": "5bffc99c-4032-4f9d-ae73-2da058b43e47",
+      "name": "Merge1"
     }
   ],
   "pinData": {},
@@ -210,9 +321,9 @@
       "main": [
         [
           {
-            "node": "Code",
+            "node": "Merge1",
             "type": "main",
-            "index": 0
+            "index": 1
           }
         ]
       ]
@@ -243,6 +354,11 @@
         [
           {
             "node": "Get many database pages",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get row(s) in sheet",
             "type": "main",
             "index": 0
           }
@@ -278,6 +394,33 @@
             "node": "Send a message",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -287,7 +430,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "9bd743af-f78e-4f07-a6c7-d1f2bd9ad817",
+  "versionId": "12c60bdf-2caa-4836-b206-37267cd013d7",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"

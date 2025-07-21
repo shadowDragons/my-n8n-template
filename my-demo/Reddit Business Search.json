@@ -21,7 +21,7 @@
       "name": "Post Sentiment Analysis",
       "type": "@n8n/n8n-nodes-langchain.sentimentAnalysis",
       "position": [
-        2680,
+        2900,
         840
       ],
       "typeVersion": 1
@@ -41,7 +41,7 @@
       "name": "Post Summarization",
       "type": "@n8n/n8n-nodes-langchain.chainSummarization",
       "position": [
-        2700,
+        2920,
         60
       ],
       "typeVersion": 2
@@ -72,7 +72,7 @@
       "name": "Merge 3 Inputs",
       "type": "n8n-nodes-base.merge",
       "position": [
-        3520,
+        3740,
         360
       ],
       "typeVersion": 3
@@ -158,7 +158,7 @@
       "name": "Filter Posts By Content",
       "type": "n8n-nodes-base.if",
       "position": [
-        2360,
+        2580,
         500
       ],
       "typeVersion": 2.2
@@ -237,6 +237,7 @@
         "operation": "search",
         "subreddit": "=smallbusiness",
         "keyword": "looking for a solution",
+        "limit": 10,
         "additionalFields": {
           "sort": "hot"
         }
@@ -265,7 +266,7 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        2700,
+        2920,
         480
       ],
       "id": "f5832405-a637-403c-8b06-6948316a5277",
@@ -278,7 +279,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
       "typeVersion": 1,
       "position": [
-        2660,
+        2880,
         620
       ],
       "id": "3ad7c4f9-ed81-486e-8cae-b0ff51a2f3f2",
@@ -297,7 +298,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
       "typeVersion": 1,
       "position": [
-        2680,
+        2900,
         1020
       ],
       "id": "394f208e-e6d5-4ac2-895f-67d0e2bc844b",
@@ -316,7 +317,7 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
       "typeVersion": 1,
       "position": [
-        2700,
+        2920,
         220
       ],
       "id": "23a00263-72d6-4cea-b5f2-cef612811900",
@@ -335,7 +336,7 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        3100,
+        3320,
         840
       ],
       "id": "87efe0fa-91a9-431d-8b76-bb9329561684",
@@ -358,7 +359,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3060,
+        3280,
         480
       ],
       "id": "393f6587-6e08-419b-8527-a30d346d39de",
@@ -381,7 +382,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3080,
+        3300,
         60
       ],
       "id": "b9f9a32f-645d-46ae-8e0f-506ac009fb6b",
@@ -404,7 +405,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3340,
+        3560,
         840
       ],
       "id": "272a3183-43df-42e5-81ed-7cfbec9760f6",
@@ -546,7 +547,7 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        3740,
+        3960,
         400
       ],
       "id": "bd99463c-177f-4c00-b24a-fdfe6f2d5242",
@@ -610,6 +611,7 @@
           ]
         },
         "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
         "options": {}
       },
       "type": "n8n-nodes-base.merge",
@@ -642,33 +644,12 @@
     },
     {
       "parameters": {
-        "text": "={{ $json.title }}",
-        "translateTo": "ZH",
-        "additionalFields": {}
-      },
-      "type": "n8n-nodes-base.deepL",
-      "typeVersion": 1,
-      "position": [
-        2740,
-        -140
-      ],
-      "id": "546b4386-454b-464f-933d-27cdcb9d01b9",
-      "name": "Translate a language",
-      "credentials": {
-        "deepLApi": {
-          "id": "Hvq79pJtDXHC9Lcg",
-          "name": "DeepL account"
-        }
-      }
-    },
-    {
-      "parameters": {
         "assignments": {
           "assignments": [
             {
               "id": "64a5b2c9-fa0d-411d-ad53-5b7baf0d1b88",
               "name": "title_chinese",
-              "value": "={{ $json.text }}",
+              "value": "={{ $json.output }}",
               "type": "string"
             }
           ]
@@ -678,7 +659,7 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        3020,
+        3240,
         -140
       ],
       "id": "2d769d0c-327d-455a-9c47-3589344d64d5",
@@ -695,11 +676,45 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        400,
-        660
+        500,
+        700
       ],
       "id": "ec015de6-e809-41c7-b83c-a2ec5f498aae",
       "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=翻译这个内容，翻译成中文： {{ $json.title }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        2360,
+        -140
+      ],
+      "id": "04c44f6a-9736-4beb-ad8f-40e4e1d2a2a5",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        2380,
+        80
+      ],
+      "id": "6a5e3b72-a55a-4449-90a5-90d5815edc53",
+      "name": "DeepSeek Chat Model4",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -729,7 +744,7 @@
             "index": 1
           },
           {
-            "node": "Translate a language",
+            "node": "AI Agent1",
             "type": "main",
             "index": 0
           }
@@ -982,17 +997,6 @@
         ]
       ]
     },
-    "Translate a language": {
-      "main": [
-        [
-          {
-            "node": "Edit Fields3",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Edit Fields3": {
       "main": [
         [
@@ -1014,13 +1018,35 @@
           }
         ]
       ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "091f7608-9721-48c2-8e27-c977829bcd6e",
+  "versionId": "15f884b4-71d0-419d-b8a1-2d9b15aa375d",
   "meta": {
     "templateId": "2978",
     "templateCredsSetupCompleted": true,
