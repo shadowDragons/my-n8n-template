@@ -1,0 +1,400 @@
+{
+  "name": "wechat-offiaccount",
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=请严格按照以下要求完成任务：\n    按照用户提供的信息，创作一篇公众号原创文。\n    请为你创作的文章生成一段摘要（digest），适合公众号摘要展示，要求精炼、吸引人，字数30-54字之间。\n    请根据你写的文章内容，额外生成一段英文图片描述，用于 AI 绘图工具（如 midjourney/stable diffusion）自动生成封面配图。要求：图片描述要与文章主题和情绪高度相关，突出细节和氛围，只写英文画面描述，不要出现“AI绘图”“prompt”等字眼，不要有无关说明。\n    请严格只输出如下 JSON 格式，不要有多余内容、不要有代码块标记，所有字段都必须有值（即使为空字符串）：{\n  \"output\": {\n    \"title\": \"\",\n    \"article\": \"\",\n    \"digest\": \"\",\n    \"cover_image_prompt\": \"\"\n  }\n}\n以下是待分析的信息：{{ $json.message }}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        660,
+        0
+      ],
+      "id": "02f27289-4a7e-46f0-84db-5fab88a86267",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        680,
+        160
+      ],
+      "id": "5b227930-ad22-4a5f-8ff5-b5125c0efaad",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"title\": \"title\",\n    \"article\": \"article\",\n    \"digest\": \"digest\",\n    \"cover_image_prompt\": \"cover_image_prompt\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        840,
+        220
+      ],
+      "id": "12741af8-5b95-418f-acba-afbbdb4bbc6a",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=请根据正文内容（{{ $json.output.article }}），输出结构分块、极简松散风格、微信公众号正文HTML片段：\n1. 不要主标题/副标题/FAQ，只分块输出正文内容。\n2. 内容拆成2-4个逻辑区块，每区块用<h2>或<h3>作红紫色调标题，标题前加1个合适emoji（如💡、🔥、🌸、🧠等，需与内容匹配且不可重复），例如：\n   <h2 style=\"color:#e0438c;font-size:22px;font-weight:bold;margin-bottom:16px;\">💡 行动启示</h2>\n3. 区块用淡粉、淡紫、淡红背景（如#faf0ff、#fbe8f9），左侧红紫色粗边框（#e0438c），上下间距大（margin-bottom:32px），圆角（border-radius:12px），**整体风格温柔有呼吸感**。\n4. **正文内容行间距宽，金句/重要句必须单独成行，每句话多用<br>和空行分隔**，不能紧凑堆在一起。\n5. 结尾加底部互动区，渐变红紫底，emoji和“点赞|收藏|关注|转发”文案，风格温暖。\n6. 只用微信支持的标签与行内style。\n只输出HTML正文，无需<html><body>等标签，示例：\n<div style=\"background:#faf0ff;border-left:6px solid #e0438c;padding:20px 20px 20px 24px;margin-bottom:32px;border-radius:12px;\">\n  <h2 style=\"color:#e0438c;font-size:22px;font-weight:bold;margin-bottom:16px;\">💡 主要压力来源</h2>\n  <p style=\"font-size:17px;line-height:2.3;margin-bottom:14px;\">\n    每一行单独成行，<br>\n    金句单独成段。<br><br>\n    其他内容也要多用<br>和空行，绝不能全部堆在一起。\n  </p>\n</div>\n<div style=\"background:#fbe8f9;border-left:6px solid #c347d2;padding:20px 20px 20px 24px;margin-bottom:32px;border-radius:12px;\">\n  <h2 style=\"color:#c347d2;font-size:22px;font-weight:bold;margin-bottom:16px;\">🔥 成长与自救</h2>\n  <p style=\"font-size:17px;line-height:2.3;margin-bottom:14px;\">\n    重要建议、经验、心得都<br>分行书写。<br><br>\n    金句单独成段，留出呼吸感。\n  </p>\n</div>\n<div style=\"text-align:center;margin:40px 0 16px 0;padding:20px;background:linear-gradient(90deg,#e0438c,#c347d2);color:#fff;border-radius:0 0 16px 16px;\">\n  <p style=\"font-size:20px;letter-spacing:1.2px;\">💕 点赞 | 📖 收藏 | ➕ 关注 | 🔄 转发</p>\n  <p style=\"font-size:15px; color:#ffd2f0;\">@玻璃心指南</p>\n</div>",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "你是一位公众号新媒体高级内容编辑，擅长用温柔、疏朗、个性化的排版与分块结构打动用户。你的文字独立而成熟，充满知性，同时展现出强烈的责任感。你的文章排版风格简洁有呼吸感，善于用分块、色彩和适度表情让内容更具吸引力。请严格按照以下要求生成 HTML 代码：\n    只输出正文内容，无需主标题、副标题、FAQ区块。\n    将正文内容智能分为2~4个区块，每个区块用<h2>或<h3>标签做红紫色调（如#e0438c/#c347d2）小标题，且标题前加1个与内容高度相关的 emoji 表情（如💡、🔥、🌸、🧠等），不可重复、不可滥用。\n    区块容器使用淡粉、淡紫等背景色（如#faf0ff、#fbe8f9），左侧用红紫色粗边框强调，圆角、上下间距大，确保页面疏朗、温柔、留白感足。\n    区块正文部分多用<br>和空行分割，每一句都分开，金句和重点句单独成段，行间距宽，绝不堆叠紧凑。\n    区块内严禁密集 emoji，只允许标题前1个。\n    全部样式均用行内 style，严禁<style>标签与外部CSS。\n    仅使用微信公众号支持的HTML标签（如div、h2/h3、p、ul、li、br等）。\n    文末添加底部互动区块，采用渐变红紫色背景，内容为“点赞 | 收藏 | 关注 | 转发”等温暖文案，并配合适量 emoji，整体风格温柔治愈，绝不商务。\n    整体页面必须极简、留白、干净，风格温暖治愈不花哨。\n请严格依照上述要求生成HTML片段，确保内容和排版极致契合，既美观又实用，适合在微信公众号直接发布。\n任何涉及图片描述或内容生成，均严禁出现色情、裸露、低俗、敏感、挑逗、暗示性等不适宜内容，所有输出需健康、积极、生活化，适合公开发布。"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1300,
+        20
+      ],
+      "id": "14c7fac2-c9ed-47e8-a7ca-28683a3cded3",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1260,
+        320
+      ],
+      "id": "e2c87c0b-f53c-4b6a-acc3-37c2846fdaec",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{  \"article\": \"\" }"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.2,
+      "position": [
+        1600,
+        320
+      ],
+      "id": "3f4a9d8e-b8b5-41c5-9820-8e12b74b7187",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.fastgpt.in/api/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"flux-1\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"{{ $('AI Agent').item.json.output.cover_image_prompt }}\"\n    }\n  ],\n  \"stream\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1240,
+        -140
+      ],
+      "id": "9d45b031-e14c-4e10-bb07-1a636f2fb491",
+      "name": "HTTP Request",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "r0sEHkWmnEZple0z",
+          "name": "fastgpt"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "message",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "message",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        0
+      ],
+      "id": "eb8f7f2a-55f2-428b-8df1-dac2eb146262",
+      "name": "On form submission",
+      "webhookId": "1144987d-4127-4a61-aacf-d5cc7081fa3d"
+    },
+    {
+      "parameters": {
+        "jsCode": "const content = $input.first().json.choices[0].message.content;\nconst match = content.match(/\\((https?:\\/\\/[^\\)]+)\\)/);\nreturn [{\n  ImgUrl: match ? match[1] : ''\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        -140
+      ],
+      "id": "1fcc0f8d-0bfa-49c9-af1d-32f2a2ef2285",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.ImgUrl }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1680,
+        -140
+      ],
+      "id": "fc798895-9770-42be-81d2-962dc60d1cfc",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "resource": "media",
+        "operation": "media:uploadOther"
+      },
+      "type": "n8n-nodes-wechat-offiaccount.wechatOfficialAccountNode",
+      "typeVersion": 1,
+      "position": [
+        1900,
+        -140
+      ],
+      "id": "b375ee4c-07f3-4d3c-96cc-f0680e5c1cd1",
+      "name": "Wechat Official Account Node",
+      "credentials": {
+        "wechatOfficialAccountCredentialsApi": {
+          "id": "HInvJcZeRPcekeQs",
+          "name": "Wechat Official Account Credentials account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\n// 标题/正文/封面ID等基础信息\nconst title    =  $('AI Agent').first().json.output.title  || '';\nconst content  =  $('AI Agent1').first().json.output.article || '';\nconst digest   =  $('AI Agent').first().json.output.digest || ''; // 可选摘要\nconst author   = 'A流派';\nconst thumb_media_id = $input.first().json.media_id || '';\nconst content_source_url = ''; // 原文链接（选填）\n// 可选：封面裁剪\nconst pic_crop_235_1 = ''; // 如'0.1945_0_1_0.5236'\nconst pic_crop_1_1   = '';\n// 构建articles对象（标准图文，article_type默认为news）\nconst articles = [\n  {\n    article_type: 'news',\n    title,\n    author,\n    digest,                 // 为空时微信自动截取正文前54字\n    content,                // 支持HTML\n    content_source_url,     // 原文链接\n    thumb_media_id,\n    need_open_comment: 0,\n    only_fans_can_comment: 0,\n    pic_crop_235_1,\n    pic_crop_1_1,\n    // 如需添加更多参数，可按需补充\n  }\n];\n// 如果你还需要组图片消息或商品，可在此扩展articles.push({...})\n// 返回对象+字符串两种格式\nreturn [\n  {\n    json: {\n      articles,\n      articlesJson: JSON.stringify(articles)\n    }\n  }\n];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2000,
+        100
+      ],
+      "id": "6d28768a-99a0-4ad7-bf33-d9e43c483923",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "operation": "draft:add",
+        "articles": "={{ $json.articlesJson }}"
+      },
+      "type": "n8n-nodes-wechat-offiaccount.wechatOfficialAccountNode",
+      "typeVersion": 1,
+      "position": [
+        2220,
+        100
+      ],
+      "id": "3d527c7c-b951-477c-b7f7-854818b37649",
+      "name": "Wechat Official Account Node1",
+      "credentials": {
+        "wechatOfficialAccountCredentialsApi": {
+          "id": "HInvJcZeRPcekeQs",
+          "name": "Wechat Official Account Credentials account"
+        }
+      }
+    }
+  ],
+  "pinData": {
+    "AI Agent1": [
+      {
+        "json": {
+          "output": {
+            "article": "<div style=\"background:#faf0ff;border-left:6px solid #e0438c;padding:20px 20px 20px 24px;margin-bottom:32px;border-radius:12px;\">\n  <h2 style=\"color:#e0438c;font-size:22px;font-weight:bold;margin-bottom:16px;\">🚀 工作流起点</h2>\n  <p style=\"font-size:17px;line-height:2.3;margin-bottom:14px;\">\n    从表单提交开始，用户通过填写“工具链接”字段触发工作流。<br><br>\n    这是自动化流程的第一步，简单却至关重要。<br>\n  </p>\n</div>\n\n<div style=\"background:#fbe8f9;border-left:6px solid #c347d2;padding:20px 20px 20px 24px;margin-bottom:32px;border-radius:12px;\">\n  <h2 style=\"color:#c347d2;font-size:22px;font-weight:bold;margin-bottom:16px;\">🤖 AI 生成与解析</h2>\n  <p style=\"font-size:17px;line-height:2.3;margin-bottom:14px;\">\n    AI Agent 分析工具链接，生成一篇完整的推荐文章。<br><br>\n    结构化输出解析器确保内容符合 JSON 格式，为后续节点铺平道路。<br><br>\n    DeepSeek 聊天模型提供高质量的语言支持，让内容更专业。<br>\n  </p>\n</div>\n\n<div style=\"background:#fff0f5;border-left:6px solid #e0438c;padding:20px 20px 20px 24px;margin-bottom:32px;border-radius:12px;\">\n  <h2 style=\"color:#e0438c;font-size:22px;font-weight:bold;margin-bottom:16px;\">📌 发布与同步</h2>\n  <p style=\"font-size:17px;line-height:2.3;margin-bottom:14px;\">\n    文章内容发布到 Notion 数据库，标题、摘要、分类一应俱全。<br><br>\n    等待节点确保数据同步完成，避免遗漏。<br><br>\n    最后，Telegram 节点将文章推送到频道，方便用户分享和查看。<br>\n  </p>\n</div>\n\n<div style=\"text-align:center;margin:40px 0 16px 0;padding:20px;background:linear-gradient(90deg,#e0438c,#c347d2);color:#fff;border-radius:0 0 16px 16px;\">\n  <p style=\"font-size:20px;letter-spacing:1.2px;\">💖 点赞 | 📚 收藏 | ➕ 关注 | 🔄 转发</p>\n  <p style=\"font-size:15px; color:#ffd2f0;\">@工具收藏指南</p>\n</div>"
+          }
+        }
+      }
+    ]
+  },
+  "connections": {
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Wechat Official Account Node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wechat Official Account Node": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Wechat Official Account Node1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a0661301-0e0d-4d1d-acc5-947cad3f4dfd",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "2fzI8uHRhimYGzsZ",
+  "tags": []
+}
