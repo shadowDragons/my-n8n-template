@@ -43,8 +43,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        840,
-        220
+        820,
+        160
       ],
       "id": "12741af8-5b95-418f-acba-afbbdb4bbc6a",
       "name": "Structured Output Parser"
@@ -61,8 +61,8 @@
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        1300,
-        20
+        940,
+        0
       ],
       "id": "14c7fac2-c9ed-47e8-a7ca-28683a3cded3",
       "name": "AI Agent1"
@@ -74,8 +74,8 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
       "typeVersion": 1,
       "position": [
-        1260,
-        320
+        940,
+        160
       ],
       "id": "e2c87c0b-f53c-4b6a-acc3-37c2846fdaec",
       "name": "DeepSeek Chat Model1",
@@ -93,8 +93,8 @@
       "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
       "typeVersion": 1.2,
       "position": [
-        1600,
-        320
+        1100,
+        160
       ],
       "id": "3f4a9d8e-b8b5-41c5-9820-8e12b74b7187",
       "name": "Structured Output Parser1"
@@ -113,8 +113,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1240,
-        -140
+        940,
+        -200
       ],
       "id": "9d45b031-e14c-4e10-bb07-1a636f2fb491",
       "name": "HTTP Request",
@@ -141,8 +141,8 @@
       "type": "n8n-nodes-base.formTrigger",
       "typeVersion": 2.2,
       "position": [
-        480,
-        0
+        500,
+        100
       ],
       "id": "eb8f7f2a-55f2-428b-8df1-dac2eb146262",
       "name": "On form submission",
@@ -155,8 +155,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1460,
-        -140
+        1120,
+        -200
       ],
       "id": "1fcc0f8d-0bfa-49c9-af1d-32f2a2ef2285",
       "name": "Code"
@@ -175,8 +175,8 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1680,
-        -140
+        1280,
+        -200
       ],
       "id": "fc798895-9770-42be-81d2-962dc60d1cfc",
       "name": "HTTP Request1"
@@ -189,8 +189,8 @@
       "type": "n8n-nodes-wechat-offiaccount.wechatOfficialAccountNode",
       "typeVersion": 1,
       "position": [
-        1900,
-        -140
+        1480,
+        -200
       ],
       "id": "b375ee4c-07f3-4d3c-96cc-f0680e5c1cd1",
       "name": "Wechat Official Account Node",
@@ -208,8 +208,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        2000,
-        100
+        1860,
+        0
       ],
       "id": "6d28768a-99a0-4ad7-bf33-d9e43c483923",
       "name": "Code1"
@@ -223,8 +223,8 @@
       "type": "n8n-nodes-wechat-offiaccount.wechatOfficialAccountNode",
       "typeVersion": 1,
       "position": [
-        2220,
-        100
+        2020,
+        0
       ],
       "id": "3d527c7c-b951-477c-b7f7-854818b37649",
       "name": "Wechat Official Account Node1",
@@ -234,6 +234,43 @@
           "name": "Wechat Official Account Credentials account"
         }
       }
+    },
+    {
+      "parameters": {
+        "inputSource": "jsonExample",
+        "jsonExample": "{\"message\": \"message\"}"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        500,
+        -60
+      ],
+      "id": "6632b410-2bec-4d35-a357-422a7372af88",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c863f6e3-4021-4e72-8b95-f9444d5ce8b0",
+              "name": "media_id",
+              "value": "={{ $json.media_id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1700,
+        -200
+      ],
+      "id": "6e052879-b118-43ae-812e-9ae3ff94b5c7",
+      "name": "Edit Fields1"
     }
   ],
   "pinData": {
@@ -367,7 +404,7 @@
       "main": [
         [
           {
-            "node": "Code1",
+            "node": "Edit Fields1",
             "type": "main",
             "index": 0
           }
@@ -384,13 +421,35 @@
           }
         ]
       ]
+    },
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
-  "active": false,
+  "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "a0661301-0e0d-4d1d-acc5-947cad3f4dfd",
+  "versionId": "4f8b6326-775a-4217-9e2e-11eb0453a9ec",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
