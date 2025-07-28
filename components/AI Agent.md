@@ -8,67 +8,46 @@ json:
     {
       "parameters": {
         "promptType": "define",
-        "text": "=你是一个工具推荐中文写作博主，你需要分析工具链接：{{ $json[\"工具连接\"] }}，写一篇推荐该工具的中文博客文章，输出内容如下：\n类型type：Post（固定值）\n状态status: Published（固定值）\n输出标题title(格式：产品名称：一句话总结)，\n摘要summary，\n内容connent，\n日期date：{{$today}}，\n标签tags：多个值，在这里面选（付费，免费，开源，AI），\n分类category：单个值，在这里面选（开发工具，学习教育，数据分析，新闻资讯，设计创意，音视频资源和处理，营销工具，健康科学，职场面试，生活旅行，文化历史，休闲娱乐，文件处理工具，图像资源和处理，搜索百科）\nurl：{{ $json[\"工具连接\"] }}\nslug(产品名称英文或者拼音)",
-        "hasOutputParser": true,
-        "options": {
-          "systemMessage": ""
-        }
+        "text": "=你是一位推荐工具的爆款推特写作专家，请针对该产品名称和产品简介，写一篇推文，字数限制在60以内，以痛点问题开头，不要加标签，不要任何多余信息\n\n产品名称：{{ $json.name }}\n产品信息：{{ $json.property_summary }}\n\n\n ",
+        "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
-      "typeVersion": 1.8,
+      "typeVersion": 2,
       "position": [
-        -320,
-        -160
+        920,
+        120
       ],
-      "id": "2d53f9e8-7ff7-42a9-af1a-3abf935e6f9e",
+      "id": "a998d7a1-3319-4b0f-9c22-9a2636b61bbf",
       "name": "AI Agent"
     },
     {
       "parameters": {
-        "jsonSchemaExample": "{\n\t\"title\": \"title\",\n\t\"summary\": \"summary\",\n    \"content\": \"content\",\n    \"url\": \"url\",\n    \"category\": \"category\",\n    \"date\": \"date\",\n    \"type\": \"Post\",\n    \"statuts\": \"Published\",\n    \"slug\": \"slug\",\n    \"tags\": [\"tag1\", \"tag2\"]\n}"
-      },
-      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
-      "typeVersion": 1.2,
-      "position": [
-        -160,
-        20
-      ],
-      "id": "42731d58-b63b-4120-8949-b4f4d311ea24",
-      "name": "Structured Output Parser"
-    },
-    {
-      "parameters": {
+        "model": "deepseek/deepseek-chat-v3-0324:free",
         "options": {}
       },
-      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
       "typeVersion": 1,
       "position": [
-        -320,
-        0
+        920,
+        300
       ],
-      "id": "72e809da-0205-41ef-8dc8-e53ac4a5f6d4",
-      "name": "DeepSeek Chat Model",
+      "id": "3df381e4-7d88-4bff-aa3a-17c671ca0443",
+      "name": "OpenRouter Chat Model",
       "credentials": {
-        "deepSeekApi": {
-          "id": "HG2MiMSzHpKDJXkh",
-          "name": "DeepSeek account"
+        "openRouterApi": {
+          "id": "buuT1LirpxP5bKK6",
+          "name": "OpenRouter account"
         }
       }
     }
   ],
   "connections": {
-    "Structured Output Parser": {
-      "ai_outputParser": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_outputParser",
-            "index": 0
-          }
-        ]
+    "AI Agent": {
+      "main": [
+        []
       ]
     },
-    "DeepSeek Chat Model": {
+    "OpenRouter Chat Model": {
       "ai_languageModel": [
         [
           {
@@ -82,6 +61,7 @@ json:
   },
   "pinData": {},
   "meta": {
+    "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
   }
 }

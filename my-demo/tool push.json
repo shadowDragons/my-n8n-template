@@ -111,8 +111,8 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1480,
-        20
+        1460,
+        300
       ],
       "id": "ed5480af-0c53-4fe6-8b81-6b2aa12d689c",
       "name": "Send a message",
@@ -157,25 +157,6 @@
       ],
       "id": "a998d7a1-3319-4b0f-9c22-9a2636b61bbf",
       "name": "AI Agent"
-    },
-    {
-      "parameters": {
-        "options": {}
-      },
-      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
-      "typeVersion": 1,
-      "position": [
-        760,
-        260
-      ],
-      "id": "22fbd7fe-7471-4021-ac3a-544cb6ada3c9",
-      "name": "DeepSeek Chat Model",
-      "credentials": {
-        "deepSeekApi": {
-          "id": "HG2MiMSzHpKDJXkh",
-          "name": "DeepSeek account"
-        }
-      }
     },
     {
       "parameters": {
@@ -302,6 +283,46 @@
       ],
       "id": "5bffc99c-4032-4f9d-ae73-2da058b43e47",
       "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "text": "=#每日工具推荐\n{{ $('AI Agent').first().json.output }}\n工具链接👉：https://tool.directory.cab/article/{{ $json.property_slug }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 2,
+      "position": [
+        1460,
+        120
+      ],
+      "id": "7f3ff09f-7346-4d76-a448-f71b6a23b223",
+      "name": "Create Tweet",
+      "credentials": {
+        "twitterOAuth2Api": {
+          "id": "IYbFleDCi8ezqsN9",
+          "name": "X account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": "deepseek/deepseek-chat-v3-0324:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        920,
+        300
+      ],
+      "id": "3df381e4-7d88-4bff-aa3a-17c671ca0443",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "buuT1LirpxP5bKK6",
+          "name": "OpenRouter account"
+        }
+      }
     }
   ],
   "pinData": {},
@@ -376,17 +397,6 @@
         ]
       ]
     },
-    "DeepSeek Chat Model": {
-      "ai_languageModel": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "ai_languageModel",
-            "index": 0
-          }
-        ]
-      ]
-    },
     "Merge": {
       "main": [
         [
@@ -397,6 +407,11 @@
           },
           {
             "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Create Tweet",
             "type": "main",
             "index": 0
           }
@@ -424,13 +439,24 @@
           }
         ]
       ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "12c60bdf-2caa-4836-b206-37267cd013d7",
+  "versionId": "cf9153d0-4664-44d8-8293-923fd0d719e1",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
