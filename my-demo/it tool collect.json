@@ -1,0 +1,118 @@
+{
+  "name": "it tool collect",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "IT工具收藏",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "工具连接",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        180,
+        0
+      ],
+      "id": "14dd8361-6f3b-4cb7-a3e7-15effa2dfc98",
+      "name": "On form submission",
+      "webhookId": "f8aa54bd-3b7f-453a-9854-95251acc59e3"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1G_2YPHqmalgwVsTHHZ25ArZfyKsAvmoDmIUPNe4J-0g",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1G_2YPHqmalgwVsTHHZ25ArZfyKsAvmoDmIUPNe4J-0g/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $json['工具连接'] }}",
+            "send": "0"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "send",
+              "displayName": "send",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        400,
+        0
+      ],
+      "id": "3cb232c1-b037-44fd-b47a-433f8f0307a0",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Nl41fcUY0NozeVjw",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "04fbf65a-47a1-49e4-92e1-17cbc7255f75",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "7cMNq7b7BhjvczwJ",
+  "tags": []
+}
