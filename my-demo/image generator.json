@@ -1,0 +1,168 @@
+{
+  "name": "image generator",
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "图片描述或链接",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "desc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        0
+      ],
+      "id": "7d2fc998-9850-4852-9fc5-5516f7d72556",
+      "name": "On form submission",
+      "webhookId": "b9293ff4-561c-4f38-a3ce-fa865fe42395"
+    },
+    {
+      "parameters": {
+        "url": "=https://image.pollinations.ai/prompt/{{ $json.output }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        464,
+        0
+      ],
+      "id": "499c3437-b74f-4d94-aef2-30775904ec5f",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=请根据提供的内容 ，额外生成一段英文图片描述，用于 AI 绘图工具（如 midjourney/stable diffusion）自动生成封面配图。要求：图片描述要与文章主题和情绪高度相关，突出细节和氛围，只写英文画面描述，不要出现“AI绘图”“prompt”等字眼，不要有无关说明，只要文字和逗号句号，不要引号和其他任何符号。\n\n内容： {{ $json.desc }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        80,
+        0
+      ],
+      "id": "24e7ab23-15c2-4a11-9aa0-6d5d7d5d068e",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "7512e712-c0ba-4def-b4c7-a6195f8ac5bb",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "HG2MiMSzHpKDJXkh",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shadowdragon4399@gmail.com",
+        "subject": "图片生成",
+        "message": "=",
+        "options": {
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {}
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        672,
+        0
+      ],
+      "id": "7d1f0148-464b-4588-b9c9-097945d8d8d6",
+      "name": "Send a message",
+      "webhookId": "0963d509-cfd7-4606-96bc-44b5affb36a4",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "989b27c0-793c-4fe9-9e0a-03e8b7f71d8b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "YozB3ZAA9BZD4EuL",
+  "tags": []
+}
