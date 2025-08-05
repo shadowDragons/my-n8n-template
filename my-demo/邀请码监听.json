@@ -294,8 +294,8 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        368,
-        -128
+        320,
+        -80
       ],
       "id": "0d53a9a0-b59f-43f1-af7b-b67441770543",
       "name": "Merge"
@@ -467,6 +467,11 @@
             "node": "Code1",
             "type": "main",
             "index": 0
+          },
+          {
+            "node": "Execute a SQL query",
+            "type": "main",
+            "index": 0
           }
         ]
       ]
@@ -509,7 +514,7 @@
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "68fde8ef-2722-4fb6-9b61-b70157defff9",
+  "versionId": "a789cbdb-5da0-476c-bd10-693adb99bc31",
   "meta": {
     "templateCredsSetupCompleted": true,
     "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
