@@ -1,0 +1,519 @@
+{
+  "name": "邀请码监听",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=邀请码监听 - {{ $json.title }}",
+        "message": "={{ $json.title }}\n\n原文链接：{{ $json.link }}\n\n所有链接：{{ $json.urls.allLinks.join('<br/>') }}\n\n匹配到的链接：\n{{ $json.urls.matchingLinks.join('<br/>') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1104,
+        32
+      ],
+      "id": "85931368-9d53-4b5c-985a-1eb0f969cb00",
+      "name": "Send a message",
+      "webhookId": "34f1aa27-9b08-4492-97de-0703608d6a7c",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d89e4dbd-be27-4cbd-9f8a-864fccf1150a",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "a1c070da-2c3d-4710-b7a5-9c3a88336c58",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ba4ad9e4-5367-4e43-adf8-99ed6cc37de8",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "Comet",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "a54a4ba5-fb44-44ee-9caf-d0d0d96d0de8",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "Comet",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -208,
+        -208
+      ],
+      "id": "c1a97bf4-e6cd-4b63-b2bb-18005a49fff4",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a0b9e0b9-1889-47cd-a9de-064ec71abadc",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "7f6bc4c0-4f02-4c6e-9558-d2deeb8f47d5",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        320
+      ],
+      "id": "e75d51cc-aba8-4c2e-b7bc-728063c4fc6a",
+      "name": "Filter1"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "http://huginn.xumin-ai.tech/users/1/web_requests/60/linuxdo-flym.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -208
+      ],
+      "id": "346d4d22-9a73-49f5-92ad-b89b71fb8024",
+      "name": "linuxdo"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://v2ex.com/feed/in.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -48
+      ],
+      "id": "8ddd3fab-b05a-4472-a281-d516c6608332",
+      "name": "v2ex"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://rss.app/feeds/bFIaMQyw3Q5ko9pr.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        128
+      ],
+      "id": "a1fe0aad-767b-4815-b922-9ad0c4fe4dc2",
+      "name": "twitter"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "29024b85-4c6f-4543-9eaa-81e93648c55d",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "db11bc45-7aac-4971-a8d0-5b19015f8e3e",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "537d0fbf-e974-4fd2-a160-5291044fdae6",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "Comet",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "ab56698b-3791-4eb1-a22c-c8f5f949f1e8",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "Comet",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -160,
+        -48
+      ],
+      "id": "4b1434c6-5b6a-4884-9a90-b69f5d0b2ad4",
+      "name": "Filter2"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://rss.app/feeds/FbA0LyzUnQPZLvnx.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        320
+      ],
+      "id": "2bbfb243-8df4-411a-a62c-f87db192890c",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.email \nFROM team_member a \nLEFT JOIN team b ON a.team_id = b.id \nLEFT JOIN \"user\" c ON a.user_id = c.id \nWHERE b.name = 'comet';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        512,
+        176
+      ],
+      "id": "f887e892-01af-4647-9a01-1443597bee23",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "NLdpxfy8Q0wN4P0t",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        368,
+        -128
+      ],
+      "id": "0d53a9a0-b59f-43f1-af7b-b67441770543",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "jsCode": "const list1 = $('Execute a SQL query').all();\nconst list2 = $('Code1').all();\nconst result = [];\n\nif (list1 && list2) {\n  for (const item1 of list1) {\n    for (const item2 of list2) {\n      // 使用扩展运算符 (...) 创建一个新对象，复制 item2 的所有属性\n      const resultItem = { ...item2.json };\n      \n      // 添加来自 item1 的 email 属性\n      resultItem.email = item1.json.email;\n\n      // 将新对象推入结果数组\n      result.push(resultItem);\n    }\n  }\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        848,
+        32
+      ],
+      "id": "d244afb3-a890-4e1c-a7cc-d5aac2394810",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 从 n8n 输入中获取文本数据\n// 假设您的文本位于 item.json.text 字段中\nconst text = $json.content\n\n// 定义用于匹配链接的正则表达式\n// 这个正则表达式会匹配以 \"http\" 或 \"https\" 开头的所有 URL\nconst urlRegex = /(https?:\\/\\/[^\\s]+)/g;\n\n// 定义用于模糊匹配目标链接的正则表达式\n// 这个表达式匹配包含 \"perplexity.ai/browser/claim\" 的链接\nconst targetRegex = /perplexity\\.ai\\/browser\\/claim/i;\n\n// 存储匹配到的所有链接和目标链接\nconst allLinks = [];\nconst matchingLinks = [];\n\n// 使用正则表达式查找所有链接\nlet match;\nwhile ((match = urlRegex.exec(text)) !== null) {\n  const link = match[0];\n  allLinks.push(link);\n\n  // 检查当前链接是否模糊匹配目标链接\n  if (targetRegex.test(link)) {\n    matchingLinks.push(link);\n  }\n}\n\n// 将结果输出到 n8n\n// 您可以根据需要调整输出的格式\nreturn {\n  link: $json.link,\n  title: $json.title,\n  content: $json.content,\n  urls: {\n    allLinks: allLinks,\n    matchingLinks: matchingLinks\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        576,
+        -96
+      ],
+      "id": "1fcc49eb-2976-4c7a-86ef-b5336cfa7f49",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "249307a2-0b64-4b1d-99f6-3424a00a22bc",
+              "leftValue": "={{ $json.title }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "656cd1ed-c436-4879-8cb9-2a09685ae77b",
+              "leftValue": "={{ $json.content }}",
+              "rightValue": "perplexity.ai/browser/claim",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        -176,
+        128
+      ],
+      "id": "90e09c73-6a9b-401e-a492-300970e12bf5",
+      "name": "Filter3"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "linuxdo": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "v2ex": {
+      "main": [
+        [
+          {
+            "node": "Filter2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "twitter": {
+      "main": [
+        [
+          {
+            "node": "Filter3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Filter1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "68fde8ef-2722-4fb6-9b61-b70157defff9",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "OGxewAss0iFoItn8",
+  "tags": []
+}
