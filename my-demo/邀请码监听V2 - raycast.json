@@ -1,0 +1,612 @@
+{
+  "name": "邀请码监听V2 - raycast",
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ $json.email }}",
+        "subject": "=邀请码监听 - raycast",
+        "message": "=监听到的邀请码链接如下：\n{{ $json.targetUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2048,
+        -176
+      ],
+      "id": "be0bc95c-f5c4-4846-b724-ba711add7114",
+      "name": "Send a message",
+      "webhookId": "bc45d9f4-6f69-4186-afcd-be0598c54e14",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "gikZLZ6HdSttDchP",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "http://huginn.xumin-ai.tech/users/1/web_requests/60/linuxdo-flym.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -400,
+        -208
+      ],
+      "id": "3c54cd83-063c-41d0-a6c9-2c63d3d712a0",
+      "name": "linuxdo"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://v2ex.com/feed/in.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -48
+      ],
+      "id": "d505e931-563a-44b5-9868-8b7f3052365c",
+      "name": "v2ex"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://rss.app/feeds/n6cUosaf9MsUWAym.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        128
+      ],
+      "id": "5ac15aa3-b0ee-47b5-84f6-f26ac55b5a01",
+      "name": "twitter"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://rss.app/feeds/dTovxn3ztMRH3iah.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        320
+      ],
+      "id": "979d8f2b-55fb-4144-bf81-db60118c1d5b",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "SELECT c.email \nFROM team_member a \nLEFT JOIN team b ON a.team_id = b.id \nLEFT JOIN \"user\" c ON a.user_id = c.id \nWHERE b.name = 'Raycast for Windows';",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.6,
+      "position": [
+        1104,
+        -240
+      ],
+      "id": "d5a2e869-daa8-495f-b69e-3417d8b2ca26",
+      "name": "Execute a SQL query",
+      "credentials": {
+        "postgres": {
+          "id": "NLdpxfy8Q0wN4P0t",
+          "name": "Postgres account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Assuming list1 and list2 are correctly populated\nconst list1 = $('Execute a SQL query').all();\nconst list2 = $('Loop Over Items1').all();\n\nconst result = [];\n\n// Use map() to extract all targetUrls from list2 and join them into a single string\nconst targetUrlsString = list2.map(item => item.json.target_url).join('<br/>');\n\n// If both lists exist and have items, proceed with the loop\nif (list1 && list1.length > 0) {\n  for (const item1 of list1) {\n    // Create a copy of the current item's JSON\n    const resultItem = { ...item1.json };\n    \n    // Assign the combined targetUrl string to the new object\n    resultItem.targetUrl = targetUrlsString;\n    \n    // Push the new object into the result array\n    result.push(resultItem);\n  }\n}\n\nreturn result;"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1712,
+        -160
+      ],
+      "id": "cdfebda7-c4c9-4f17-827e-2e207f42b181",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allItems = $input.all();\n\nconst urlRegex = /https?:\\/\\/[^\\s\"'<>()]+/g;\n\nlet urls = [];\nfor (const item of allItems) {\n  // 使用正则表达式查找所有链接\n  let match;\n  while ((match = urlRegex.exec(item.json.content)) !== null) {\n    urls.push(match[0]);\n  }\n}\n\nreturn {\n  urls: urls\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        112
+      ],
+      "id": "648c3809-9dcf-4275-8b1c-824c5e950153",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "url": "=https://url-expander1.p.rapidapi.com/url_expander",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "short_url",
+              "value": "={{ $json.urls }}"
+            },
+            {
+              "name": "get_title",
+              "value": "True"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "url-expander1.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "7adf8c6d72msh488376094fc1eb6p10c2d6jsnc34f7743ac55"
+            }
+          ]
+        },
+        "options": {
+          "redirect": {
+            "redirect": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1824,
+        112
+      ],
+      "id": "338363d7-52fb-4932-954f-1995b3322136",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1088,
+        96
+      ],
+      "id": "364f5eeb-316b-465c-881a-a88e3b621ebb",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "amount": 1
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2160,
+        112
+      ],
+      "id": "4b582951-b0d6-4a67-9dbd-4d68ea8c2f19",
+      "name": "Wait1",
+      "webhookId": "8e135c64-18f0-405a-97c6-eb36663a4d97"
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -64,
+        64
+      ],
+      "id": "ab5dfdd9-e490-463f-b0b8-c40ddbcd8b04",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "urls",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        880,
+        96
+      ],
+      "id": "20815af9-988f-43c2-bf51-68dd701e9cbd",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "30cad5f9-0b65-48d2-825b-a52b4fdbd68a",
+              "leftValue": "={{ $json.target_url }}",
+              "rightValue": "www.raycast.com/windows",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1296,
+        0
+      ],
+      "id": "58f59096-6bf6-4275-85a1-747eae245614",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1eBprpLlqBxA3_VrPgSwqcIVgj7yv34ZflmfATGQLsmQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eBprpLlqBxA3_VrPgSwqcIVgj7yv34ZflmfATGQLsmQ/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "url",
+              "lookupValue": "={{ $json.link }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        128,
+        240
+      ],
+      "id": "111d0e8f-5d35-40b6-9915-a5f3fdc3cc94",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Nl41fcUY0NozeVjw",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "advanced": true,
+        "mergeByFields": {
+          "values": [
+            {
+              "field1": "link",
+              "field2": "url"
+            }
+          ]
+        },
+        "joinMode": "keepNonMatches",
+        "outputDataFrom": "input1",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        288,
+        112
+      ],
+      "id": "7663dc7d-2154-465d-b3d6-32c77fd71cda",
+      "name": "Merge1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1eBprpLlqBxA3_VrPgSwqcIVgj7yv34ZflmfATGQLsmQ",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eBprpLlqBxA3_VrPgSwqcIVgj7yv34ZflmfATGQLsmQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "url": "={{ $json.link }}"
+          },
+          "matchingColumns": [
+            "url"
+          ],
+          "schema": [
+            {
+              "id": "url",
+              "displayName": "url",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.6,
+      "position": [
+        464,
+        240
+      ],
+      "id": "e46df8e7-93a4-41c9-868d-700da367f246",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Nl41fcUY0NozeVjw",
+          "name": "Google Sheets account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "linuxdo": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "v2ex": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "twitter": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Execute a SQL query": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "c3c2e13c-5150-4d1f-a3c3-fbeccbaf0430",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+  },
+  "id": "T2VQdRZAOLHfoXJH",
+  "tags": []
+}
