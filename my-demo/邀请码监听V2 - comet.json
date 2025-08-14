@@ -1,25 +1,25 @@
 {
-  "name": "邀请码监听V2 - raycast",
+  "name": "邀请码监听V2 - comet",
   "nodes": [
     {
       "parameters": {
         "sendTo": "={{ $json.email }}",
-        "subject": "=邀请码监听 - raycast",
+        "subject": "=邀请码监听 - comet",
         "message": "=监听到的邀请码链接如下：\n{{ $json.targetUrl }}",
         "options": {}
       },
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        2048,
-        -176
+        3072,
+        -80
       ],
-      "id": "be0bc95c-f5c4-4846-b724-ba711add7114",
+      "id": "8f32962b-a41c-45e2-b9bb-9824f8836337",
       "name": "Send a message",
-      "webhookId": "bc45d9f4-6f69-4186-afcd-be0598c54e14",
+      "webhookId": "34f1aa27-9b08-4492-97de-0703608d6a7c",
       "credentials": {
         "gmailOAuth2": {
-          "id": "gikZLZ6HdSttDchP",
+          "id": "jdLbhl184KYQidLg",
           "name": "Gmail account"
         }
       }
@@ -38,10 +38,10 @@
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        -400,
-        -208
+        208,
+        -112
       ],
-      "id": "3c54cd83-063c-41d0-a6c9-2c63d3d712a0",
+      "id": "6a2f7729-0b81-444f-abab-48f32abe37a8",
       "name": "linuxdo"
     },
     {
@@ -58,10 +58,10 @@
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        -384,
-        -48
+        224,
+        48
       ],
-      "id": "d505e931-563a-44b5-9868-8b7f3052365c",
+      "id": "ad9071cd-c92a-4ed3-892c-b2cb8a98f647",
       "name": "v2ex"
     },
     {
@@ -73,15 +73,15 @@
             }
           ]
         },
-        "feedUrl": "https://rss.app/feeds/n6cUosaf9MsUWAym.xml"
+        "feedUrl": "https://rss.app/feeds/5ZJgiEPXhd8J23Do.xml"
       },
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        -384,
-        128
+        224,
+        224
       ],
-      "id": "5ac15aa3-b0ee-47b5-84f6-f26ac55b5a01",
+      "id": "36d77e57-e0cf-47d8-9efe-d7968a7970af",
       "name": "twitter"
     },
     {
@@ -93,91 +93,80 @@
             }
           ]
         },
-        "feedUrl": "https://rss.app/feeds/dTovxn3ztMRH3iah.xml"
+        "feedUrl": "https://rss.app/feeds/ROFckJXhgR9sdMwT.xml"
       },
       "type": "n8n-nodes-base.rssFeedReadTrigger",
       "typeVersion": 1,
       "position": [
-        -384,
-        320
+        224,
+        416
       ],
-      "id": "979d8f2b-55fb-4144-bf81-db60118c1d5b",
+      "id": "c1f22e89-ba84-4baf-8e68-21b255a17884",
       "name": "RSS Feed Trigger"
     },
     {
       "parameters": {
         "operation": "executeQuery",
-        "query": "SELECT c.email \nFROM team_member a \nLEFT JOIN team b ON a.team_id = b.id \nLEFT JOIN \"user\" c ON a.user_id = c.id \nWHERE b.name = 'Raycast for Windows';",
+        "query": "SELECT c.email \nFROM team_member a \nLEFT JOIN team b ON a.team_id = b.id \nLEFT JOIN \"user\" c ON a.user_id = c.id \nWHERE b.name = 'comet';",
         "options": {}
       },
       "type": "n8n-nodes-base.postgres",
       "typeVersion": 2.6,
       "position": [
-        1104,
-        -240
+        2320,
+        32
       ],
-      "id": "d5a2e869-daa8-495f-b69e-3417d8b2ca26",
+      "id": "71d283f9-ff3f-47b1-96f7-c2c63adae494",
       "name": "Execute a SQL query",
       "credentials": {
         "postgres": {
-          "id": "NLdpxfy8Q0wN4P0t",
+          "id": "zjHbgT6L3hYNMfqC",
           "name": "Postgres account"
         }
       }
     },
     {
       "parameters": {
-        "jsCode": "// Assuming list1 and list2 are correctly populated\nconst list1 = $('Execute a SQL query').all();\nconst list2 = $('Loop Over Items1').all();\n\nconst result = [];\n\n// Use map() to extract all targetUrls from list2 and join them into a single string\nconst targetUrlsString = list2.map(item => item.json.target_url).join('<br/>');\n\n// If both lists exist and have items, proceed with the loop\nif (list1 && list1.length > 0) {\n  for (const item1 of list1) {\n    // Create a copy of the current item's JSON\n    const resultItem = { ...item1.json };\n    \n    // Assign the combined targetUrl string to the new object\n    resultItem.targetUrl = targetUrlsString;\n    \n    // Push the new object into the result array\n    result.push(resultItem);\n  }\n}\n\nreturn result;"
+        "jsCode": "// Assuming list1 and list2 are correctly populated\nconst list1 = $('Remove Duplicates').all();\nconst list2 = $('Filter').all();\n\nconst result = [];\n\n// Use map() to extract all targetUrls from list2 and join them into a single string\nconst targetUrlsString = list2.map(item => item.json.target_url).join('<br/>');\n\n// If both lists exist and have items, proceed with the loop\nif (list1 && list1.length > 0) {\n  for (const item1 of list1) {\n    // Create a copy of the current item's JSON\n    const resultItem = { ...item1.json };\n    \n    // Assign the combined targetUrl string to the new object\n    resultItem.targetUrl = targetUrlsString;\n    \n    // Push the new object into the result array\n    result.push(resultItem);\n  }\n}\n\nreturn result;"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        1712,
-        -160
+        2736,
+        -64
       ],
-      "id": "cdfebda7-c4c9-4f17-827e-2e207f42b181",
+      "id": "71d991c0-01d7-427c-979f-23135d7fcb98",
       "name": "Code"
     },
     {
       "parameters": {
-        "jsCode": "const allItems = $input.all();\n\nconst urlRegex = /https?:\\/\\/[^\\s\"'<>()]+/g;\n\nlet urls = [];\nfor (const item of allItems) {\n  // 使用正则表达式查找所有链接\n  let match;\n  while ((match = urlRegex.exec(item.json.content)) !== null) {\n    urls.push(match[0]);\n  }\n}\n\nreturn {\n  urls: urls\n};"
+        "jsCode": "const allItems = $(\"Merge1\").all();\n\nconst urlRegex = /https?:\\/\\/[^\\s\"'<>()]+/g;\n\nlet urls = [];\nfor (const item of allItems) {\n  // 使用正则表达式查找所有链接\n  let match;\n  while ((match = urlRegex.exec(item.json.content)) !== null) {\n    urls.push(match[0]);\n  }\n}\n\nreturn {\n  urls: urls\n};"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        672,
-        112
+        1280,
+        208
       ],
-      "id": "648c3809-9dcf-4275-8b1c-824c5e950153",
+      "id": "34e31cd2-672e-440b-9d93-6d82c35a1d6b",
       "name": "Code1"
     },
     {
       "parameters": {
-        "url": "=https://url-expander1.p.rapidapi.com/url_expander",
+        "url": "=https://www.tool.vin/api/short-link-decoder",
         "sendQuery": true,
         "queryParameters": {
           "parameters": [
             {
-              "name": "short_url",
+              "name": "url",
               "value": "={{ $json.urls }}"
-            },
-            {
-              "name": "get_title",
-              "value": "True"
             }
           ]
         },
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
-            {
-              "name": "x-rapidapi-host",
-              "value": "url-expander1.p.rapidapi.com"
-            },
-            {
-              "name": "x-rapidapi-key",
-              "value": "7adf8c6d72msh488376094fc1eb6p10c2d6jsnc34f7743ac55"
-            }
+            {}
           ]
         },
         "options": {
@@ -189,10 +178,10 @@
       "type": "n8n-nodes-base.httpRequest",
       "typeVersion": 4.2,
       "position": [
-        1824,
-        112
+        2640,
+        208
       ],
-      "id": "338363d7-52fb-4932-954f-1995b3322136",
+      "id": "f2a0a63b-4753-4460-a6a4-dddfa56938b4",
       "name": "HTTP Request1"
     },
     {
@@ -202,10 +191,10 @@
       "type": "n8n-nodes-base.splitInBatches",
       "typeVersion": 3,
       "position": [
-        1088,
-        96
+        1904,
+        192
       ],
-      "id": "364f5eeb-316b-465c-881a-a88e3b621ebb",
+      "id": "ab7a2001-8c96-4c4c-b6d3-b561a0ccde2d",
       "name": "Loop Over Items1"
     },
     {
@@ -215,12 +204,12 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1.1,
       "position": [
-        2160,
-        112
+        2976,
+        208
       ],
-      "id": "4b582951-b0d6-4a67-9dbd-4d68ea8c2f19",
+      "id": "fc1eda4f-5aa1-4196-abb0-7a12087c59ce",
       "name": "Wait1",
-      "webhookId": "8e135c64-18f0-405a-97c6-eb36663a4d97"
+      "webhookId": "0dc699b1-be67-4bca-9071-bc350e2ac5c7"
     },
     {
       "parameters": {
@@ -229,10 +218,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        -64,
-        64
+        544,
+        160
       ],
-      "id": "ab5dfdd9-e490-463f-b0b8-c40ddbcd8b04",
+      "id": "3c90f7c3-f52c-4722-a71e-0d072af4b541",
       "name": "Merge"
     },
     {
@@ -243,10 +232,10 @@
       "type": "n8n-nodes-base.splitOut",
       "typeVersion": 1,
       "position": [
-        880,
-        96
+        1488,
+        192
       ],
-      "id": "20815af9-988f-43c2-bf51-68dd701e9cbd",
+      "id": "fff47ebd-49aa-470f-b253-40869952a038",
       "name": "Split Out"
     },
     {
@@ -262,10 +251,10 @@
             {
               "id": "30cad5f9-0b65-48d2-825b-a52b4fdbd68a",
               "leftValue": "={{ $json.target_url }}",
-              "rightValue": "www.raycast.com/windows",
+              "rightValue": "=^https://www.perplexity.ai/browser/claim/.+$",
               "operator": {
                 "type": "string",
-                "operation": "contains"
+                "operation": "regex"
               }
             }
           ],
@@ -276,10 +265,10 @@
       "type": "n8n-nodes-base.filter",
       "typeVersion": 2.2,
       "position": [
-        1296,
-        0
+        2112,
+        96
       ],
-      "id": "58f59096-6bf6-4275-85a1-747eae245614",
+      "id": "483842db-ac0e-44a2-9e77-26c00d5779fc",
       "name": "Filter"
     },
     {
@@ -293,7 +282,7 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "工作表1",
+          "cachedResultName": "comet",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eBprpLlqBxA3_VrPgSwqcIVgj7yv34ZflmfATGQLsmQ/edit#gid=0"
         },
         "filtersUI": {
@@ -309,14 +298,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        128,
-        240
+        736,
+        336
       ],
-      "id": "111d0e8f-5d35-40b6-9915-a5f3fdc3cc94",
+      "id": "7b22bc3f-6cdb-456c-9de2-ea08eb8c9304",
       "name": "Get row(s) in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Nl41fcUY0NozeVjw",
+          "id": "Z6zQflZ6Lj7KoT4g",
           "name": "Google Sheets account"
         }
       }
@@ -340,10 +329,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        288,
-        112
+        896,
+        208
       ],
-      "id": "7663dc7d-2154-465d-b3d6-32c77fd71cda",
+      "id": "b2cdda47-d7d9-4fb3-9ad8-86d302167a1c",
       "name": "Merge1"
     },
     {
@@ -358,7 +347,7 @@
           "__rl": true,
           "value": "gid=0",
           "mode": "list",
-          "cachedResultName": "工作表1",
+          "cachedResultName": "comet",
           "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1eBprpLlqBxA3_VrPgSwqcIVgj7yv34ZflmfATGQLsmQ/edit#gid=0"
         },
         "columns": {
@@ -400,17 +389,43 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        464,
-        240
+        1072,
+        208
       ],
-      "id": "e46df8e7-93a4-41c9-868d-700da367f246",
+      "id": "63ba6faa-ad4e-4680-ac13-9f66bcfc8734",
       "name": "Append or update row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Nl41fcUY0NozeVjw",
+          "id": "Z6zQflZ6Lj7KoT4g",
           "name": "Google Sheets account"
         }
       }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        2512,
+        32
+      ],
+      "id": "5569872f-6de3-42d8-abc8-7d4fc34b4df9",
+      "name": "Remove Duplicates"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.removeDuplicates",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        192
+      ],
+      "id": "1deda84c-711b-46a6-a596-4ce782751f63",
+      "name": "Remove Duplicates1"
     }
   ],
   "pinData": {},
@@ -463,7 +478,7 @@
       "main": [
         [
           {
-            "node": "Code",
+            "node": "Remove Duplicates",
             "type": "main",
             "index": 0
           }
@@ -552,7 +567,7 @@
       "main": [
         [
           {
-            "node": "Loop Over Items1",
+            "node": "Remove Duplicates1",
             "type": "main",
             "index": 0
           }
@@ -563,23 +578,7 @@
       "main": [
         [
           {
-            "node": "Code",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Merge1": {
-      "main": [
-        [
-          {
-            "node": "Code1",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Append or update row in sheet",
+            "node": "Execute a SQL query",
             "type": "main",
             "index": 0
           }
@@ -596,17 +595,61 @@
           }
         ]
       ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "c3c2e13c-5150-4d1f-a3c3-fbeccbaf0430",
+  "versionId": "9d074cc5-49cb-49b6-b162-617a19e10808",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+    "instanceId": "fe84bdfa8a7ed5ee1cfa4da11b2f4ae23db8a35626636ca3f22715c13a4eba53"
   },
-  "id": "T2VQdRZAOLHfoXJH",
+  "id": "347UmZWrZCa4vD2k",
   "tags": []
 }

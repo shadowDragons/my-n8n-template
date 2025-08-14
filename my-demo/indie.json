@@ -1,0 +1,1071 @@
+{
+  "name": "indie",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": " http://feed.indiehackers.world/posts.rss"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e8858852-f02a-4677-94f4-c0f4f0020e26",
+      "name": "RSS Feed Trigger"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://pudding.cool/rss.xml"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        176
+      ],
+      "id": "7635a9ce-658e-450f-9dfa-4a6607c3133f",
+      "name": "RSS Feed Trigger1"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://www.reddit.com/r/indiehackers/.rss"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        352
+      ],
+      "id": "337cce0c-9270-491f-bcb3-4df3fd1bc7b1",
+      "name": "RSS Feed Trigger2"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://www.reddit.com/r/indiehackers/top/.rss?t=week"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        -144
+      ],
+      "id": "5c37229d-0bc5-4f8f-af9d-c608cbd2fe03",
+      "name": "RSS Feed Trigger3"
+    },
+    {
+      "parameters": {
+        "formTitle": "独立开发故事收集",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "url",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        32,
+        560
+      ],
+      "id": "c5a2c352-3f19-4197-a0e9-98883f4b4bc6",
+      "name": "On form submission",
+      "webhookId": "0eaa78e4-c56a-4efc-baf9-334ae26bed2b"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://156.254.6.45:3002/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.url }}\",\n  \"formats\": [\"json\", \"markdown\", \"rawHtml\", \"links\"],\n  \"excludeTags\": [\"iframe\", \"nav\", \"header\", \"footer\"],\n  \"onlyMainContent\": true,\n  \"jsonOptions\": {\n    \"prompt\": \"Identify the main content of the text (i.e., the article or newsletter body). Provide the exact text for that main content verbatim, without summarizing or rewriting any part of it. Exclude all non-essential elements such as banners, headers, footers, calls to action, ads, or purely navigational text. Format this output as markdown using appropriate '#' characters as heading levels. Exclude any promotional or sponsored content on your output. Additionally, you must identify and extract the image urls within this main content. These images must be inside the main content of the page so you must exclude small logo images, icons, avatars and other images which aren't a core part of the main content. The images you extract should at least have a width of 600 pixels (px) so it can be included on our content.\",\n    \"schema\": {\n    \"type\": \"object\",\n      \"properties\": {\n        \"title\": {\n          \"type\": \"string\",\n          \"description\": \"The title of the webpage or article\"\n        },\n        \"content\": {\n          \"type\": \"string\",\n          \"description\": \"The exact verbatim main text content of the web page in markdown format.\"\n        },\n        \"main_content_image_urls\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\",\n            \"description\": \"An image url that appears within the main content of the web page. This image must be inside the main content of the page so you must exclude small logo images, icons, avatars and other images which aren't a core part of the main content. The image should be at least 600px in width.\"\n          },\n          \"description\": \"An array of the exact image urls that appear within the main content of the web page. Extra images such as icons and images not relevant to the main content MUST be excluded.\"\n        }\n      },\n      \"required\": [\"content\", \"main_content_image_urls\"]\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        240,
+        560
+      ],
+      "id": "fb604390-cc58-4e42-a97f-35183bc6de26",
+      "name": "scrape_url",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "feedUrl": "https://www.youtube.com/feeds/videos.xml?channel_id=UCuvjQYKukKjVyhSVxQibgOw"
+      },
+      "type": "n8n-nodes-base.rssFeedReadTrigger",
+      "typeVersion": 1,
+      "position": [
+        16,
+        768
+      ],
+      "id": "24b3a5b0-7df8-421c-b4a5-0930086af813",
+      "name": "RSS Feed Trigger4"
+    },
+    {
+      "parameters": {
+        "resource": "video",
+        "operation": "get",
+        "videoId": "={{ $json.parsedId }}",
+        "options": {}
+      },
+      "id": "994f224a-9c60-416c-a0ef-b00c04e09183",
+      "name": "Get YouTube Video",
+      "type": "n8n-nodes-base.youTube",
+      "position": [
+        464,
+        752
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "youTubeOAuth2Api": {
+          "id": "dxZcRwRjo2kdcf3X",
+          "name": "YouTube account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7653a859-556d-4e00-bafa-6f70f90de0d7",
+              "name": "transcript",
+              "type": "string",
+              "value": "={{ $json.cleanedTranscript }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0d65b301-5152-4e11-affb-20d0469ffdb9",
+      "name": "cleanedTranscript",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1024,
+        752
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "functionCode": "// Extract and process the transcript\nconst data = $input.first().json;\n\nif (!data.transcript && !data.text) {\n  return {\n    json: {\n      success: false,\n      message: 'No transcript available for this video',\n      videoUrl: $input.first().json.body?.videoUrl || 'Unknown'\n    }\n  };\n}\n\n// Process the transcript text\nlet transcriptText = '';\n\n// Handle different API response formats\nif (data.transcript) {\n  // Format for array of transcript segments\n  if (Array.isArray(data.transcript)) {\n    data.transcript.forEach(segment => {\n      if (segment.text) {\n        transcriptText += segment.text + ' ';\n      }\n    });\n  } else if (typeof data.transcript === 'string') {\n    transcriptText = data.transcript;\n  }\n} else if (data.text) {\n  // Format for single transcript object with text property\n  transcriptText = data.text;\n}\n\n// Clean up the transcript (remove extra spaces, normalize punctuation)\nconst cleanedTranscript = transcriptText\n  .replace(/\\s+/g, ' ')\n  .replace(/\\s([.,!?])/g, '$1')\n  .trim();\n\nreturn {\n  json: {\n    success: true,\n    videoUrl: $input.first().json.body?.videoUrl || 'From transcript',\n    rawTranscript: data.text || data.transcript,\n    cleanedTranscript,\n    duration: data.duration,\n    offset: data.offset,\n    language: data.lang\n  }\n};"
+      },
+      "id": "be223331-3168-4745-9168-6e9a3217262f",
+      "name": "processTranscript",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        832,
+        752
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://youtube-transcript3.p.rapidapi.com/api/transcript",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "videoId",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "x-rapidapi-host",
+              "value": "youtube-transcript3.p.rapidapi.com"
+            },
+            {
+              "name": "x-rapidapi-key",
+              "value": "5230d7b76fmsheb407ac6cb96efap1c703cjsnd3f8f5715b27"
+            },
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4d4c21a9-0cf1-4a60-ad96-80c58ef102f8",
+      "name": "extractTranscript",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        640,
+        752
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nconst parsedItems = items.map((item) => {\n  const idParts = item?.json?.id.split(\":\");\n  item.json.parsedId = idParts.length > 2 ? idParts[2] : \"\";\n  return item;\n});\nreturn parsedItems;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        224,
+        768
+      ],
+      "id": "aad51404-0304-4f9f-9724-b72c2c980ac0",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "8da76be4-e56b-4681-a5db-989f9a469ecb",
+              "name": "content",
+              "value": "={{ $json.contentSnippet }}",
+              "type": "string"
+            },
+            {
+              "id": "d858be77-34c4-4e51-9b20-c06056dd6c3d",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "cc71b786-b376-4c9c-bae5-e209cb7b3bf1",
+              "name": "link",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        192,
+        -144
+      ],
+      "id": "92245189-c9bd-4807-9dbb-777cfe9febc9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a4736e28-673d-4c0d-a7a5-6f23f7d15d25",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "01538c14-e5bf-43be-9bba-b44e016cdf3a",
+              "name": "link",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "d9fb75d9-8096-464b-a2a5-87aa546a208c",
+              "name": "content",
+              "value": "={{ $json['content:encodedSnippet'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "41698852-d55a-4459-87bc-81c9339e28bb",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5d2e533d-d80d-4ba2-a760-d40cad169436",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "a8efa0fd-65d1-4f93-a27e-99b2b46a0a30",
+              "name": "link",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "003cb026-eb59-490f-9d09-2e44aac166c9",
+              "name": "contentSnippet",
+              "value": "={{ $json.contentSnippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        176
+      ],
+      "id": "cdd68899-dbf5-4d0a-8051-0997e5662d90",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1c7b95b8-142e-453f-8620-db40e9122877",
+              "name": "title",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "f0471b1a-a8a0-406d-9f05-b483254997cb",
+              "name": "link",
+              "value": "={{ $json.link }}",
+              "type": "string"
+            },
+            {
+              "id": "d2a5a855-d89d-4393-a9b4-487ee48daa37",
+              "name": "content",
+              "value": "={{ $json.contentSnippet }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        352
+      ],
+      "id": "804ed5e8-7906-4008-bee3-ebc8a1bb09b1",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "87473335-dc7c-4652-a447-a1c9b603dcc2",
+              "name": "link",
+              "value": "={{ $json.data.metadata.ogUrl }}",
+              "type": "string"
+            },
+            {
+              "id": "e0c3d3f7-4cb9-4460-a69a-8b065b180a97",
+              "name": "title",
+              "value": "={{ $json.data.metadata['og:title'] }}",
+              "type": "string"
+            },
+            {
+              "id": "f4c8c00a-42e1-4b84-8438-a4858094151b",
+              "name": "content",
+              "value": "={{ $json.data.markdown }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        560
+      ],
+      "id": "0f5aee80-5a74-46b4-81d0-aa9bc7ed2963",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "60439fc0-4001-4c2a-9cc4-e01903dad42e",
+              "name": "content",
+              "value": "={{ $json.transcript }}",
+              "type": "string"
+            },
+            {
+              "id": "f3abfa1c-3682-4650-9a3e-544503e9ecb7",
+              "name": "title",
+              "value": "={{ $('RSS Feed Trigger4').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "e510a5c2-75f0-40ff-93c0-d94ff00c90ae",
+              "name": "link",
+              "value": "={{ $('RSS Feed Trigger4').item.json.link }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1232,
+        752
+      ],
+      "id": "47697204-df5c-4313-9692-6e978b619692",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=我要给大家讲独立开发者的故事，帮我识别该文章内容是否符合以下所有条件：\n1. 是一个好故事，足够吸引人。\n2. 是一个独立开发相关的故事。\n3. 该故事能引起启发。\n\n返回yes or no，并给出中文理由\n\n故事内容：\n {{ $json.content }}",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1616,
+        208
+      ],
+      "id": "9a9bde09-187c-4b05-80e7-cc1a187168ae",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        1584,
+        464
+      ],
+      "id": "b8517bf1-0d47-4ac5-88d6-10674f0d3a8f",
+      "name": "DeepSeek Chat Model",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "OJzQ5rkg9vlRqE9I",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"yesorno\": \"yes\",\n    \"reason\": \"这是理由\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1760,
+        464
+      ],
+      "id": "42a22ae5-eb63-4eac-93ce-57391a24b5a6",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "numberInputs": 6
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1376,
+        176
+      ],
+      "id": "0c6c04d9-954f-43ac-a6ac-af00965eeb7a",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=根据我提供的内容和文章风格模板，帮我写一篇中文独立开发者故事。\n\n要求：\n1. 故事层层递进，足够吸引人。\n2. 要忠于原文，不要自己虚构任何信息。\n\n输出：\n迷蒙风格的标题\n文章摘要\n原文链接：{{ $('Merge').item.json.link }}\n文章正文内容,使用markdonw格式\n\n内容：\n```\n {{ $('Merge').item.json.content }}\n```\n\n文档风格模板：\n```\n这是迈克尔·伯里。\n电影《大空头》的主角之一， Scion Capital 的创始人，GameStop 逼空华尔街的幕后推手。\n他曾在 2000 年代中期成功押注美国房地产市场将会崩盘。\n这次押注让他个人赚了 1 亿美元，他的投资人也获利 7 亿美元。\n下面是他的故事……🧵\n迈克尔·伯里原本是一位神经科医生，后来转行做投资，并在 2000 年创立了自己的基金公司 Scion Capital。\n他的投资理念深受价值投资思想影响，重视通过深入研究和分析，找出市场低估的股票。\n虽然他起初是学医的，但他对金融和经济有着极强的理解能力，这也使他能在复杂的投资世界中如鱼得水。\n在 21 世纪初，伯里开始注意到美国房地产市场中出现了一些令人警惕的趋势。\n他观察到以下几个问题：\n1. 房价快速上涨\n当时房地产市场的房价飞速上涨，房屋的升值速度远远超出历史水平。\n2. 次级贷款激增\n银行和贷款机构越来越多地向信用记录不良的借款人发放贷款。\n这类次级贷款通常在前期利率很低，但之后会调整到更高的利率，借款人很可能无法承受。\n他深入分析了大量抵押贷款数据，发现其中很多贷款一旦利率上调，借款人将难以还款。\n这意味着将会出现大量违约和房屋被收回。\n他因此得出判断：次贷市场本质上存在严重问题，崩盘几乎不可避免。\n于是他决定根据自己的判断采取行动，押注房地产市场会下跌。\n尽管当时整个华尔街都沉浸在房市繁荣的热潮中，\n他却选择通过购买信用违约掉期（CDS）做空次级抵押贷款债券。\n这在当时是极具争议的做法，因为他实际上是在赌整个房地产市场会崩溃 —— 而这样的观点在当时几乎没人相信。\n但到了 2007 到 2008 年，房地产泡沫真的破了，伯里的基金获得了巨大的回报。\n这场逆势押注最终为他和他的投资人带来了数亿美元的收益。\n```\n\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2192,
+        208
+      ],
+      "id": "7c426c07-cc58-45f9-9d1f-61c0a29db026",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "2af1b826-8562-463e-b2db-5f759795d33c",
+              "leftValue": "={{ $json.output.yesorno }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.filter",
+      "typeVersion": 2.2,
+      "position": [
+        1968,
+        208
+      ],
+      "id": "ef1a1674-4d0c-440b-8a94-fa5a2f34d91c",
+      "name": "Filter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "typeVersion": 1,
+      "position": [
+        2176,
+        432
+      ],
+      "id": "cc5c0e98-0515-4d58-9032-b7aaae9d700d",
+      "name": "DeepSeek Chat Model1",
+      "credentials": {
+        "deepSeekApi": {
+          "id": "OJzQ5rkg9vlRqE9I",
+          "name": "DeepSeek account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\t\"title\": \"title\",\n\t\"link\": \"链接\",\n    \"summary\": \"摘要\",\n    \"content\": \"正文\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2368,
+        416
+      ],
+      "id": "9b715ae5-6c24-4426-8224-020f68b00022",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1KiUNfFvFN60xHYxG6OqsbZHNIYtOUG8PgCm93etKYfg",
+          "mode": "id"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "工作表1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1KiUNfFvFN60xHYxG6OqsbZHNIYtOUG8PgCm93etKYfg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "title": "={{ $json.output.title }}",
+            "link": "={{ $json.output.link }}",
+            "summary": "={{ $json.output.summary }}",
+            "content": "={{ $json.output.content }}"
+          },
+          "matchingColumns": [
+            "link"
+          ],
+          "schema": [
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "link",
+              "displayName": "link",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "summary",
+              "displayName": "summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "content",
+              "displayName": "content",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2544,
+        208
+      ],
+      "id": "cc116e93-f865-471c-a70d-b81d0d773539",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "Z6zQflZ6Lj7KoT4g",
+          "name": "Google Sheets account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "shadowdragon4399@gmail.com",
+        "subject": "=独立开发者故事收集 -  {{ $json.title }}",
+        "message": "=标题：{{ $json.title }} <br/>\n\n原文链接：{{ $json.link }} <br/>\n\n摘要：{{ $json.summary }} <br/>\n\n正文： <br/>\n{{ $json.data }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2960,
+        208
+      ],
+      "id": "3327b3dd-cf12-40b7-a7e9-1dbef3ef69d7",
+      "name": "Send a message",
+      "webhookId": "ed7d6f5e-3ecf-451c-a442-e31fb7186ddc",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "jdLbhl184KYQidLg",
+          "name": "Gmail account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": "={{ $json.content }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        2752,
+        208
+      ],
+      "id": "70bc8978-9193-4e26-8b9d-90a60370ab90",
+      "name": "Markdown",
+      "disabled": true
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "scrape_url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get YouTube Video": {
+      "main": [
+        [
+          {
+            "node": "extractTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "processTranscript": {
+      "main": [
+        [
+          {
+            "node": "cleanedTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "extractTranscript": {
+      "main": [
+        [
+          {
+            "node": "processTranscript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger4": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Get YouTube Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Feed Trigger2": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "scrape_url": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "cleanedTranscript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Filter",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter": {
+      "main": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "8a87ebd0-b5bf-4c02-a1f5-08d267d7990b",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fe84bdfa8a7ed5ee1cfa4da11b2f4ae23db8a35626636ca3f22715c13a4eba53"
+  },
+  "id": "AfFfv7jeYn1KkKpN",
+  "tags": []
+}

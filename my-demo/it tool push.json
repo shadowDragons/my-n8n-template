@@ -1,15 +1,15 @@
 {
-  "name": "IT工具推荐",
+  "name": "it tool push",
   "nodes": [
     {
       "parameters": {},
       "type": "n8n-nodes-base.manualTrigger",
       "typeVersion": 1,
       "position": [
-        0,
-        0
+        -1360,
+        192
       ],
-      "id": "2cb18a9b-1386-45c8-9d38-cc2ec78596e7",
+      "id": "7c3af064-dff4-4b51-a8fb-e7237a1af09a",
       "name": "When clicking ‘Execute workflow’"
     },
     {
@@ -39,14 +39,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        208,
-        0
+        -1152,
+        192
       ],
-      "id": "930b3e9d-0ada-410d-bbf2-da54e640a9a0",
+      "id": "d2158dc0-17aa-4283-b718-17736f8ce41f",
       "name": "Get row(s) in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Nl41fcUY0NozeVjw",
+          "id": "Z6zQflZ6Lj7KoT4g",
           "name": "Google Sheets account"
         }
       }
@@ -58,10 +58,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        384,
-        0
+        -976,
+        192
       ],
-      "id": "ca7bb026-3e59-44e0-be71-7612bbb3a3f0",
+      "id": "d0c2d7b1-3567-4e27-9ff3-85e84f6c8e9d",
       "name": "Code"
     },
     {
@@ -74,15 +74,15 @@
       "type": "n8n-nodes-base.gmail",
       "typeVersion": 2.1,
       "position": [
-        1232,
-        48
+        -128,
+        240
       ],
-      "id": "e42b2897-cdc0-454a-b288-6c11a4e7e377",
+      "id": "1c9d36c5-3eee-45f1-b179-551138a567bb",
       "name": "Send a message",
       "webhookId": "d41ee605-282b-43c1-aa84-174a11a31d12",
       "credentials": {
         "gmailOAuth2": {
-          "id": "gikZLZ6HdSttDchP",
+          "id": "jdLbhl184KYQidLg",
           "name": "Gmail account"
         }
       }
@@ -90,16 +90,16 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=你是一位资深的IT科技博主，擅长通过真实工具测评写出高传播度的公众号爆文。请基于以下提供的产品链接，深度体验并分析该工具的核心功能、适用场景及差异化优势，撰写一篇面向程序员的「技术工具推荐」公众号文章。\n\n写作风格参考：https://mp.weixin.qq.com/s/qo-7d0ALdBPxUoOCmZLfBw\n不要加任何备注和不相关内容\n\n结尾加上：\n```\n\n--- \n\n我是仁戈，关注我，一起成长。\n\n如果你觉得这篇文章对你有帮助，别忘了点赞+收藏+转发哦～\n```\n\n输出：markdown格式\n\n工具链接：{{ $json.url }}",
+        "text": "=你是一位资深的IT科技博主，擅长通过真实工具测评写出高传播度的公众号爆文。请基于以下提供的产品内容，深度体验并分析该工具的核心功能、适用场景及差异化优势，撰写一篇面向程序员的「技术工具推荐」公众号文章。\n\n要求：\n标题采用迷蒙风格\n不需要虚构任何信息，一切忠于事实。\n不要加任何备注和不相关内容\n输出markdonw格式\n\n产屁内容：\n{{ $json.data.markdown }}\n\n\n写作风格参考：\n```\n这个开源项目，野心勃勃啊。\n\n它直接把将文档、白板、表格、幻灯片和知识管理功能深度融合在一个统一的画布（Canvas）平台上。\n\n堪称 Notion（文档、数据库、知识管理）和 Miro（白板协作、视觉化）的最佳开源替代。\n\n现在都已经在 GitHub 上获得 5W 多 Star 了。\n\n图片\n\n01.项目简介\n\nAFFiNE 是一个开源、隐私优先、本地优先的全能知识库和工作空间平台。\n目标是搞成一个比 Notion 和 Miro 更强大、更灵活、更注重用户数据主权和隐私的神器。\n功能相当话花哨，不能说这个玩意儿是文档，更像是一个知识库操作系统。\n因为它集成构建了知识库所需的所有模块（Wiki、知识管理、演示文稿、数字资产等）。\n开源地址：https://github.com/toeverything/AFFiNE\n\n图片\n\n02. 有啥功能\n\n① 真正的自由画布\n\n不知道大家有没有用过海外的 Miro，开源项目 AFFiNE 也直接搞了一个类似的“无边画布”\n\n这是 AFFiNE 区别于其它知识库开源项目的核心功能。说白了，就类似一个在线无边界的黑板，你能在上面写写画画。\n\n不同于传统文档编辑器的线性结构，你能在任何位置自由放置和组合各种类型的“块（Block）”，包括：\n\n- 富文本段落\n- 便签（Sticky Notes）\n- 任何嵌入的网页\n- 多视图数据库（Multi-view databases）\n- 链接页面\n- 形状（Shapes）\n- 幻灯片（Slides）\n\n图片\n\n这是 AFFiNE 区别于 Notion 等工具的关键，文档编辑和视觉化白板协作在同一个空间中自然进行。\n\n② 文档&画布一键切换\n文档与白板无缝融合：可以在编辑器区域一键切换文档编辑器/画布。\n线性的文档很难容纳跳跃的思维，一键把文档作为一个 Block 丢进画布里面，基于该文档拓展思维，头脑风暴，写写画画，真的挺不错的。\n\n图片\n\n③ 保护你的隐私\n你的数据默认会存储在本地设备上，但是 AFFiNE 仍支持通过 Web 和跨平台客户端进行高效的实时协作和同步。\n\n03.依赖技术\n\n下面是 AFFiNE  背后基于的核心框架和关键技术依赖项，都是基于开源的核心技术实现。\n\n图片\n```",
         "options": {}
       },
       "type": "@n8n/n8n-nodes-langchain.agent",
       "typeVersion": 2,
       "position": [
-        512,
-        112
+        -752,
+        304
       ],
-      "id": "160eab11-f495-44ab-8b9d-29368dbd621e",
+      "id": "7d5cc6bc-1137-47e7-b974-748571bd0798",
       "name": "AI Agent"
     },
     {
@@ -111,10 +111,10 @@
       "type": "n8n-nodes-base.merge",
       "typeVersion": 3.2,
       "position": [
-        928,
-        -64
+        -432,
+        128
       ],
-      "id": "85634d61-a638-4cee-8973-8d9123b9b1b2",
+      "id": "c7a78e5e-a3ef-426a-b2af-a06ee4c5bd38",
       "name": "Merge"
     },
     {
@@ -181,14 +181,14 @@
       "type": "n8n-nodes-base.googleSheets",
       "typeVersion": 4.6,
       "position": [
-        1216,
-        -208
+        -144,
+        -16
       ],
-      "id": "9cce0b43-5722-480b-b742-497d808f5fc2",
+      "id": "37da40c1-77c8-4821-85aa-775d0f59818d",
       "name": "Update row in sheet",
       "credentials": {
         "googleSheetsOAuth2Api": {
-          "id": "Nl41fcUY0NozeVjw",
+          "id": "Z6zQflZ6Lj7KoT4g",
           "name": "Google Sheets account"
         }
       }
@@ -200,10 +200,10 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        944,
-        144
+        -416,
+        336
       ],
-      "id": "6cfbf767-a14c-4572-b071-1ff7e25a873a",
+      "id": "6b2c4c73-6470-49dc-adc7-a66e21e8c5a3",
       "name": "Code1"
     },
     {
@@ -213,14 +213,14 @@
       "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
       "typeVersion": 1,
       "position": [
-        480,
-        320
+        -880,
+        512
       ],
-      "id": "79b1e71a-2d35-4464-9066-f777e84e1887",
+      "id": "441e703e-e686-472b-a6c7-2fb8369cf516",
       "name": "DeepSeek Chat Model",
       "credentials": {
         "deepSeekApi": {
-          "id": "HG2MiMSzHpKDJXkh",
+          "id": "OJzQ5rkg9vlRqE9I",
           "name": "DeepSeek account"
         }
       }
@@ -230,7 +230,10 @@
         "rule": {
           "interval": [
             {
-              "daysInterval": 3,
+              "field": "weeks",
+              "triggerAtDay": [
+                3
+              ],
               "triggerAtHour": 8
             }
           ]
@@ -239,14 +242,63 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.2,
       "position": [
-        -32,
-        176
+        -1392,
+        368
       ],
-      "id": "7a8158b8-eaab-43ed-9559-a13fe7c77562",
+      "id": "7dcf5543-811e-42ff-b802-3dcd6c8a061d",
       "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://156.254.6.45:3002/v1/scrape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"url\": \"{{ $json.url }}\",\n  \"formats\": [\"json\", \"markdown\", \"rawHtml\", \"links\"],\n  \"excludeTags\": [\"iframe\", \"nav\", \"header\", \"footer\"],\n  \"onlyMainContent\": true,\n  \"jsonOptions\": {\n    \"prompt\": \"Identify the main content of the text (i.e., the article or newsletter body). Provide the exact text for that main content verbatim, without summarizing or rewriting any part of it. Exclude all non-essential elements such as banners, headers, footers, calls to action, ads, or purely navigational text. Format this output as markdown using appropriate '#' characters as heading levels. Exclude any promotional or sponsored content on your output. Additionally, you must identify and extract the image urls within this main content. These images must be inside the main content of the page so you must exclude small logo images, icons, avatars and other images which aren't a core part of the main content. The images you extract should at least have a width of 600 pixels (px) so it can be included on our content.\",\n    \"schema\": {\n    \"type\": \"object\",\n      \"properties\": {\n        \"content\": {\n          \"type\": \"string\",\n          \"description\": \"The exact verbatim main text content of the web page in markdown format.\"\n        },\n        \"main_content_image_urls\": {\n          \"type\": \"array\",\n          \"items\": {\n            \"type\": \"string\",\n            \"description\": \"An image url that appears within the main content of the web page. This image must be inside the main content of the page so you must exclude small logo images, icons, avatars and other images which aren't a core part of the main content. The image should be at least 600px in width.\"\n          },\n          \"description\": \"An array of the exact image urls that appear within the main content of the web page. Extra images such as icons and images not relevant to the main content MUST be excluded.\"\n        }\n      },\n      \"required\": [\"content\", \"main_content_image_urls\"]\n    }\n  }\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -1056,
+        400
+      ],
+      "id": "c57d4abc-6eb4-4ce3-bb80-150a5df16677",
+      "name": "scrape_url",
+      "retryOnFail": true,
+      "maxTries": 3,
+      "waitBetweenTries": 5000,
+      "onError": "continueRegularOutput"
     }
   ],
-  "pinData": {},
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-08-13T08:00:01.009+08:00",
+          "Readable date": "August 13th 2025, 8:00:01 am",
+          "Readable time": "8:00:01 am",
+          "Day of week": "Wednesday",
+          "Year": "2025",
+          "Month": "August",
+          "Day of month": "13",
+          "Hour": "08",
+          "Minute": "00",
+          "Second": "01",
+          "Timezone": "Asia/Shanghai (UTC+08:00)"
+        }
+      }
+    ]
+  },
   "connections": {
     "When clicking ‘Execute workflow’": {
       "main": [
@@ -264,6 +316,22 @@
         [
           {
             "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "scrape_url",
             "type": "main",
             "index": 0
           }
@@ -291,22 +359,6 @@
           },
           {
             "node": "Send a message",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Code": {
-      "main": [
-        [
-          {
-            "node": "AI Agent",
-            "type": "main",
-            "index": 0
-          },
-          {
-            "node": "Merge",
             "type": "main",
             "index": 0
           }
@@ -345,17 +397,28 @@
           }
         ]
       ]
+    },
+    "scrape_url": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "active": true,
   "settings": {
     "executionOrder": "v1"
   },
-  "versionId": "b9e8de9e-7c00-471a-b756-7e749e588412",
+  "versionId": "4c6e6265-2532-407b-b479-5a5efa5da76b",
   "meta": {
     "templateCredsSetupCompleted": true,
-    "instanceId": "c18b83340b516ec35503d90265d11efa191837c0f100386c72a196f9f7c5c10f"
+    "instanceId": "fe84bdfa8a7ed5ee1cfa4da11b2f4ae23db8a35626636ca3f22715c13a4eba53"
   },
-  "id": "6GxhJIqz3R37pMJ3",
+  "id": "egnkXqokdUz9fJ4c",
   "tags": []
 }
