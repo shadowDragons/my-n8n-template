@@ -1,0 +1,151 @@
+{
+  "name": "idea-email-send",
+  "nodes": [
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://idea.tool.vin/api/newsletter/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "nl_sk_8f9a2b1c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "frequency",
+              "value": "weekly"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        16
+      ],
+      "id": "c1a8f3eb-0c83-46cd-ac72-585debf86e41",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://idea.tool.vin/api/newsletter/send",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "x-api-key",
+              "value": "nl_sk_8f9a2b1c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "frequency",
+              "value": "daily"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        208
+      ],
+      "id": "ec86e997-03a7-4c6d-989b-d43c7e358e53",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "weeks"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        32
+      ],
+      "id": "aad964fb-0ce8-47cb-b48a-dd74b8129d00",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        208
+      ],
+      "id": "2d38daa9-73b4-44a2-89db-a9749dc5789e",
+      "name": "Schedule Trigger1"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "02441e6c-3233-480d-a83b-295688bc22ad",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "fe84bdfa8a7ed5ee1cfa4da11b2f4ae23db8a35626636ca3f22715c13a4eba53"
+  },
+  "id": "29dlvhX76XhXIGyt",
+  "tags": []
+}
